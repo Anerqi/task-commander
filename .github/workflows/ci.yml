@@ -1,0 +1,67 @@
+# Three-platform matrix CI: zero third-party dependencies, pure-stdlib Python script validation
+# Triggers: push / pull_request / manual (workflow_dispatch)
+# All steps use shell-neutral commands (no redirection, pipes, or grep), so
+# each platform's default shell runs them identically
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: "${{ matrix.os }} / Python ${{ matrix.python-version }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Three-platform matrix: ubuntu / macos / windows
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        # Verify the lowest supported line, a maintained stable line, and the
+        # newest stable line.
+        python-version:
+          - "3.10"
+          - "3.13"
+          - "3.14"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Syntax check (py_compile, both scripts)
+        run: python -m py_compile scripts/scan-skills.py scripts/validate-project-state.py
+
+      - name: --help smoke test (both scripts; CLI usable, exit code 0)
+        run: |
+          python scripts/scan-skills.py --help
+          python scripts/validate-project-state.py --help
+
+      - name: Unit and regression tests
+        run: python -m unittest discover -s tests -v
+
+      - name: scan-skills.py real run assertions
+        # --roots points at the repo root (includes the repo's own SKILL.md);
+        # --max-results exercises truncation in practice. The inline Python
+        # runs the script via subprocess and asserts the JSON result fields;
+        # a failed assertion exits non-zero and fails this step
+        run: |
+          python -c "import json, subprocess, sys; p = subprocess.run([sys.executable, 'scripts/scan-skills.py', '--roots', '.', '--max-results', '5'], capture_output=True); assert p.returncode == 0, p.stderr.decode('utf-8'); d = json.loads(p.stdout.decode('utf-8')); assert isinstance(d['unique_skills_scanned'], int) and d['unique_skills_scanned'] >= 1; assert isinstance(d['candidates_returned'], int) and d['candidates_returned'] >= 1"
+
+      - name: validate-project-state.py real run
+        # Full structural validation of the in-repo template
+        # templates/project-status.md; the spec file is located by the
+        # script relative to its own position (templates/task-state-spec.txt),
+        # with no out-of-repo dependency; a failed validation (including
+        # format errors) exits with code 1 and fails this step
+        run: python scripts/validate-project-state.py --path templates/project-status.md
