@@ -8,7 +8,7 @@ Machine validation uses `templates/task-state-spec.txt`; it must stay consistent
 
 - The sole writer of `project-status.md` is the Commander.
 - The Context Agent creates the file from `templates/project-status.md` only when initializing a new project, and sets the project phase to `Planning` after delivering the background documents.
-- Executor, Reviewer, QA, Risk Manager, and Decision Manager never modify `project-status.md`; they only give evidence and suggested states in their delivery reports.
+- Executor, Reviewer, QA, Risk Manager, Decision Manager, and Backup Manager never modify `project-status.md`; they only give evidence and suggested states in their delivery reports.
 - When parallel tasks complete, the Commander reads the results one by one and updates the status file serially; multiple agents must never write at the same time.
 
 ## Project phases
@@ -39,14 +39,14 @@ Every task in `project-status.md` must record:
 - Output directory
 - Last updated time
 
-A task id, once used, must never be reassigned to another task. Revision rounds use `<task id>-R1`, `<task id>-R2`, belonging to the original task; never create a new top-level id.
+A task id, once used, must never be reassigned to another task. Revision rounds use `<task id>-R1`, `<task id>-R2`, belonging to the original task; never create a new top-level id solely for a same-scope correction. Record rounds in receipts/history, not as duplicate task rows. A new objective or independent experiment may be a linked top-level task.
 
 ## Task states
 
 | State | Meaning | Entry evidence |
 |---|---|---|
 | TODO | The brief is complete and dependencies are satisfied, but not yet dispatched | Full task prompt and output directory |
-| In Progress | The Executor or another primary agent has picked up the task | Dispatched task prompt |
+| In Progress | The Executor or another primary agent has picked up the task | User or host confirmation of dispatch/pickup; emitting a copyable prompt alone leaves TODO |
 | In Review | The delivery exists, waiting for or undergoing Reviewer review | Delivery file paths and self-check results |
 | Needs Revision | Reviewer, QA, or Commander found issues that must be fixed | Concrete issue list with evidence locations |
 | QA Pending | The delivery or revision passed the required review; waiting for or undergoing QA | Review conclusion or exemption basis |
@@ -87,6 +87,8 @@ If any step fails, keep the original state and record it as an issue to handle; 
 
 ## Review and QA gates
 
+Use `references/16-quality-gates.md` for risk-based selection, evidence reuse/invalidation, finding severity, revision budgets and exploration acceptance. The state machine is unchanged by a batch, continuation, or experiment: waived gates still pass through Awaiting Acceptance; a negative experiment result may satisfy its stated question but is not implementation success.
+
 - Reviewer requirements are decided by risk, impact scope, compliance requirements, or the task brief.
 - QA requirements are decided by runnability, recomputability, data truthfulness, or user acceptance requirements.
 - When the Reviewer fails the delivery or QA fails, the task enters `Needs Revision` and a new revision round is created.
@@ -115,4 +117,13 @@ A task may be marked parallel-safe only when all hold:
 - One task's output does not change another task's input.
 - No executing agent writes `project-status.md`.
 
-Parallelism only changes dispatch order; it never changes a single task's state machine.
+- Shared source files, data stores, browser sessions, ports and other resources are also checked for conflicts; use isolated snapshots/workspaces and an integration owner when needed.
+- A required backup is a prerequisite and must have verified evidence before the dependent mutation is dispatched as ready. A snapshot may be reused only while its coverage/version remains adequate.
+
+Parallelism only changes dispatch order; it never changes a single task's state machine. Use the ready-batch policy in `references/15-collaboration.md` rather than limiting each reply to a single prompt.
+
+## Optional coordination metadata
+
+The optional Coordination, Active windows, Pending user actions, Backups, and Synchronization sections in `templates/project-status.md` track context revisions, task/window mappings, input versions, ownership and acknowledgment. They do not add states or alter the required task/history columns. Existing projects may add them incrementally.
+
+Commander checks these fields manually; `scripts/validate-project-state.py` currently validates structure/state names and requested transitions, not evidence truth, backup restorability, read/write conflicts, acknowledgment, permission enforcement, or history consistency. A successful CLI result does not replace those checks.

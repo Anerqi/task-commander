@@ -1,5 +1,7 @@
 # Verification Guidelines
 
+> Apply the task's required criteria, risk tier and evidence reuse rules from `references/16-quality-gates.md`. The lists below are a menu by deliverable type, not a demand to repeat every check for every task/round. Use inherited tools and human assistance per `references/15-collaboration.md`; backup-sensitive tests follow `references/14-backup-manager.md`.
+
 ## Verification principles
 
 Any output must answer:

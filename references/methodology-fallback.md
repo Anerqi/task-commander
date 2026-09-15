@@ -25,7 +25,7 @@ When the four modules are composed, the orchestration order and document sources
 ### Steps
 
 1. Understand the current state. Read the project structure and documents first: CONTEXT.md, decision-log.md, existing background documents, and code; when the project already uses ADRs, read them as well. Record facts confirmable from files directly; do not ask the user.
-2. Deep-dive question by question. Ask one question at a time; wait for the answer before the next. Every question must:
+2. Deep-dive by decision dependency. Ask the highest-impact question first; wait before dependent follow-ups. Related low-effort questions may be grouped per `references/15-collaboration.md`. Every question must:
    - Check the term table: point out conflicts between the user's wording and existing standard terms immediately.
    - Sharpen vague language: when the user is vague or polysemous, propose precise standard-term candidates and ask the user to confirm.
    - Test with concrete scenarios: give bounded scenarios to test whether abstract claims and domain relations hold.
@@ -89,7 +89,7 @@ When the four modules are composed, the orchestration order and document sources
 
 ### Steps
 
-1. Interrogate the sending side, not the subject. Confirm only two things with the current user, one exchange round each:
+1. Interrogate the sending side, not the subject. Confirm two things with the current user, together when easy to answer or separately when one depends on the other:
    - Who receives it: role, expertise, relationship with the user - this decides the questionnaire's tone and how much context it must carry. Completion criteria: know who the recipient is and what they have that the user lacks.
    - What to get back: the list of decisions or facts the user cannot resolve alone and must obtain from the other side. Completion criteria: a concrete list of "what the user must be able to decide or do when they leave".
 2. Write the questionnaire against the knowledge gap between recipient and user, with this structure:

@@ -53,6 +53,18 @@ Capabilities:
 Call when:
 Technical uncertainty exists.
 
+## Backup Manager
+
+Capabilities:
+- Assessing recovery coverage for dirty/untracked files, documents, assets and data stores
+- Creating consistent recovery snapshots and manifests in approved storage
+- Verifying integrity and performing approved isolated restore/readback checks
+- Reporting retention, privacy, consistency and restoration limitations
+
+Call when:
+Risky mutation, migration, integration, release, or changed irreplaceable assets lack an adequate verified recovery point. Required backup verification precedes dependent work.
+Role file: `references/14-backup-manager.md`
+
 ## Decision Manager
 
 Capabilities:

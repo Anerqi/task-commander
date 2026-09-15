@@ -42,7 +42,7 @@ Completion criteria: a list of "confirmed facts, contradictory information, gaps
 
 ### 3. Question-by-question deep-dive
 
-Follow `grill-with-docs`; ask one question at a time. Every question must:
+Follow `grill-with-docs`; prioritize one decision at a time, with dependent questions waiting for its answer. Related low-effort questions may be grouped using the host UI per `references/15-collaboration.md`. Every question must:
 
 - State why this answer is needed now.
 - Use the standard terms in `CONTEXT.md`.
@@ -52,7 +52,7 @@ Follow `grill-with-docs`; ask one question at a time. Every question must:
 
 For each answer, first judge whether it is a goal, scope item, constraint, term, decision, or open item, then write it to the matching source of truth.
 
-Completion criteria: success criteria, in-scope, out-of-scope, users, constraints, deliverables, acceptance methods, and key terms are all confirmed, or explicitly marked as open with an assigned owner.
+Completion criteria: success criteria, in-scope, out-of-scope, users, constraints, deliverables, acceptance methods, key terms, and collaboration policy (tools, capacity, user help and recovery needs) are confirmed, or explicitly marked as open with an assigned owner. Use `references/15-collaboration.md` to elicit useful user contributions throughout execution, not only at initialization.
 
 ### 4. Clarity gate
 
@@ -82,18 +82,24 @@ Completion criteria: every third-party knowledge gap is covered by a questionnai
 
 Update the documents per the source-of-truth table; check that terms, decisions, and project background do not duplicate a second authoritative copy of each other. Report to the user: confirmed content, open items, questionnaire paths, and next steps.
 
-Completion criteria: the documents the Context Agent prescribes all exist and are readable, and every gap has a status and an owner.
+Completion criteria: the prescribed documents are readable, every gap has a status/owner, and a filled Commander handoff has been emitted per `references/01-context-brief.md` when planning-ready. Stop in the Context role; a new project phase does not switch this window's role.
 
 ## Document sources of truth
 
 | Information type | Sole source of truth | How other files reference it |
 |---|---|---|
-| Project goal, motivation, scope, users, constraints, deliverables, acceptance methods | `background/01_project_background.md` | Summary or path only |
+| Project goal, motivation, scope, users, constraints, deliverables, acceptance methods, collaboration/tool/backup policy | `background/01_project_background.md` | Summary or path only; effective permissions copied into standalone task prompts as a versioned snapshot |
 | Standard terms, avoided terms, domain relations | `CONTEXT.md` | The project background lists only core terms and points to `CONTEXT.md` |
 | Available skills, plugins, and call requirements | `background/02_skill_list.md` | Task prompts reference concrete entries |
 | Major decisions confirmed by the user | `decision-log.md` | Project status and background write only the id and a summary |
-| Current phase, tasks, blockages, and next actions | `project-status.md` | Other files do not copy dynamic status |
+| Current phase, tasks, blockages, next actions, context revision, window/sync tracking and backup pointers | `project-status.md` | Other files reference current records; task briefs/receipts label their historical input revision |
 | Third-party questions awaiting replies | `background/pending-questionnaire/` | The project background records open items and questionnaire paths |
+
+## Writes and synchronization after handoff
+
+After initialization, Commander integrates updates to central background, terms, decisions and status serially. Context and other agents submit proposed deltas in task outputs rather than editing central records concurrently. User-confirmed decisions remain subject to confirmation; a model's receipt is not authority to decide.
+
+Follow `references/15-collaboration.md` for revision increments, affected-task notification and acknowledgment. Task evidence and backup manifests live with their producing tasks; central files carry pointers, not competing copies. A saved brief/receipt is a historical snapshot, never a second live source of truth.
 
 ## CONTEXT.md and ADR rules
 

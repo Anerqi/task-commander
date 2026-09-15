@@ -11,6 +11,12 @@
 - Prefer `--version` or `--help` output when a tool version matters. If the
   version cannot be confirmed, report that limitation.
 
+## Recovery and user-assisted execution
+
+Before potentially destructive or hard-to-reverse work, verify the task's recovery prerequisite per `references/14-backup-manager.md`. If inadequate, ask Commander to dispatch Backup Manager and keep only the risky action blocked. A successful command or Git commit alone does not prove recovery coverage.
+
+Use `references/15-collaboration.md` when missing information, authentication, browser controls or repeated automation failures are better resolved by the user. Ask for a precise safe action/result, not credentials; continue independent work. Tool unavailability is a reason to offer an alternative, not silently prohibit all network or delegation.
+
 ## Filesystem operations
 
 - Prefer the host's file-editing capability for modifying existing files; avoid whole-file rewrites.

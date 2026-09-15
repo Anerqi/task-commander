@@ -5,6 +5,9 @@ __pycache__/
 .venv/
 venv/
 
+# Local agent sessions, task logs and review artifacts (not project sources)
+.pi/
+
 # OS
 .DS_Store
 Thumbs.db

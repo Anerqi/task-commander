@@ -2,7 +2,7 @@
 
 **Turn one AI coding agent into a disciplined multi-model team.**
 
-Build context before coding. Split work into verifiable tasks. Dispatch execution across chat windows. Review and QA every important delivery. Keep decisions and task state in files, not in your head.
+Build context before coding. Dispatch independent tasks in parallel, keep their chat windows alive for follow-up, and use the human as an active collaborator. Protect valuable data before risky changes. Reuse evidence and apply review/QA in proportion to risk. Keep decisions and task state in files, not in your head.
 
 Task Commander is a host-neutral orchestration skill built around a formal task state machine and two zero-dependency Python scripts. No server, no API key, no agent runtime — just a structured protocol you can run across Windows, macOS, and Linux.
 
@@ -21,9 +21,9 @@ Task Commander takes a different approach: **keep the intelligence in the models
 
 **A lightweight command center for AI-assisted projects:**
 
-`Context Agent → Commander → Executor → Reviewer / QA → Risk Manager → Decision Manager`
+`Context Agent → explicit Commander handoff → ready task batches → receipts → acceptance or continuation`
 
-![Task Commander workflow](assets/workflow-section-en.png)
+Commander coordinates Executor, Reviewer, QA, Risk Manager, Decision Manager, and Backup Manager. Roles do not automatically switch when a phase ends. The existing [workflow illustration](assets/workflow-section-en.png) shows the original role overview; the protocol below also covers backup, parallel batches, human assistance and persistent windows.
 
 Every task has an explicit owner, scope, dependencies, quality gates, acceptance criteria, and state. The state machine defines what transitions are legal, while the validator script checks the project status instead of trusting the conversation.
 
@@ -31,10 +31,16 @@ The human remains the final decision-maker. Task Commander handles the structure
 
 ## Features
 
-- Multi-role collaboration: Context Agent, Commander, Executor, Reviewer, QA, Risk Manager, Decision Manager
-- Task state machine: `project-status.md` manages phases, tasks, blockages, and history in one place; the script enforces legal state transitions
-- Low-cost skill discovery: skill list generation reading only frontmatter
-- Cross-platform core: the runtime principles avoid assumptions about a specific OS, shell, path layout, or CLI; Codex and OpenCode are the currently supported hosts, and skill paths are located by runtime discovery
+- **Explicit handoff:** Context Agent must deliver a filled Commander startup prompt, then remain in its own role.
+- **Ready batches:** one independently copyable prompt per task, several prompts per reply when dependencies and read/write scopes allow it. Proposed default: 3 active primary tasks, adjustable to your capacity.
+- **Useful tools and human help:** project-authorized public research and focused subagents are encouraged; users can supply domain facts, make decisions, log in locally, demonstrate browser flows, or export missing data. Sensitive transfer and external write actions need specific authorization.
+- **Risk-based acceptance:** select Reviewer/QA gates before dispatch, reuse fresh unchanged evidence, and recheck affected scope only. After the default 2 targeted revision rounds, replan rather than loop or automatically pass.
+- **Bounded experiments:** compare uncertain approaches in isolation; a well-evidenced negative feasibility result is useful delivery, not production success.
+- **Persistent windows:** startup, continuation and lost-window recovery prompts retain task identity and accepted evidence.
+- **Recovery-first work:** proactively dispatch Backup Manager when risky changes lack an adequate verified recovery point. Check coverage, integrity and applicable restore tests; Git alone does not cover dirty/untracked files or live databases.
+- **Shared information:** versioned receipts, central sources of truth and targeted synchronization with acknowledgment; no assumption that other windows see updates automatically.
+- **Task state machine:** the CLI checks status structure, names and requested transitions; it does not enforce permissions, schedule agents, verify evidence or certify backups.
+- **Low-cost discovery and portable core:** frontmatter-only Skill scanning, Python standard library, Windows/macOS/Linux. Codex and OpenCode are the currently supported hosts.
 
 ## Installation
 
@@ -79,9 +85,12 @@ Optional:
   - `10-context-orchestration.md` context orchestration protocol
   - `11-task-state-machine.md` task state machine
   - `12-skill-discovery.md` skill discovery protocol
+  - `14-backup-manager.md` recovery triggers, backup verification and restore boundaries
+  - `15-collaboration.md` permissions, ready batches, human help, windows and synchronization
+  - `16-quality-gates.md` risk-based gates, evidence reuse, revision budgets and experiments
   - `runtime.md` cross-platform host execution principles
   - `methodology-fallback.md` built-in methodology fallback (zero-dependency distillation used when the composed external skills are absent)
-- `templates/` — project status, state specification, agent registry, and decision log templates
+- `templates/` — project status (including optional coordination sections), state specification, agent registry, decision log, task receipt and continuation/recovery templates
 - `scripts/` — skill scanning and project status validation scripts
   - `scan-skills.py` scans skill candidates by frontmatter
   - `validate-project-state.py` validates `project-status.md` structure and state transitions
@@ -101,6 +110,20 @@ Optional:
 - Explicit call of `task-commander` or `$task-commander`
 - Requests expressing context building, task breakdown, multi-model collaboration, review, and QA acceptance
 
+## Typical use
+
+1. Ask Task Commander to clarify the project. Confirm proposed tool/capacity/backup preferences and supply facts only you know.
+2. Paste its explicit handoff into a Commander window. Keep this window for project coordination.
+3. Open the ready batch's task windows. Required backup work comes before its dependent mutation; unrelated tasks can proceed.
+4. Return task receipts to Commander. Paste targeted fixes or context updates back into the original windows, rather than restarting tasks.
+5. Accept against evidence, save useful experiment results, and keep non-blocking polish in the backlog.
+
+There is no automatic cross-window message bus or backup daemon. On hosts without dispatch support, you relay prompts/receipts. Protocol checks are agent responsibilities, not guarantees from the Python scripts.
+
+### Existing projects
+
+Keep existing task IDs, phases and history. Add the optional coordination sections from `templates/project-status.md`, establish a context revision and project Collaboration policy, and checkpoint active tasks with `templates/task-receipt.md`. Existing status tables remain compatible; no schema migration is required. New defaults do not override previously agreed task permissions or gates; change an active contract explicitly.
+
 ## Script self-check
 
 ```text
@@ -109,4 +132,9 @@ Optional:
 
 # Scan skill candidates (reads only frontmatter)
 <python> scripts/scan-skills.py --query-terms <query term1> <query term2>
+
+# Automated unit/regression tests
+<python> -m unittest discover -s tests -v
 ```
+
+CI runs the checks on three operating systems. `tests/behavioral-scenarios.md` defines manual model-level scenarios for handoff, parallelism, continued dialogue, tools, review budgets, synchronization, backups and human help. Static/document tests are regression guards, not proof that every model will obey the protocol.

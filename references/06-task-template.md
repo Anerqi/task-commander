@@ -1,102 +1,77 @@
-# Task Prompt Template (filled in by the Commander)
+# Task Startup Prompt
 
-> Every dispatch uses this template to generate the complete prompt; do not drop any required field except "fill-in" items.
-> Before dispatching, replace the Skill-root placeholder paths in [Conditional must-read] with resolved absolute paths; never load them as ordinary must-read files, never keep placeholder text in the final prompt, and do not copy this filling note.
-
----
-
-## Single-task prompt (copy everything below to the target agent)
+> Commander fills one independently copyable prompt per ready task. A reply may contain a batch of these prompts; each retains one primary owner and a bounded objective. For an existing task window, use `templates/task-continuation.md` instead. Resolve all path placeholders before sending.
 
 ```text
-You are the target agent assigned to this task. First read the files in [Role rules] below, then execute strictly per the task brief; if [Execution agent] contradicts the role rules, stop immediately and report.
+[Mode] Start
+[Task id / target window] <01_task_name / human-readable window label>
+[Priority / kind / risk] <P0-P3 / delivery or exploration / low, standard or high>
+[Primary role] <Executor / Reviewer / QA / Risk Manager / Decision Manager / Backup Manager>
+[Why this task] <value and why it is ready now>
 
-[Task id] 01_task_name
+[Contract and context]
+Project root: <absolute path>
+Original brief location: <absolute task-local path; save this contract there before execution>
+Shared context revision and relevant input versions: <revision plus precise input pointers>
+Must read:
+- <absolute primary-role file path in this Skill>
+- <absolute Skill root>/references/15-collaboration.md
+- <absolute Skill root>/references/11-task-state-machine.md
+- <absolute project root>/background/01_project_background.md
+- <absolute project root>/background/02_skill_list.md
+- <absolute project root>/project-status.md
+- <only relevant terms, decisions, upstream artifacts and acceptance evidence>
+Conditional reads:
+- Before file/CLI work: <absolute Skill root>/references/runtime.md; follow its recovery rules on error/uncertainty.
+- When selecting or applying acceptance checks/experiments: <absolute Skill root>/references/16-quality-gates.md.
+- When recovery risk or backup work applies: <absolute Skill root>/references/14-backup-manager.md.
 
-[Task priority]
-P0/P1/P2/P3
+[Dependencies and parallel contract]
+Prerequisites: <satisfied tasks and evidence, or none>
+Parallel-safe: <yes/no and reason; batch companions if any>
+Read scope: <files/data/services/browser sessions and stable input versions>
+Write scope: <exclusive files/directories/resources; central records remain Commander-owned>
+Isolation and integration owner: <workspace/snapshot and owner, or not applicable>
+Backup prerequisite: <verified recovery artifact covering current inputs / required task / not needed with reason>
+User contribution: <question/action and expected return, or none; identify what waits>
 
-[Task dependency]
-Prerequisites:
-- None
-Or:
-- task 01
+[Effective tools and budget]
+Policy source: <absolute project background path and section>
+Network: <public read-only research allowed / restriction and concrete reason>
+Sources/freshness: <source requirements and cutoff if relevant>
+Skills/plugins: <available selected names and absolute entry paths>
+Subagents: <allowed with bounded scope/count / restriction and concrete reason>
+Model policy: parent model by default; changes require explicit authorization and host support.
+Resource/time budget and stop condition: <task-appropriate bounds>
+Sensitive transfer, payment, publishing, deployment and destructive actions need applicable explicit authorization; inherited research permission does not authorize them.
 
-[Parallel-safe]
-Yes / No
+[Work]
+<Goal, scope, expected deliverable; 2-5 sentences. For exploration include the question/hypothesis, comparison criteria and isolated experiment plan.>
 
 [Quality gates]
-- Reviewer: required / not required; reason:
-- QA: required / not required; reason:
+Reviewer: <required/not required and risk-based reason>
+QA: <required/not required and risk-based reason>
+Acceptance criteria: <small numbered list of observable requirements, no unrelated polish>
+Evidence: <checks, source or runtime requirements, version identity and paths>
+Revision budget: <inherit project policy or justified exception; exhaustion means replan, not pass>
+Compliance: <specific security/privacy/copyright/domain boundaries or relevant background section>
 
-[Execution agent]
-Executor / Reviewer / QA / Risk Manager / Decision Manager
-
-[Call reason]
-Why this agent was chosen
-
-[Role rules]
-- Fill in the absolute path of the role file matching the target agent in the task-commander Skill
-- Executor: references/03-executor.md
-- Reviewer: references/04-reviewer.md
-- QA: references/05-qa.md
-- Risk Manager: references/08-risk-manager.md
-- Decision Manager: references/09-decision-manager.md
-
-[Must-read files]
-- Task Commander Skill root/references/11-task-state-machine.md
-- Project root/background/01_project_background.md
-- Project root/background/02_skill_list.md
-- Project root/project-status.md
-- (other task-related files, per the Commander's fill-in)
-
-[Conditional must-read]
-- Before writing or deleting files, running a CLI or script, or producing a deliverable: Task Commander Skill root/references/runtime.md
-- When a file write, CLI, or verification command errors, produces no output, times out, or is uncertain: verify and retry per the "Command result verification" and "Error recovery" sections of Task Commander Skill root/references/runtime.md
-- When the work is pure interviewing, planning, review explanation, read-only analysis of user-provided content, or generating prompts that do not land on disk, and runs no CLI or script: do not load Task Commander Skill root/references/runtime.md.
-
-[Output location]
-- Project root/task-output/01_task_name/
-- Deliverable file: 01_result.md
-- Review file (if needed): 04_review_findings.md
-- QA file (if needed): 05_qa_validation.md
-
-[Network and tools]
-- Network: required / not required
-- Data source requirement: name the sites and the cutoff time
-- Plugins/Skills: list by skill name (e.g. writing-for-agents; path info in `background/02_skill_list.md`)
-- Subagent: allowed / not allowed; when allowed, must note "the subagent must inherit the parent model and must not switch models"
-
-[Task content]
-<The Commander writes 2-5 sentences here: goal, scope, output.>
-
-[Compliance prerequisites]
-<State the security, privacy, copyright, industry, or decision boundaries this task must obey; when there are no special requirements, write "obey all constraints in the background documents and role rules".>
-
-[Acceptance criteria]
-1. <verifiable criterion 1>
-2. <verifiable criterion 2>
-3. <verifiable criterion 3>
-
-[Suggested state after completion]
-<In Review / QA Pending / Awaiting Acceptance; must match the quality gates; never write Completed>
-
+[Output and handback]
+Task directory: <absolute project root>/task-output/<task id_task name>/
+Deliverable: <concrete files, commonly 01_result.md>
+Gate briefs use distinct names (04_review_brief.md, 05_qa_brief.md) so they never overwrite the execution brief or deliverable; details in `references/15-collaboration.md`.
+Review/QA reports when required: 04_review_findings.md / 05_qa_validation.md (preserve revision evidence)
+Return a concise receipt using <absolute Skill root>/templates/task-receipt.md, including context acknowledgment, evidence, shared-information delta and pending human actions.
+Suggested next state: <legal state matching gates, never self-assign Completed>
+Remain available in this task window for clarification and targeted revision. Do not switch roles or edit project-status.md.
 ```
 
 ## Pre-dispatch checklist
 
-1. Do the task id and output directory carry 01/02 numbering?
-2. Are all must-read files absolute paths?
-3. Do the role rules match the execution agent, with absolute paths?
-4. Is network required/not required stated explicitly?
-5. Are skills/plugins/subagent stated explicitly?
-6. Are there 3-5 verifiable acceptance criteria?
-7. Is the compliance prerequisites section present?
-8. Do the Reviewer/QA gates and the suggested completion state match?
-9. Is the host-execution reference (runtime.md) in conditional must-read as an absolute path, and kept on-demand?
-
-## Task dependency
-
-This task depends on:
-- None
-Or:
-- Runs after task 01 completes
+1. Each prompt has its own ID, target window, primary role, goal, absolute paths, and saved brief location.
+2. Prerequisites are actually satisfied; writes, input mutations, browser/services and integration ownership are conflict-checked against active tasks.
+3. Required recovery point is verified before risky mutation. A pending backup means dispatch the backup task first, not runnable dependent work.
+4. Effective tools inherit the project policy; restrictions have a reason, capability is real, and human help is requested where useful.
+5. Acceptance criteria, required gates, budgets, and evidence are risk-proportionate; exploration failure is distinguished from implementation failure.
+6. Input revision and receipt/continuation conventions are supplied. A new prompt does not imply confirmed pickup by another window.
+7. Reviewer/QA tasks name the reviewed task ID and artifact version, keep gate briefs in separate files, and record the gate window without creating a duplicate deliverable row.
