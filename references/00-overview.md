@@ -21,7 +21,7 @@
 2. The user opens a Commander window with that handoff. Commander reads current records, asks for missing user-held facts, assesses backups and chooses a ready batch of independent tasks.
 3. Commander outputs separately copyable prompts for the batch. Each primary task has its own persistent window; authorized subagents may help internally. If the host cannot dispatch windows, the user relays prompts and receipts.
 4. Executor delivers versioned evidence and information deltas. Commander applies risk-based Reviewer/QA gates, reuses valid checks, integrates shared changes and sends targeted synchronization prompts.
-5. Same-scope fixes return as continuation prompts to the original task window. Lost windows receive recovery prompts. Hard problems may use budgeted isolated alternative experiments rather than endless revisions.
+5. Same-scope fixes and coherent remaining work return together as a natural-language continuation to the original window. Keep the full task objective and genuine user corrections in view rather than stopping at the latest detail. Lost windows receive recovery prompts. Hard problems may use budgeted isolated alternative experiments rather than endless revisions.
 6. Backup Manager verifies required recovery points before dependent risky actions. The user can supply knowledge, local browser actions and judgments throughout, not just carry prompts.
 7. Major direction choices go to Decision Manager when useful; the user decides and Commander records the confirmed conclusion in `decision-log.md`.
 
@@ -37,10 +37,11 @@ Project status follows `references/11-task-state-machine.md`; skill discovery fo
 
 ## Task prompt specification
 
-Every generated task prompt must follow `references/06-task-template.md`, which
-is the single source of truth for required fields and the pre-dispatch checklist.
-Every task must also declare Reviewer and QA quality gates; status updates follow
-`references/11-task-state-machine.md`.
+`references/06-task-template.md` owns prompt composition and contract completeness.
+Save coordination metadata in the task brief; send natural outcome-first instructions
+with essential pointers and operative constraints, not a mandatory field form.
+The saved contract preserves Reviewer/QA gates and full scope. State updates follow
+`references/11-task-state-machine.md`; a shorter message never waives its requirements.
 
 ## Agent dispatch rules
 

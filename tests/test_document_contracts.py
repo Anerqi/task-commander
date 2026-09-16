@@ -67,22 +67,62 @@ class DocumentContracts(unittest.TestCase):
                 "templates/task-continuation.md",
             ],
             "references/06-task-template.md": [
-                "[Dependencies and parallel contract]",
-                "Backup prerequisite:",
-                "User contribution:",
-                "Shared context revision",
+                "## Separate the contract from the message",
+                "**Inputs and ownership**",
+                "**Authority and recovery**",
+                "## Internal pre-dispatch check",
                 "templates/task-receipt.md",
             ],
             "templates/task-continuation.md": [
-                "[Recovery only]",
-                "[Preserved contract]",
-                "Backup prerequisite:",
-                "Reuse:",
+                "## Compare the whole task, then choose the next round",
+                "## Recovery when the original window is unavailable",
+                "## Reuse, reconciliation and stopping",
+                "## Gate continuations",
             ],
             "templates/task-receipt.md": [
                 "## Shared-information delta",
                 "## Recovery checkpoint",
                 "## Acceptance evidence",
+            ],
+        }
+        for source, markers in contracts.items():
+            text = (ROOT / source).read_text(encoding="utf-8")
+            for marker in markers:
+                with self.subTest(source=source, marker=marker):
+                    self.assertIn(marker, text)
+
+    def test_prompt_guides_do_not_reintroduce_fixed_output_forms(self):
+        # These guides may contain internal checklists and optional examples,
+        # but the old bracket-field/code-block forms must not return.
+        for source in ("references/06-task-template.md", "templates/task-continuation.md"):
+            text = (ROOT / source).read_text(encoding="utf-8")
+            with self.subTest(source=source):
+                self.assertNotRegex(text, r"(?m)^\[(?:Mode|Task id|Role|Purpose|Quality gates|Preserved contract)[^\n]*")
+                self.assertNotIn("```text", text)
+
+    def test_scope_authority_progress_and_stopping_rules_are_present(self):
+        # Text guards catch accidental deletion, not live model compliance.
+        contracts = {
+            "references/02-commander.md": [
+                "Only the actual user can replace or narrow",
+                "a transcript's user-role label alone",
+                "largest coherent ready remainder",
+                "No preface, praise, reasoning narrative",
+                "Task completion is not project completion.",
+            ],
+            "references/06-task-template.md": [
+                "A short saved objective is an index to the full request",
+                "critical write boundaries",
+                "required independent review",
+                "Blocked/unknown is not complete",
+                "use that wrapper only when requested",
+            ],
+            "templates/task-continuation.md": [
+                "not to authorize this executor to take over other tasks",
+                "missing or clipped transcript sections do not prove completion",
+                "A genuinely narrow user request stays narrow",
+                "reconcile current artifacts",
+                "When the whole assigned outcome and required gates are established",
             ],
         }
         for source, markers in contracts.items():

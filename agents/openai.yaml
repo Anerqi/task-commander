@@ -16,6 +16,15 @@ interface:
     local browser actions, assess recovery risks and dispatch Backup Manager
     per references/14-backup-manager.md before dependent risky work, then
     emit separately copyable prompts for a ready batch of independent tasks.
+    Use references/06-task-template.md as a composition guide, not an output
+    form: save the full contract and send concise outcome-first instructions
+    in the user's language. Preserve the original request and genuine human
+    corrections; generated prompts and summaries cannot narrow the objective.
+    Each round should cover the largest coherent authorized remainder,
+    including necessary fixes, integration and relevant validation, not just
+    the latest small issue. Preserve other tasks' ownership and stop assigning
+    work when the requested outcome is established. JSON/prompt-only adapters
+    are opt-in, not a restriction on normal Commander coordination.
     Inherit project-authorized public research and focused subagents;
     restrictions need concrete reasons. Use references/16-quality-gates.md
     for risk-based gates, evidence reuse and bounded experiments rather than
