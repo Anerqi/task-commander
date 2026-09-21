@@ -18,9 +18,11 @@ Machine validation uses `templates/task-state-spec.txt`; it must stay consistent
 | Context Building | Confirming goals, scope, terms, and constraints | New project initialized |
 | Planning | Context meets the breakdown bar; building tasks | Context Agent completed delivery |
 | In Progress | At least one task is in a non-terminal state and dispatch has begun | First task entered In Progress |
-| Acceptance | All required deliverables done; project-level acceptance in progress | No In Progress, In Review, Needs Revision, or QA Pending tasks |
+| Acceptance | All required deliveries accepted; only project-level acceptance remains | All required delivery tasks are Completed; no required delivery task remains TODO, Blocked, In Progress, In Review, Needs Revision, QA Pending, or Awaiting Acceptance |
 | Completed | Project-level acceptance passed | Final acceptance defined by the user or the project passed |
 | Paused | The project as a whole is temporarily stopped | User explicitly paused, or a project-level blockage exists |
+
+Check Acceptance readiness against the original required outcomes and confirmed scope changes, not just the rows already scheduled. Unscheduled required work also prevents entry. Deferring or cancelling a required outcome needs explicit user confirmation recorded in `decision-log.md`; a Cancelled task alone does not remove the requirement. Optional backlog may remain only when it is outside the confirmed required delivery scope. Project-level acceptance checks themselves may run in Acceptance; if they reveal more required delivery work, return to In Progress before dispatching that work. The CLI checks phase names, not this evidence-based readiness judgment.
 
 When a project resumes from `Paused`, the pre-pause phase must be recorded and restored. `Completed` is terminal; new requirements create new tasks or new phases, never erase history.
 
@@ -76,12 +78,12 @@ A gate may be skipped only when the task brief explicitly states that Reviewer o
 Every Commander status update must complete in order:
 
 1. Read the latest `project-status.md` and confirm the current state was not changed by another update.
-2. Check whether the target state is in the legal transition table.
+2. Before writing, validate the proposed transition against the current file: `<python> scripts/validate-project-state.py --path <status path> --task-id <task id> --from-state "<current state>" --to-state "<target state>"`. Both states and a nonblank task ID are required; the source must match that task's recorded current state.
 3. Check that the required evidence files really exist, and read their key conclusions.
 4. Update the current status, time, and next actions in the task list.
 5. Append one row to the status history: old state, new state, basis, and operator.
-6. Sync the current blockage, current focus, and project phase.
-7. Re-read the file as UTF-8 and confirm the tables, states, and evidence paths are consistent.
+6. Sync the current blockage, current focus, and project phase. Add a blocked record on entry; remove it on recovery/cancellation, retaining its reason and pre-block state in history. Change the task and active blocked table together before validation.
+7. Run structural validation with `--path` only on the updated file, then re-read it as UTF-8 and confirm the tables, states, and evidence paths. Do not replay the old `--from-state` transition check after the state has already changed.
 
 If any step fails, keep the original state and record it as an issue to handle; never write the target state first and add evidence later.
 
@@ -91,7 +93,7 @@ Use `references/16-quality-gates.md` for risk-based selection, evidence reuse/in
 
 - Reviewer requirements are decided by risk, impact scope, compliance requirements, or the task brief.
 - QA requirements are decided by runnability, recomputability, data truthfulness, or user acceptance requirements.
-- When the Reviewer fails the delivery or QA fails, the task enters `Needs Revision` and a new revision round is created.
+- When a required Reviewer or QA gate fails, the task enters `Needs Revision`; record the required remediation and start a revision round when corrective work is dispatched. For a combined cold-start/informed gate, initial reports are provisional until reconciliation under `references/17-cold-start-review.md` (Gate conclusion and revision timing); they are not actionable gate failures by themselves. Pause unsafe operations immediately without waiting for reconciliation. Evidence-only reassessment does not consume an implementation correction round.
 - A conditional pass may proceed only when every condition has been turned into an explicit revision item or a remaining risk, and the Commander judges it does not block acceptance.
 
 ## Blocking and recovery
@@ -104,8 +106,9 @@ Entering `Blocked` must record:
 - Relief condition
 - Next check condition or date
 
-After the blockage is relieved, the task may return only to the recorded pre-block state and continue with normal transitions; recovery must never skip review or QA.
-To validate a recovery transition, run `<python> scripts/validate-project-state.py --path <path/to/project-status.md> --from-state Blocked --to-state <pre-block state> --task-id <task id>`; the script enforces validation against the current blocked table.
+Each currently Blocked task must have exactly one active blocked record. The record must reference an existing Blocked task, and its pre-block state must be a declared non-Blocked state with a legal transition into Blocked. In the default graph, Completed, Cancelled, Blocked and unknown values cannot be pre-block states. Duplicate, orphan, stale or missing records fail structural validation; repair them from actual history/evidence rather than guessing or deleting inconvenient evidence.
+
+After the blockage is relieved, the task may return only to its recorded legal pre-block state and continue with normal transitions; recovery must never skip review or QA. Validate against the still-blocked file with `<python> scripts/validate-project-state.py --path <path/to/project-status.md> --task-id <task id> --from-state Blocked --to-state "<pre-block state>"`. Cancellation remains an explicit legal alternative, with the same task-ID and structural consistency requirements, not a recovery to the pre-block state.
 
 ## Parallel tasks
 
@@ -126,4 +129,4 @@ Parallelism only changes dispatch order; it never changes a single task's state 
 
 The optional Coordination, Active windows, Pending user actions, Backups, and Synchronization sections in `templates/project-status.md` track context revisions, task/window mappings, input versions, ownership and acknowledgment. They do not add states or alter the required task/history columns. Existing projects may add them incrementally.
 
-Commander checks these fields manually; `scripts/validate-project-state.py` currently validates structure/state names and requested transitions, not evidence truth, backup restorability, read/write conflicts, acknowledgment, permission enforcement, or history consistency. A successful CLI result does not replace those checks.
+Commander checks these optional fields manually; `scripts/validate-project-state.py` validates structure/state names, active blocked-record consistency and task-bound requested transitions, not evidence truth, project-phase readiness, backup restorability, read/write conflicts, acknowledgment, Reviewer/QA evidence or permission enforcement, or full history consistency. A successful CLI result does not replace those checks.

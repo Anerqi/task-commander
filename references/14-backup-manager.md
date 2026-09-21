@@ -10,6 +10,16 @@ Dispatch a dedicated Backup Manager prompt using `references/06-task-template.md
 
 Treat required backup completion as a dependency: mutation waits for a verified receipt. Unrelated safe tasks may proceed. If backup creation or verification fails, keep the risky action blocked, explain the recovery gap, and offer a user-assisted export or a safer plan. A permission to modify data does not itself prove a backup exists.
 
+## Pre-initialization protection
+
+When valuable existing assets need protection before `project-status.md` or a usable project brief exists, Context Agent may give the user a standalone Backup Manager prompt. This is a narrow protective handoff, not a switch to Commander or permission to dispatch business tasks. Commander encountering the same missing-state case may use this path instead of sending the user back and forth for initialization.
+
+- Confirm source scope, approved destination/report location, sensitivity, consistency method and required verification with the user. Do not assume a not-yet-established project policy grants network, subagent or upload permissions; state the effective authorization in the prompt. The existing backup verification and privacy rules below still apply.
+- Use a unique provisional reference (for example `preinit-backup-<timestamp>`) and absolute source, role, runtime and output pointers. Include the necessary brief inline; this exception does not require a saved task brief, status file, ordinary task ID, background files or a state-validation command. Do not create/overwrite those files merely to unlock a backup.
+- Backup Manager writes only the authorized new recovery artifacts and receipt, leaving originals and central records untouched. Do not restore, delete old backups or start implementation under this exception.
+- Return the receipt to the requesting Context/Commander window. That role checks coverage, source identity, integrity and any required restore/readback evidence before permitting the protected initialization writes. If it cannot verify readiness, request the specific user action/evidence and leave those writes blocked; a prompt or claimed success alone is insufficient.
+- Context remains Context and resumes initialization after verification. Include the provisional backup reference and evidence paths in the initialized status/Commander handoff. Commander later adopts those pointers without inventing a prior task-state history or repeating an adequate unchanged backup.
+
 ## Inputs to the backup task
 
 - Trigger, dependent task/action, required recovery scope and versions.

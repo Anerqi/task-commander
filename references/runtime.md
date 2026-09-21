@@ -13,7 +13,7 @@
 
 ## Recovery and user-assisted execution
 
-Before potentially destructive or hard-to-reverse work, verify the task's recovery prerequisite per `references/14-backup-manager.md`. If inadequate, ask Commander to dispatch Backup Manager and keep only the risky action blocked. A successful command or Git commit alone does not prove recovery coverage.
+Before potentially destructive or hard-to-reverse work, verify the task's recovery prerequisite per `references/14-backup-manager.md`. If inadequate, ask Commander to dispatch Backup Manager and keep only the risky action blocked. Before a status file exists, use that reference's Pre-initialization protection handoff: Context may supply the standalone backup prompt without switching roles or waiting for Commander initialization. Missing project records do not block this protective action, but permissions and backup verification still apply. A successful command or Git commit alone does not prove recovery coverage.
 
 Use `references/15-collaboration.md` when missing information, authentication, browser controls or repeated automation failures are better resolved by the user. Ask for a precise safe action/result, not credentials; continue independent work. Tool unavailability is a reason to offer an alternative, not silently prohibit all network or delegation.
 

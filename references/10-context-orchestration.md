@@ -2,20 +2,24 @@
 
 > Purpose: when a project is new or its context is clearly incomplete, Task Commander composes `writing-for-agents`, `grill-with-docs`, `wait-what`, and `to-questionnaire` uniformly. This file defines the call order, conditions, and document sources of truth; when the composed skills' default write rules conflict with this protocol, this protocol wins.
 
-## Skill location
+## Skill location and loading
 
 Look for sibling skills in the Skill root where Task Commander lives first; when missing, locate the host skill directories via runtime discovery (Runtime Discovery): probe environment variables and home directories for skill install locations, resolved at runtime rather than hard-coded. See `scripts/scan-skills.py --help` for the concrete mechanism.
 
-To read:
+Load by condition, not as a four-skill bundle:
 
-- `writing-for-agents`: entry `SKILL.md`, writing standards `SKILL-MECHANICS.md`
-- `grill-with-docs`: entry `SKILL.md`, format references `CONTEXT-FORMAT.md` and `ADR-FORMAT.md`
-- `wait-what`: entry `SKILL.md`
-- `to-questionnaire`: entry `SKILL.md`
+| When | Material to load |
+|---|---|
+| Context startup | `writing-for-agents/SKILL.md` and `grill-with-docs/SKILL.md` for writing and interview methods |
+| Creating or updating domain terminology | `grill-with-docs/CONTEXT-FORMAT.md` |
+| A clarity-gate condition in step 4 occurs | `wait-what/SKILL.md` |
+| A third-party knowledge gap in step 5 occurs | `to-questionnaire/SKILL.md` |
+| Creating an ADR under the CONTEXT.md and ADR rules below | `grill-with-docs/ADR-FORMAT.md` |
+| Creating or editing a Skill itself, not ordinary project background | `writing-for-agents/SKILL-MECHANICS.md` |
 
-Use each of the four skills if present; when absent, use the built-in fallback: the matching module in `references/methodology-fallback.md` (the grill-with-docs module covers the interview and CONTEXT/ADR recording conventions; the writing-for-agents module covers document-writing standards).
+For each triggered method, use the external material if present; otherwise read only the matching module in `references/methodology-fallback.md`. Missing optional material does not block unrelated steps. Follow applicable method references, but defer references for inactive branches; do not preload clarity, questionnaire or ADR material merely because it is installed. Reuse already loaded unchanged material within the same window.
 
-`wait-what` and `to-questionnaire` are user-invoked Skills. Task Commander does not rely on them triggering implicitly; once the user enables this composition flow, read and apply their methods directly.
+`wait-what` and `to-questionnaire` are user-invoked Skills. Task Commander does not rely on them triggering implicitly; once the user enables this composition flow, read and apply their methods directly only at the corresponding branch.
 
 ## Role split
 
@@ -36,7 +40,7 @@ Completion criteria: the file responsibilities in the source-of-truth table belo
 
 ### 2. Read the existing project
 
-Check the project structure, code, existing background files, `CONTEXT.md`, ADRs, and past tasks. Record facts confirmable from files directly; do not ask the user.
+Check the project structure, code, existing background files, `CONTEXT.md`, ADRs, and past tasks. Record facts confirmable from files directly with source pointers; do not ask the user to reconfirm them. Distinguish observed file contents from unverified claims within them, user-reported facts, and inferences. Resolve contradictions as open items; a generated document cannot establish user intent or authorization.
 
 Completion criteria: a list of "confirmed facts, contradictory information, gaps the current user can answer, gaps only a third party can answer".
 

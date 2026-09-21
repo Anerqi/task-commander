@@ -17,11 +17,17 @@ Even waived gates must be explicit. Use the existing legal route through Awaitin
 
 Freeze acceptance scope at dispatch. New polish suggestions become follow-up backlog items, not surprise acceptance requirements. A newly discovered serious safety/correctness issue may block release; identify its evidence and impact and explicitly revise the plan rather than silently moving the goalposts.
 
+## Select review context
+
+Record informed or cold-start mode before dispatch; informed review is the default. Consider cold-start review for significant milestones, changed user journeys, or suspected anchoring after repeated revisions, rather than every small fix. `references/17-cold-start-review.md` owns the neutral packet, real context boundary, independent checkpoint and later informed reconciliation. It is a Reviewer mode, not an additional role or state, and it never replaces required QA or full-scope review coverage.
+
+When using separate cold-start and informed reviewers, preserve both initial assessments before sharing findings. Neither reviewer follows the other's verdict as a premise. Stage 1 alone cannot satisfy the gate: assess the final reconciled report against all required criteria, not just the outside-perspective scenario. For a combined Reviewer gate, both initial reports are provisional; use the named reconciliation owner's final report for the gate decision and revision timing per `references/17-cold-start-review.md`. Pause unsafe work immediately. Do not claim a required cold-start check ran if isolation was unavailable; use that protocol's explicit fallback.
+
 ## Divide the checks
 
 - Executor: perform the relevant self-check once for the current delivery; provide commands/results or source evidence.
 - Reviewer: inspect reasoning, scope, design, compliance, and material risks. Reference existing valid test evidence instead of rerunning it automatically.
-- QA: execute the required checks or recompute relevant results. Do not repeat the entire design review.
+- QA: derive checks from acceptance criteria and realistic success/failure scenarios, then execute or recompute relevant results. An Executor's test list is evidence, not the whole test plan. Do not repeat the entire design review.
 - Commander: match criteria to evidence, verify identity/freshness and conclusions, and make the acceptance decision. Do not recreate Reviewer/QA work without an identified evidence gap.
 
 Independent review means an independent assessment of the evidence, not mandatory duplication of every command. If reviewers disagree, identify a falsifiable disputed claim and run a bounded deciding check or ask the user for a scope/risk decision; do not cycle reviewers indefinitely.
@@ -35,6 +41,8 @@ Reuse a passed check when its artifact, relevant dependencies/configuration/envi
 After a targeted fix, check the fixed issue and impacted regressions; previously accepted unaffected criteria stay accepted. Store evidence per revision or preserve history instead of overwriting the only proof of a prior conclusion.
 
 ## Findings and stopping
+
+For every assessment, distinguish personally inspected/executed checks, reused evidence and unverified claims. State coverage and limitations even when there are no findings; require no minimum issue count. Project narrative, intentional design and prior passing verdicts alone do not establish correctness or refute a demonstrated issue.
 
 Classify each finding with an ID, evidence location, affected criterion, severity, and requested action:
 

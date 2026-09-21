@@ -12,12 +12,21 @@
 
 ## Acceptance evidence
 
-| Check / criterion | Artifact + relevant input versions | Method / environment or source date | Result | Evidence path / checker |
+| Check / criterion | Artifact + relevant input versions | Method / environment or source date | Result + provenance (direct / reused / unverified) | Evidence path / checker |
 |---|---|---|---|---|
 
 - Reused checks and why still valid:
 - Changed inputs, invalidated checks and regression scope:
 - Findings: ID, blocking / non-blocking / suggestion / unverified, location, disposition:
+
+## Review context (when relevant)
+
+- Mode / stage / concrete scenario / assigned coverage:
+- Packet version and inputs actually read; inherited or accidental context exposure and timing:
+- Preserved independent record path; stage-2 context release and final report paths:
+- Initial finding ID -> confirmed / refuted by evidence / user-accepted trade-off / unverified; evidence and reason for each disposition or severity change:
+- Checked criteria, untested areas and remaining coverage gaps (including zero-finding reports):
+- Stage 1 is a checkpoint, not a gate pass; acknowledge only context actually received. Follow `references/17-cold-start-review.md` for isolation and reconciliation.
 
 ## Shared-information delta
 

@@ -58,6 +58,30 @@ jobs:
         run: |
           python -c "import json, subprocess, sys; p = subprocess.run([sys.executable, 'scripts/scan-skills.py', '--roots', '.', '--max-results', '5'], capture_output=True); assert p.returncode == 0, p.stderr.decode('utf-8'); d = json.loads(p.stdout.decode('utf-8')); assert isinstance(d['unique_skills_scanned'], int) and d['unique_skills_scanned'] >= 1; assert isinstance(d['candidates_returned'], int) and d['candidates_returned'] >= 1"
 
+      - name: scan-skills.py host profile smoke test
+        # Every discovery profile must run cleanly on any platform, and
+        # --project-root must anchor discovery. Header lines are printed so a
+        # failure shows which profile broke. This asserts the CLI contract
+        # only: it does not prove a live host integration, and CI has no
+        # installed skills, so candidate counts are not asserted here.
+        run: |
+          python -c "
+          import json, subprocess, sys
+          hosts = ['all', 'codex', 'opencode', 'claude-code', 'cursor', 'copilot', 'pi']
+          for host in hosts:
+              process = subprocess.run([sys.executable, 'scripts/scan-skills.py', '--host', host, '--project-root', '.', '--max-results', '5'], capture_output=True)
+              assert process.returncode == 0, (host, 'exit', process.returncode, process.stderr.decode('utf-8'))
+              payload = json.loads(process.stdout.decode('utf-8'))
+              assert isinstance(payload['roots'], list) and isinstance(payload['candidates'], list), host
+              print(host, 'ok, roots:', len(payload['roots']))
+          "
+
+      - name: scan-skills.py explicit-root discovery of this repository
+        # The repository's own SKILL.md is not inside a host skill directory,
+        # so it is found through explicit --roots rather than a profile.
+        run: |
+          python -c "import json, subprocess, sys; p = subprocess.run([sys.executable, 'scripts/scan-skills.py', '--roots', '.', '--query-terms', 'task-commander'], capture_output=True); assert p.returncode == 0, p.stderr.decode('utf-8'); d = json.loads(p.stdout.decode('utf-8')); assert any(c['name'] == 'task-commander' for c in d['candidates']), d['roots']"
+
       - name: validate-project-state.py real run
         # Full structural validation of the in-repo template
         # templates/project-status.md; the spec file is located by the

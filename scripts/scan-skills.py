@@ -8,18 +8,19 @@ directories, parse the simple YAML frontmatter fields needed for skill
 discovery, dedupe by skill name, score the entries against the query terms,
 and print the surviving candidates as JSON.
 
-- Flags: --query-terms (one or more query terms); --max-results (1-500,
-  default 30); --roots (one or more scan root directories); --output-path.
-- Default scan roots (runtime discovery): when --roots is omitted, the
-  roots are discovered at runtime; no absolute path is hard-coded.
-  Project-level skill directories (.opencode/skills, .agents/skills,
-  .claude/skills) are collected walking upward from the current working
-  directory, stopping at the filesystem root or at the git worktree top
-  when git reports one. User-level directories under the home directory
-  follow (~/.config/opencode/skills, ~/.agents/skills, ~/.claude/skills),
-  then the Codex directories under CODEX_HOME (defaults to ~/.codex):
-  skills plus the three plugins/cache directories. Only existing
-  directories are scanned, and each real path is scanned once.
+- Flags: --query-terms; --max-results (1-500, default 30); --roots;
+  --output-path; --host (all by default); --project-root (cwd by default).
+- Discovery: HOST_PROFILES declares candidate paths, not host availability.
+  Project paths are collected nearest-first up to the Git worktree top or
+  filesystem root, then user paths, then selected compatibility paths.
+  Nonempty --roots replaces discovery entirely; an empty --roots retains
+  the legacy automatic-discovery behavior. Pi's .pi/skills is local to the
+  discovery start; its shared .agents/skills follows ancestor discovery.
+  PI_CODING_AGENT_DIR overrides the Pi user configuration base.
+  Only existing directories are scanned; realpath/normcase deduplication
+  also prevents cycles when following skill-directory symlinks.
+  This does not reproduce host permissions or conflict-resolution rules,
+  read host configuration, or execute plugins.
 - Frontmatter parsing: read line by line; the first line must be '---';
   at most 200 lines are parsed; keys are lower-cased; quotes are stripped;
   '>' '|' '>-' '|-' count as empty values; indented continuation lines are
@@ -46,31 +47,92 @@ import re
 import sys
 
 
-def default_roots():
-    """Discover default scan roots at runtime; no path is hard-coded.
+# Ordered candidates only: directory existence does not imply host availability.
+# Keep native paths before compatibility paths within each scope.
+HOST_PROFILES = {
+    'codex': {
+        'project': ('.agents/skills',),
+        'user': ('.agents/skills',),
+    },
+    'opencode': {
+        'project': ('.opencode/skills', '.agents/skills', '.claude/skills'),
+        'user': ('.config/opencode/skills', '.agents/skills', '.claude/skills'),
+    },
+    'claude-code': {
+        'project': ('.claude/skills',),
+        'user': ('.claude/skills',),
+    },
+    'cursor': {
+        'project': ('.cursor/skills', '.agents/skills', '.claude/skills', '.codex/skills'),
+        'user': ('.cursor/skills', '.agents/skills', '.claude/skills', '.codex/skills'),
+    },
+    'copilot': {
+        'project': ('.github/skills', '.claude/skills', '.agents/skills'),
+        'user': ('.copilot/skills', '.agents/skills'),
+    },
+    'pi': {
+        'project': ('.pi/skills', '.agents/skills'),
+        'user': ('.pi/agent/skills', '.agents/skills'),
+    },
+}
+# Preserve the previous shared-path ordering in all mode.
+ALL_HOST_ORDER = ('opencode', 'codex', 'claude-code', 'cursor', 'copilot', 'pi')
+CODEX_COMPAT_PATHS = (
+    'skills',
+    'plugins/cache/openai-curated',
+    'plugins/cache/openai-bundled',
+    'plugins/cache/openai-curated-remote',
+)
 
-    Project level: walk upward from the current working directory,
-    collecting the .opencode/skills, .agents/skills, and .claude/skills
-    directories that exist at each level; stop at the filesystem root, or
-    at the git worktree top when git is available and reports one.
-    User level: ~/.config/opencode/skills, ~/.agents/skills, and
-    ~/.claude/skills under the home directory. Codex: the skills directory
-    under CODEX_HOME (defaults to ~/.codex) and the three plugins/cache
-    directories, when they exist.
-    Only existing directories are returned; after resolving to real paths
-    each directory is kept once.
+
+def path_key(path):
+    return os.path.normcase(os.path.realpath(path))
+
+
+def existing_unique_roots(candidates):
+    """Keep existing directories once, in first-occurrence order."""
+    roots = []
+    seen = set()
+    for candidate in candidates:
+        if not candidate.strip() or not os.path.isdir(candidate):
+            continue
+        real = os.path.realpath(candidate)
+        key = path_key(real)
+        if key not in seen:
+            seen.add(key)
+            roots.append(real)
+    return roots
+
+
+def project_root_type(text):
+    if not text.strip() or not os.path.isdir(text):
+        raise argparse.ArgumentTypeError('must be an existing directory')
+    return os.path.realpath(text)
+
+
+def default_roots(host='all', project_root=None):
+    """Discover ordered project, user, and compatibility roots for a profile.
+
+    --project-root, not the script installation directory, anchors Git and
+    ancestor discovery. Configuration files and extra plugin roots are not read;
+    callers can supply --roots for any additional directories.
     """
     import subprocess
 
-    home = os.path.expanduser('~')
-
+    current = project_root_type(os.getcwd() if project_root is None else project_root)
+    start = current
+    hosts = ALL_HOST_ORDER if host == 'all' else (host,)
+    paths = {
+        scope: tuple(dict.fromkeys(
+            path for selected in hosts for path in HOST_PROFILES[selected][scope]))
+        for scope in ('project', 'user')
+    }
     roots = []
-
-    # Project level: nearest directories first
     worktree_top = None
     try:
         probe = subprocess.run(
             ['git', 'rev-parse', '--show-toplevel'],
+            cwd=current,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             encoding='utf-8',
@@ -78,47 +140,30 @@ def default_roots():
             check=False,
             timeout=10)
         if probe.returncode == 0 and probe.stdout.strip():
-            worktree_top = os.path.realpath(probe.stdout.strip())
+            worktree_top = path_key(probe.stdout.strip())
     except (OSError, subprocess.TimeoutExpired):
         pass
-    current = os.path.abspath(os.getcwd())
     while True:
-        for name in ('.opencode', '.agents', '.claude'):
-            candidate = os.path.join(current, name, 'skills')
-            if os.path.isdir(candidate):
-                roots.append(candidate)
-        if worktree_top is not None and os.path.realpath(current) == worktree_top:
+        roots.extend(os.path.join(current, path) for path in paths['project']
+                     if path != '.pi/skills' or current == start)
+        if worktree_top is not None and path_key(current) == worktree_top:
             break
         parent = os.path.dirname(current)
         if parent == current:
             break
         current = parent
 
-    # User level
-    for name in ('.config/opencode', '.agents', '.claude'):
-        candidate = os.path.join(home, name, 'skills')
-        if os.path.isdir(candidate):
-            roots.append(candidate)
-
-    # Codex
-    codex_home = os.environ.get('CODEX_HOME') or os.path.join(home, '.codex')
-    for relative in ('skills',
-                     os.path.join('plugins', 'cache', 'openai-curated'),
-                     os.path.join('plugins', 'cache', 'openai-bundled'),
-                     os.path.join('plugins', 'cache', 'openai-curated-remote')):
-        candidate = os.path.join(codex_home, relative)
-        if os.path.isdir(candidate):
-            roots.append(candidate)
-
-    # Dedupe after resolving real paths
-    unique_roots = []
-    seen = set()
-    for root in roots:
-        real = os.path.realpath(root)
-        if real not in seen:
-            seen.add(real)
-            unique_roots.append(real)
-    return unique_roots
+    home = os.path.expanduser('~')
+    for path in paths['user']:
+        if path == '.pi/agent/skills':
+            pi_home = os.environ.get('PI_CODING_AGENT_DIR') or os.path.join(home, '.pi', 'agent')
+            roots.append(os.path.join(pi_home, 'skills'))
+        else:
+            roots.append(os.path.join(home, path))
+    if 'codex' in hosts:
+        codex_home = os.environ.get('CODEX_HOME') or os.path.join(home, '.codex')
+        roots.extend(os.path.join(codex_home, path) for path in CODEX_COMPAT_PATHS)
+    return existing_unique_roots(roots)
 
 
 def parse_frontmatter(path):
@@ -174,19 +219,33 @@ def parse_frontmatter(path):
     )
 
 
-def find_skill_files(root):
+def find_skill_files(root, seen_dirs=None, seen_files=None):
+    """Follow directory symlinks safely, skipping inaccessible directories.
+
+    Shared visited sets avoid rescanning aliases and overlapping scan roots.
+    Filenames are matched case-insensitively; traversal is sorted.
     """
-    Recursively scan a directory for SKILL.md files; filename comparison is
-    case-insensitive so files are not missed on case-sensitive platforms.
-    Directories that cannot be accessed are skipped silently.
-    """
+    if seen_dirs is None:
+        seen_dirs = set()
+    if seen_files is None:
+        seen_files = set()
     matches = []
-    for dirpath, dirnames, filenames in os.walk(root, onerror=lambda _err: None):
+    for dirpath, dirnames, filenames in os.walk(
+            root, followlinks=True, onerror=lambda _err: None):
+        key = path_key(dirpath)
+        if key in seen_dirs:
+            dirnames[:] = []
+            continue
+        seen_dirs.add(key)
         dirnames.sort()
         filenames.sort()
         for filename in filenames:
             if filename.lower() == 'skill.md':
-                matches.append(os.path.join(dirpath, filename))
+                path = os.path.realpath(os.path.join(dirpath, filename))
+                key = path_key(path)
+                if key not in seen_files:
+                    seen_files.add(key)
+                    matches.append(path)
     return matches
 
 
@@ -217,28 +276,27 @@ def main():
     parser.add_argument('--max-results', type=max_results_type, default=30, metavar='N',
                         help='upper bound on returned candidates, 1-500 (default 30)')
     parser.add_argument('--roots', nargs='*', default=[], metavar='DIR',
-                        help='one or more scan root directories; defaults to '
-                             'runtime-discovered roots')
+                        help='nonempty explicit roots replace discovery (including home); '
+                             'omitted or empty uses automatic discovery')
+    parser.add_argument('--host', choices=('all', *HOST_PROFILES), default='all',
+                        help='candidate path profile, not host availability (default all)')
+    parser.add_argument('--project-root', type=project_root_type, default=os.getcwd(),
+                        metavar='DIR', help='existing discovery starting directory (default cwd)')
     parser.add_argument('--output-path', default=None, metavar='FILE',
                         help='JSON output file path; prints to stdout when omitted')
     args = parser.parse_args()
 
     if args.roots:
-        candidate_roots = args.roots
+        roots = existing_unique_roots(args.roots)
     else:
-        candidate_roots = default_roots()
-
-    # Keep only existing directories and resolve them to real paths; skip empty strings
-    roots = [
-        os.path.realpath(root)
-        for root in candidate_roots
-        if root.strip() and os.path.isdir(root)
-    ]
+        roots = default_roots(args.host, args.project_root)
 
     by_name = {}   # insertion order is scan order; the first-scanned root wins (root_priority)
+    seen_dirs = set()
+    seen_files = set()
     root_index = 0
     for root in roots:
-        for skill_file in find_skill_files(root):
+        for skill_file in find_skill_files(root, seen_dirs, seen_files):
             frontmatter = parse_frontmatter(skill_file)
             if frontmatter is None:
                 continue

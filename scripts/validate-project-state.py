@@ -6,8 +6,9 @@ validate-project-state.py - validate the structure and state transitions of a pr
 Standard-library-only script (Python 3.10+); the flags and the validation
 behavior are described below.
 
-- Flags: --path (required); --from-state and --to-state are used as a
-  pair; --task-id (blocked recovery validation); --spec-path (defaults to
+- Flags: --path (required; alone performs structural validation);
+  --from-state and --to-state require each other and a nonblank --task-id;
+  --task-id alone is invalid; --spec-path (defaults to
   templates/task-state-spec.txt located relative to the script, without
   hard-coding absolute paths).
 - Spec parsing: read task-state-spec.txt line by line, skip blank lines
@@ -17,11 +18,17 @@ behavior are described below.
 - Structure validation: required headings, the project phase field with a
   legal value, the task table header, the task list table (11 columns,
   duplicate task-id detection, legal states), and the blocked table (first
-  column task id, second column pre-block state).
-- Transition validation: --from-state/--to-state must be provided
-  together; source and target states must be legal and the transition must
-  be allowed by the table; the <blocked-before> pseudo-target means "the
-  task's pre-block state" and is verified with --task-id.
+  column task id, second column pre-block state). Every currently Blocked
+  task requires exactly one blocked record; other tasks must have none.
+  Pre-block states must be declared, non-Blocked states with a legal edge
+  to Blocked. Malformed, duplicate, orphan, and stale records are errors.
+- Transition validation: nonblank --from-state/--to-state and --task-id
+  identify a parsed task whose current state must match --from-state.
+  Source and target states must be legal and the transition must be allowed
+  by the table; <blocked-before> permits restoration to the recorded state.
+  Explicit edges (including Blocked -> Cancelled) do not require restoration,
+  but still require structurally consistent metadata. Reviewer/QA flags,
+  evidence, and phase semantics are not enforced.
 - Case comparison: state and transition lookup is case-insensitive; the
   spelling from the specification is retained in validation messages.
 - Output: UTF-8 without BOM, LF line endings. JSON contains valid / path /
@@ -96,16 +103,17 @@ def main():
     sys.stderr.reconfigure(encoding='utf-8')
 
     parser = argparse.ArgumentParser(
-        description='Validate the structure and state-transition legality of a '
-                    'project-status.md file')
+        description='Validate project-status.md structure with --path alone, or '
+                    'also validate a task transition with --from-state, --to-state, '
+                    'and --task-id.')
     parser.add_argument('--path', required=True, metavar='FILE',
                         help='path to the project-status.md file to validate (required)')
     parser.add_argument('--from-state', default=None, metavar='STATE',
-                        help='source state of the transition (must be paired with --to-state)')
+                        help='current task state (requires --to-state and --task-id; nonblank)')
     parser.add_argument('--to-state', default=None, metavar='STATE',
-                        help='target state of the transition (must be paired with --from-state)')
+                        help='target state (requires --from-state and --task-id; nonblank)')
     parser.add_argument('--task-id', default=None, metavar='ID',
-                        help='task id used to validate blocked recovery')
+                        help='existing task id required for every transition; invalid alone')
     parser.add_argument('--spec-path', default=None, metavar='FILE',
                         help='path to the state specification file; defaults to '
                              'templates/task-state-spec.txt under the Task Commander '
@@ -177,7 +185,7 @@ def main():
     section_pattern = ('(?s)' + re.escape(settings['task_section_start'])
                        + r'\s*(.*?)\s*' + re.escape(settings['task_section_end']))
     task_section = re.search(section_pattern, content)
-    task_ids = set()   # case-insensitive
+    task_states_by_id = {}   # case-insensitive task id -> parsed current state
     if task_section:
         for line_number, line in enumerate(
                 re.split(r'\r\n|\r|\n', task_section.group(1)), start=1):
@@ -194,17 +202,16 @@ def main():
             parsed_task_id = cells[0]
             state = cells[2]
             task_key = parsed_task_id.strip().casefold()
-            if task_key in task_ids:
+            if task_key in task_states_by_id:
                 errors.append('Duplicate task id: ' + parsed_task_id)
             else:
-                task_ids.add(task_key)
+                task_states_by_id[task_key] = state
             if not contains_ci(task_states, state):
                 errors.append('Task ' + parsed_task_id + ' has invalid state: ' + state)
     else:
         errors.append('Task table section is missing')
 
-    # blockedSection: non-greedy capture of the blocked table; keep only the
-    # first occurrence per task
+    # Validate all blocked metadata, even for structural-only invocations.
     blocked_before_by_task = {}
     blocked_pattern = ('(?s)' + re.escape(settings['blocked_section_start'])
                        + r'\s*(.*?)\s*' + re.escape(settings['blocked_section_end']))
@@ -220,22 +227,53 @@ def main():
                               + ': expected ' + str(blocked_column_count)
                               + ' columns, found ' + str(len(cells)))
                 continue
-            if contains_ci((settings['blocked_id_header'], '---', ''), cells[0]):
+            if contains_ci((settings['blocked_id_header'], '---'), cells[0]):
                 continue
             task_key = cells[0].strip().casefold()
-            if task_key not in blocked_before_by_task:
+            if not task_key:
+                errors.append('Malformed blocked table row ' + str(line_number)
+                              + ': task id must be nonblank')
+            if task_key in blocked_before_by_task:
+                errors.append('Duplicate blocked record for task: ' + cells[0])
+            else:
                 blocked_before_by_task[task_key] = cells[1]
+            if task_key not in task_states_by_id:
+                errors.append('Orphan blocked record for task: ' + cells[0])
+            elif normalize_state(task_states_by_id[task_key]) != 'blocked':
+                errors.append('Blocked record for non-Blocked task: ' + cells[0])
+            before = cells[1]
+            if (not contains_ci(task_states, before)
+                    or normalize_state(before) == 'blocked'
+                    or not contains_ci(transitions_ci.get(normalize_state(before), []),
+                                       'Blocked')):
+                errors.append('Invalid pre-block state for task ' + cells[0] + ': ' + before)
     else:
         errors.append('Blocked section is missing')
 
+    for task_key, state in task_states_by_id.items():
+        if normalize_state(state) == 'blocked' and task_key not in blocked_before_by_task:
+            errors.append('Missing blocked record for task: ' + task_key)
+
+    # Flag presence, not truthiness: empty values must never bypass validation.
     # State transition validation (including <blocked-before> blocked recovery)
     blocked_before_token = '<blocked-before>'
     from_state = args.from_state
     to_state = args.to_state
     task_id = args.task_id
-    if from_state or to_state:
-        if not from_state or not to_state:
+    if from_state is not None or to_state is not None:
+        if task_id is None or not task_id.strip():
+            errors.append('Transitions require a nonblank --task-id')
+        elif task_id.strip().casefold() not in task_states_by_id:
+            errors.append('Unknown task id: ' + task_id)
+        elif (from_state is not None and normalize_state(from_state)
+              != normalize_state(task_states_by_id[task_id.strip().casefold()])):
+            errors.append('Source state mismatch for task ' + task_id + ': current state is '
+                          + task_states_by_id[task_id.strip().casefold()]
+                          + ', not ' + from_state)
+        if from_state is None or to_state is None:
             errors.append('FromState and ToState must be provided together')
+        elif not from_state.strip() or not to_state.strip():
+            errors.append('FromState and ToState must be nonblank')
         elif not contains_ci(task_states, from_state):
             errors.append('Invalid source state: ' + from_state)
         elif not contains_ci(task_states, to_state):
@@ -246,23 +284,24 @@ def main():
             explicit_targets = [target for target in transitions_ci[normalize_state(from_state)]
                                 if normalize_state(target) != normalize_state(blocked_before_token)]
             if not contains_ci(explicit_targets, to_state):
-                if not task_id:
-                    errors.append('Blocked recovery requires --task-id to verify the pre-block state')
-                else:
-                    task_key = task_id.strip().casefold()
-                    if task_key not in blocked_before_by_task:
-                        errors.append('Task ' + task_id + ' is not listed in the blocked section')
-                    elif normalize_state(to_state) != normalize_state(blocked_before_by_task[task_key]):
-                        errors.append('Invalid state transition: ' + from_state + ' -> ' + to_state
-                                      + ' (pre-block state of task ' + task_id + ' is '
-                                      + blocked_before_by_task[task_key] + ')')
+                task_key = task_id.strip().casefold() if task_id is not None else ''
+                if task_key in task_states_by_id and task_key not in blocked_before_by_task:
+                    errors.append('Missing blocked record for task: ' + task_id)
+                elif task_key in blocked_before_by_task and (
+                        normalize_state(to_state) != normalize_state(blocked_before_by_task[task_key])):
+                    errors.append('Invalid state transition: ' + from_state + ' -> ' + to_state
+                                  + ' (pre-block state of task ' + task_id + ' is '
+                                  + blocked_before_by_task[task_key] + ')')
         elif not contains_ci(transitions_ci[normalize_state(from_state)], to_state):
             errors.append('Invalid state transition: ' + from_state + ' -> ' + to_state)
+
+    elif task_id is not None:
+        errors.append('--task-id requires --from-state and --to-state')
 
     result = {
         'valid': len(errors) == 0,
         'path': real_path,
-        'task_count': len(task_ids),
+        'task_count': len(task_states_by_id),
         'errors': errors,
     }
     # Always print the JSON; exit code 1 when errors exist

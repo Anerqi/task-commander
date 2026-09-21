@@ -7,17 +7,17 @@ description: Multi-model task orchestration. Use for context building, parallel 
 
 ## Route once, keep the role
 
-1. Determine the project root from the user's path or current workspace; ask only when ambiguous. Read `references/00-overview.md` for roles and artifact conventions.
+1. Determine the project root from the user's path or current workspace; ask only when ambiguous. Read `references/00-overview.md` for roles and artifact conventions. On an unfamiliar host, before installation, or when a needed capability may be missing, read `references/host-adapters.md`.
 2. Select the role explicitly requested by the user or assigned in the incoming task prompt. If no role is assigned, use Context Agent when background is missing; otherwise propose Commander. Keep the selected role across turns until the user explicitly changes it; introduce it only when needed for routing, not as a preface to every executor instruction. Project phase changes and task completion do not change conversation identity.
 3. Load only the selected role's branch below. This entry is a router, not an instruction to execute every role in sequence.
 4. Before writing/deleting files, running CLIs, or producing files, read `references/runtime.md`. Use its verification and recovery rules on errors, empty output, timeouts, or uncertain results. Pure conversation/read-only explanation needs no runtime reference.
 
 ## Role branches and completion
 
-- **Context Agent**: read `references/01-context-brief.md` and `references/10-context-orchestration.md`. Clarify gaps, establish collaboration/tool/backup preferences, and create the prescribed background records. Initialize status using `references/11-task-state-machine.md` and validate it. Finish by emitting the complete Commander handoff prompt specified in the Context role, tell the user its target window, then stop. Later answers update context or the handoff; they do not activate Commander automatically.
-- **Commander**: read `references/02-commander.md`, `references/15-collaboration.md`, and `references/11-task-state-machine.md`. Read/validate current status; if absent, request the Context handoff rather than inventing background. Dispatch ready independent tasks in batches using `references/06-task-template.md`. After receipts, compare progress with the full user objective and genuine corrections, integrate relevant information, accept using evidence, or send a coherent continuation to the proper existing window. Do not shrink broad work to the last-mentioned detail.
+- **Context Agent**: read `references/01-context-brief.md` and `references/10-context-orchestration.md`. Clarify gaps, establish collaboration/tool/backup preferences, and create the prescribed background records. Before protected initialization writes, use the Pre-initialization protection handoff in `references/14-backup-manager.md` if a recovery point is needed; missing status does not prevent that narrow backup request or change the Context role. Then initialize status using `references/11-task-state-machine.md` and validate it. Finish by emitting the complete Commander handoff prompt specified in the Context role, tell the user its target window, then stop. Later answers update context or the handoff; they do not activate Commander automatically.
+- **Commander**: read `references/02-commander.md`, `references/15-collaboration.md`, and `references/11-task-state-machine.md`. Read/validate current status; if absent, request the Context handoff rather than inventing background. The standalone Pre-initialization protection path in `references/14-backup-manager.md` remains available before status exists; ordinary business dispatch still waits for initialization. Dispatch ready independent tasks in batches using `references/06-task-template.md`. After receipts, compare progress with the full user objective and genuine corrections, integrate relevant information, accept using evidence, or send a coherent continuation to the proper existing window. Do not shrink broad work to the last-mentioned detail.
 - **Executor**: read `references/03-executor.md`; deliver the assigned task and remain available for follow-up in that window.
-- **Reviewer / QA**: read `references/04-reviewer.md` or `references/05-qa.md` plus `references/16-quality-gates.md`; assess the required criteria, reuse valid evidence, and report findings without editing the deliverable.
+- **Reviewer / QA**: read `references/04-reviewer.md` or `references/05-qa.md` plus `references/16-quality-gates.md`; assess the required criteria, reuse valid evidence, and report findings without editing the deliverable. When cold-start review is selected, read `references/17-cold-start-review.md` before loading project background or prior verdicts; use an isolated window and staged disclosure, not a new role.
 - **Risk Manager / Decision Manager**: read `references/08-risk-manager.md` or `references/09-decision-manager.md`; report analysis, with final major decisions reserved for the user.
 - **Backup Manager**: read `references/14-backup-manager.md`; create and verify the scoped recovery artifact before dependent risky work. Report limitations rather than claiming an untested restore succeeded.
 
@@ -33,10 +33,12 @@ description: Multi-model task orchestration. Use for context building, parallel 
 
 ## Artifact navigation
 
+- Host installation conventions and capability fallbacks: `references/host-adapters.md`
 - Context sources and optional methodology composition: `references/10-context-orchestration.md`
 - Built-in methods when external skills are absent: `references/methodology-fallback.md`
 - Task prompt and pre-dispatch checklist: `references/06-task-template.md`
 - Domain-specific verification details: `references/07-verification-guidelines.md`
+- Cold-start review packets, isolation and informed reconciliation: `references/17-cold-start-review.md`
 - Status template and machine-readable rules: `templates/project-status.md`, `templates/task-state-spec.txt`
 - Agent capabilities and decision ledger: `templates/agent-registry.md`, `templates/decision-log.md`
 - Durable delivery/checkpoint: `templates/task-receipt.md`

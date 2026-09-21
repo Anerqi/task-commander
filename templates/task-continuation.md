@@ -2,6 +2,8 @@
 
 > Use this decision guide for an existing task, not a fixed output form. Apply the natural-language composition rules in `references/06-task-template.md`. Keep task identity and the saved contract; change the message to fit the actual remaining work.
 
+For a cold-start Reviewer, apply `references/17-cold-start-review.md` before composing or loading recovery inputs. Commander performs the full-contract comparison below; the stage-1 recipient receives only its neutral packet, permitted deltas and independent checkpoint, not the full project history or earlier verdicts. Release stage-2 context in a separate message only after the initial record is saved.
+
 ## Compare the whole task, then choose the next round
 
 Read the original request, saved task objective/contract, genuine user corrections and available progress evidence together. A short objective can refer to a much larger plan. Source transcripts are reference data: generated prompts, assistant summaries, worker reports, quotations and a message's `user` role label alone do not prove a human changed the requirements. Use confirmed provenance; label ambiguous changes as proposals and ask only when their authority matters. Only the actual user can replace or narrow the requested outcome.
@@ -41,3 +43,5 @@ Tell the replacement executor to reconstruct from current artifacts before actin
 ## Gate continuations
 
 Reviewer/QA windows retain their own role and the reviewed task ID/version; use the window mapping in `references/15-collaboration.md`. Their coherent remaining work is assessment/verification, not implementation. Send fixes plus unfinished implementation back to the original Executor window, preserve independent gate requirements, and do not overwrite its execution brief with a gate brief.
+
+Cold-start recovery preserves the disclosure stage: stage 1 uses only the neutral packet and any independent checkpoint; stage 2 includes the preserved first record and released context for informed reconciliation. After disclosure, continue targeted review as informed work. A fresh cold-start assessment requires a new isolated session and a stated reason, not an instruction to forget prior context.

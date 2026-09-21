@@ -30,9 +30,10 @@ Capabilities:
 - Reviewing plans
 - Reviewing code
 - Reviewing document quality
+- Cold-start scenario assessment followed by informed reconciliation, when selected
 
 Call when:
-Quality review is needed.
+Quality review is needed. For a fresh outside perspective at a milestone or suspected anchoring, use the cold-start mode in `references/17-cold-start-review.md`; it retains the Reviewer role.
 
 ## QA
 

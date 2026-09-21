@@ -8,15 +8,23 @@ The internal contract is durable; the message is tailored to the current window 
 
 Before dispatch, save the contract in the task directory (for example `00_task_brief.md`). Commander may write this coordination brief; that is not executing the task. Keep the original contract and record authorized changes with provenance rather than replacing it with the latest narrow prompt. In a prompt-only environment without file access, include necessary context in the message or refer to explicitly available conversation context; never claim a brief was saved/read if it was not.
 
+For a protective backup before project initialization, use the Pre-initialization protection exception in `references/14-backup-manager.md`: a standalone inline brief and provisional reference replace missing project records and an ordinary task ID. Do not write a saved brief into at-risk assets merely to satisfy this guide; retain explicit permissions, safe output paths and verification requirements.
+
 ### Internal contract (save, do not mechanically print)
 
 - **Objective and provenance**: the original user request, the saved objective in context, genuine later user corrections, their source pointers, and this task's contribution to the whole project. A short saved objective is an index to the full request, not a substitute for it. Keep agent suggestions and unconfirmed scope changes separate.
-- **Assignment**: task ID, primary role, target window, priority/risk/kind, original brief location, concrete intended outcome, and explicit in/out-of-scope boundaries. Identify remaining substantive work as well as already accepted results.
+- **Assignment**: task ID, primary role, target window, priority/risk/kind, original brief location, concrete intended outcome, and explicit in/out-of-scope boundaries. For an attached acceptance gate, retain the reviewed task's primary owner and ID, and name the window's Reviewer/QA role separately. Identify remaining substantive work as well as already accepted results.
 - **Inputs and ownership**: shared context revision, relevant input/artifact versions, absolute role/source/output paths, satisfied dependencies, read/write scope, isolation, integration owner and active-task conflicts. Include relevant terms, decisions and skill pointers, not every document by default.
 - **Authority and recovery**: effective network/subagent/skill permissions and their policy source, resource/experiment/revision budgets, concrete reasons for restrictions, backup coverage/prerequisites, and pending human actions. Research permission does not authorize sensitive transfer, publishing, payment or destructive actions.
 - **Acceptance and return**: observable criteria, original quality bar, required Reviewer/QA gates and reasons, existing valid evidence, material unresolved findings, output paths and a concise receipt per `templates/task-receipt.md`.
 
 Runtime, collaboration, state and quality references are resolved under the Skill root and loaded when applicable per `SKILL.md`. Preserve role and gate separation; Executor integration and self-validation do not replace a required independent review. Gate briefs (`04_review_brief.md`, `05_qa_brief.md`) reference the execution contract without overwriting it.
+
+### Match context to the receiving role
+
+Commander keeps the full contract. Executor receives relevant goals, facts, interfaces, constraints and decisions needed to deliver. Informed Reviewer receives the applicable full acceptance context; QA receives expected behavior, environment and acceptance criteria from which to derive checks. Separate verified facts and user requirements from design rationale, hypotheses and prior evaluations; avoid wording that presupposes success or narrows the agreed review to the Commander's suspected issues.
+
+For cold-start review, apply `references/17-cold-start-review.md`: keep the full gate contract with Commander and provide a separate stage-1 packet, not a read-first pointer to the full execution brief, background, prior receipts or verdicts. Carry essential user criteria, genuine corrections and safety/permission constraints into the packet neutrally. Its source provenance remains in the full contract. In stage 1, the packet is the target window's brief; generic original-brief and accepted-evidence pointers below do not override this boundary. Verify real session isolation and record the release point for stage-2 context.
 
 ## Compose the actual instruction
 
@@ -54,6 +62,14 @@ Examples show composition, not required wording; replace example paths with reso
 
 > 只把任务 03 中两处错误的导出按钮文案改成用户确认的用词，位置见 `<绝对问题记录路径>`。核对这两处显示及相关引用即可；保留既有交互，不重做导出功能或全量测试。
 
+**Cold-start Reviewer — first-time use, stage 1 only**
+
+> 以首次使用者的视角，检查任务 03 的交付物能否让用户独立完成安装、启动和第一次任务交接。请在不继承项目对话的新窗口中，仅阅读 `<绝对冷启动简报路径>`、其中列明的产物和用户文档，按简报中的权限与隔离要求实际尝试；记录需要猜测、无法继续或与承诺不符的位置和证据。缺少必要事实时提出具体问题，不自行补设背景。将独立发现、已读材料和未验证范围保存至 `<绝对首轮记录路径>` 后交回并停下，等待另一次消息提供背景复核材料；没有发现问题也如实说明覆盖范围。
+
+**Cold-start Reviewer — later informed reconciliation**
+
+> 首轮记录 `<绝对首轮记录路径>` 已保存，现在依据 `<绝对复核简报路径>` 提供的完整验收要求、相关设计理由和历史证据进行复核。保留首轮记录，逐项说明问题仍成立、被什么证据排除、属于哪项用户确认的取舍，或仍无法验证；补查尚未覆盖的必要标准，复用有效证据。将最终结论和问题处置依据写入 `<绝对最终报告路径>`，不要修改交付物。
+
 ## Internal pre-dispatch check
 
 - The full user objective and genuine corrections are preserved, while this window's assigned scope and other tasks' ownership stay clear.
@@ -61,3 +77,4 @@ Examples show composition, not required wording; replace example paths with reso
 - Dependencies, effective tools, risk gates, backup readiness, budgets and pending user input are respected. Split for real ownership/dependency/risk reasons, not arbitrary file counts.
 - Essential paths and pointers are usable from the target window; identity, original brief and accepted evidence survive continuation/recovery. Confirm a referenced brief actually exists before dispatching a pointer-only message.
 - Each prompt is independently copyable. Gate windows name the reviewed task/artifact and keep their briefs separate; emitting a prompt alone does not establish pickup, execution, acknowledgment or completion.
+- A cold-start prompt exposes only stage-appropriate inputs, uses a concrete scenario and distinct output paths, and requires a saved independent record before a separate context-release message. Check inherited host/session context rather than claiming blindness from a role name.
