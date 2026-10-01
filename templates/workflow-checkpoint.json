@@ -1,0 +1,52 @@
+{
+  "workflow_id": "wf-example-feature",
+  "workflow_name": "Example Feature Pipeline",
+  "started_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:02:15Z",
+  "status": "CHECKPOINT_SUSPENDED",
+  "checkpoint_task": "TASK-03",
+  "completed_tasks": [
+    "TASK-01",
+    "TASK-02"
+  ],
+  "task_states": {
+    "TASK-01": {
+      "name": "Prepare Schema and Models",
+      "status": "COMPLETED",
+      "agent": "Executor",
+      "risk_level": "MEDIUM",
+      "exit_code": 0,
+      "output_dir": "task-output/TASK-01",
+      "completed_at": "2026-10-01T12:01:00Z"
+    },
+    "TASK-02": {
+      "name": "Implement Core Business Logic",
+      "status": "COMPLETED",
+      "agent": "Executor",
+      "risk_level": "LOW",
+      "exit_code": 0,
+      "output_dir": "task-output/TASK-02",
+      "completed_at": "2026-10-01T12:02:00Z"
+    },
+    "TASK-03": {
+      "name": "High-Risk Production Migration",
+      "status": "CHECKPOINT_SUSPENDED",
+      "agent": "Executor",
+      "risk_level": "HIGH",
+      "requires_checkpoint": true,
+      "output_dir": "task-output/TASK-03",
+      "suspended_reason": "High-risk task requires explicit human approval before execution"
+    },
+    "TASK-04": {
+      "name": "Review and Quality Assurance",
+      "status": "PENDING",
+      "agent": "QA",
+      "risk_level": "LOW",
+      "requires_checkpoint": false,
+      "depends_on": [
+        "TASK-03"
+      ],
+      "output_dir": "task-output/TASK-04"
+    }
+  }
+}
