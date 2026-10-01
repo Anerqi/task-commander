@@ -39,13 +39,15 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Syntax check (py_compile, both scripts)
-        run: python -m py_compile scripts/scan-skills.py scripts/validate-project-state.py
+      - name: Syntax check (all helpers)
+        run: python -m py_compile scripts/scan-skills.py scripts/validate-project-state.py scripts/run-workflow.py scripts/render-workflow.py
 
-      - name: --help smoke test (both scripts; CLI usable, exit code 0)
+      - name: --help smoke test (all helpers; CLI usable, exit code 0)
         run: |
           python scripts/scan-skills.py --help
           python scripts/validate-project-state.py --help
+          python scripts/run-workflow.py --help
+          python scripts/render-workflow.py --help
 
       - name: Unit and regression tests
         run: python -m unittest discover -s tests -v

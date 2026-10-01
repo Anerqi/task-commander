@@ -4,7 +4,7 @@
 
 Build context before coding. Dispatch independent tasks in parallel, keep their chat windows alive for follow-up, and use the human as an active collaborator. Protect valuable data before risky changes. Reuse evidence and apply review/QA in proportion to risk. Keep decisions and task state in files, not in your head.
 
-Task Commander is a host-neutral orchestration skill built around a formal task state machine and two zero-dependency Python scripts. No server, no API key, no agent runtime — just a structured protocol you can run across Windows, macOS, and Linux.
+Task Commander is a host-neutral orchestration skill built around a formal task state machine and zero-dependency Python helpers. No server, no API key, no agent runtime — just a structured protocol you can run across Windows, macOS, and Linux.
 
 ## Why this exists
 
@@ -42,6 +42,7 @@ The human remains the final decision-maker. Task Commander handles the structure
 - **Recovery-first work:** proactively dispatch Backup Manager when risky changes lack an adequate verified recovery point. Before status/background initialization, Context may provide a standalone protective backup prompt without becoming Commander. Check coverage, integrity and applicable restore tests; Git alone does not cover dirty/untracked files or live databases.
 - **Shared information:** versioned receipts, central sources of truth and targeted synchronization with acknowledgment; no assumption that other windows see updates automatically.
 - **Task state machine:** the CLI checks status structure, active blocked-record consistency and task-bound transitions against the actual recorded source state. It does not decide project-phase readiness, enforce permissions/QA gates, schedule agents, verify evidence or certify backups. Project Acceptance requires completed required deliveries, not merely the absence of actively running tasks.
+- **Optional command progress:** run explicitly authorized commands sequentially in DAG order with approval barriers and atomic checkpoints, and render their progress. This does not dispatch models or replace project acceptance; see `references/18-dynamic-workflow.md`.
 - **Low-cost discovery and portable core:** frontmatter-only Skill scanning, Python standard library, Windows/macOS/Linux. The protocol is host-neutral; documented adapters cover Pi, Claude Code, Cursor, GitHub Copilot, Codex, OpenCode, and any other host that can read the files.
 
 ## Installation
@@ -96,13 +97,16 @@ Optional:
   - `15-collaboration.md` permissions, ready batches, human help, windows and synchronization
   - `16-quality-gates.md` risk-based gates, evidence reuse, revision budgets and experiments
   - `17-cold-start-review.md` neutral review packets, context isolation, independent discovery and later informed reconciliation
+  - `18-dynamic-workflow.md` optional sequential DAG command runner, checkpoint recovery and capability boundaries
   - `host-adapters.md` host installation conventions, capability fallbacks and discovery caveats
   - `runtime.md` cross-platform host execution principles
   - `methodology-fallback.md` built-in methodology fallback (zero-dependency distillation used when the composed external skills are absent)
 - `templates/` — project status (including optional coordination sections), state specification, agent registry, decision log, task receipt and continuation/recovery templates
-- `scripts/` — skill scanning and project status validation scripts
+- `scripts/` — standard-library discovery, validation and optional command-progress helpers
   - `scan-skills.py` scans skill candidates by frontmatter
   - `validate-project-state.py` validates `project-status.md` structure and state transitions
+  - `run-workflow.py` sequentially runs trusted commands; its exit-0 completion is not project acceptance
+  - `render-workflow.py` renders command checkpoints or recorded project status
 - `agents/openai.yaml` — agent configuration
 - `assets/workflow-section-en.png` — workflow overview diagram
 - `.github/workflows/ci.yml` — three-platform CI matrix
@@ -134,6 +138,12 @@ There is no automatic cross-window message bus or backup daemon, and installing 
 Ask: "Before this milestone is accepted, have a fresh Reviewer try the first-use flow using only the deliverable, user docs and necessary criteria/constraints. Save its observations before sharing project rationale or past review results, then reconcile them against the full acceptance contract."
 
 Commander prepares the staged packets; the fresh window does not inherit the implementation conversation. Ordinary user documentation remains available and safety/permission limits always apply. If the host cannot isolate context, use a genuinely fresh user-opened window or disclose the limitation instead of claiming a blind check. Follow-up fixes can return to the now-informed review window; routine minor edits need not trigger another cold review. See `references/17-cold-start-review.md`.
+
+### Optional command runner
+
+Use the runner only for trusted, explicitly authorized command plans; it is not an agent runtime. `max_concurrency` must be 1. HIGH/CRITICAL commands pause before execution. Resume keeps the full plan and checks its hash, project root and real/simulation mode; malformed checkpoints fail rather than resetting. Interrupted RUNNING commands need side-effect reconciliation and explicit retry authorization, not automatic replay. Legacy workflow checkpoints are not silently migrated. The normal project-status schema is unchanged.
+
+Dry-run writes simulation-only checkpoints and does not execute task commands, but Python plans still execute on import. A simulated checkpoint cannot certify or skip real work. See `references/18-dynamic-workflow.md` for CLI examples, approval/retry steps, storage/lock limitations and the boundary between command success and required review/QA. `templates/workflow-checkpoint.json` is a render-only example.
 
 ### Existing projects
 

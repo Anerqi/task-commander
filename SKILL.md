@@ -43,5 +43,5 @@ description: Multi-model task orchestration. Use for context building, parallel 
 - Agent capabilities and decision ledger: `templates/agent-registry.md`, `templates/decision-log.md`
 - Durable delivery/checkpoint: `templates/task-receipt.md`
 - Continuation and lost-window recovery: `templates/task-continuation.md`
-- Dynamic workflow orchestration and checkpoints: `references/18-dynamic-workflow.md`, `templates/workflow-plan.template.py`, `templates/workflow-checkpoint.json`
+- Before optional command execution, checkpoint resume or rendering: `references/18-dynamic-workflow.md`, `templates/workflow-plan.template.py`, `templates/workflow-checkpoint.json`. The runner is sequential command progress, not agent dispatch or project acceptance.
 - Structural/status validation: `scripts/validate-project-state.py` (does not prove evidence, permissions, or actual agent behavior)

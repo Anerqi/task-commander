@@ -1,18 +1,20 @@
-"""Workflow Plan Template for Task Commander Dynamic Workflow Engine.
+"""Trusted Python plan for the optional sequential command runner.
 
-Modify this file to define DAG dependencies, risk levels, and execution hooks.
-Run with:
-    python scripts/run-workflow.py --plan templates/workflow-plan.template.py
+Commands below print examples only; they do not implement features or certify QA.
+Preview (writes a simulation checkpoint):
+    python scripts/run-workflow.py --plan templates/workflow-plan.template.py --dry-run
+Use a different --checkpoint path for a real run. Python plans execute on import.
 """
 
-from typing import Dict, Any, List
+import sys
+from typing import Dict, Any
 
 WORKFLOW: Dict[str, Any] = {
     "id": "wf-example-feature",
     "name": "Example Feature Pipeline",
     "version": "1.0",
-    "description": "Standard multi-agent workflow with parallel tasks and risk gates.",
-    "max_concurrency": 2,
+    "description": "Sequential command example with a pre-command approval barrier.",
+    "max_concurrency": 1,
     "tasks": [
         {
             "id": "TASK-01",
@@ -22,7 +24,7 @@ WORKFLOW: Dict[str, Any] = {
             "risk_level": "MEDIUM",
             "requires_checkpoint": False,
             "depends_on": [],
-            "command": "python -c \"print('Executing Task 01: Models defined')\"",
+            "command": [sys.executable, "-c", "print('Example Task 01 command')"],
             "output_dir": "task-output/TASK-01",
         },
         {
@@ -33,7 +35,7 @@ WORKFLOW: Dict[str, Any] = {
             "risk_level": "LOW",
             "requires_checkpoint": False,
             "depends_on": ["TASK-01"],
-            "command": "python -c \"print('Executing Task 02: Core logic built')\"",
+            "command": [sys.executable, "-c", "print('Example Task 02 command')"],
             "output_dir": "task-output/TASK-02",
         },
         {
@@ -42,9 +44,9 @@ WORKFLOW: Dict[str, Any] = {
             "type": "EXECUTE",
             "agent": "Executor",
             "risk_level": "HIGH",
-            "requires_checkpoint": True,  # Triggers interruption for human sign-off
+            "requires_checkpoint": True,  # HIGH/CRITICAL pause even if this flag is False
             "depends_on": ["TASK-02"],
-            "command": "python -c \"print('Executing Task 03: Migration executed safely')\"",
+            "command": [sys.executable, "-c", "print('Example Task 03 command; no production migration')"],
             "output_dir": "task-output/TASK-03",
         },
         {
@@ -55,7 +57,7 @@ WORKFLOW: Dict[str, Any] = {
             "risk_level": "LOW",
             "requires_checkpoint": False,
             "depends_on": ["TASK-03"],
-            "command": "python -c \"print('Executing Task 04: QA test suite passed')\"",
+            "command": [sys.executable, "-c", "print('Example Task 04 command; not a QA verdict')"],
             "output_dir": "task-output/TASK-04",
         },
     ],
