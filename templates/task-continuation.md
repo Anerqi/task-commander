@@ -2,7 +2,15 @@
 
 > Use this decision guide for an existing task, not a fixed output form. Apply the natural-language composition rules in `references/06-task-template.md`. Keep task identity and the saved contract; change the message to fit the actual remaining work.
 
-For a cold-start Reviewer, apply `references/17-cold-start-review.md` before composing or loading recovery inputs. Commander performs the full-contract comparison below; the stage-1 recipient receives only its neutral packet, permitted deltas and independent checkpoint, not the full project history or earlier verdicts. Release stage-2 context in a separate message only after the initial record is saved.
+For a cold-start Reviewer, read `references/17-cold-start-review.md` before composing or loading recovery inputs; its isolation and staged-disclosure rules override generic continuity.
+
+## New-window read contract
+
+Apply this contract to project task/gate startup and recovery windows, including a replacement Commander. Before acting, the recipient must read the accessible absolute paths supplied for its role: role rules (and runtime rules before file/CLI work), saved brief or handoff, applicable authoritative project records, latest relevant receipt/checkpoint, and current input/artifact versions. State the task/window identity, relevant context revision, source/output paths, read/write scope, effective permissions with their authorization sources, and critical gates/backup limits in the instruction or readable contract. A pointer supplied but not read is not loaded context; compare relevant revisions and reconcile stale inputs before acting, rather than rerunning established work wholesale.
+
+Inherit sourced facts and traceable effective authorization, not unverified approvals or pending proposals; apply `references/15-collaboration.md` (Policy activation) where authority is uncertain. Ask only for missing context or permission that blocks the next action, and continue independent authorized work. Preserve the saved task identity, history and role.
+
+For cold-start Reviewers, `references/17-cold-start-review.md` takes priority over these generic loading rules: the stage-1 recipient receives only its neutral packet, allowed inputs and any independent checkpoint. Keep full-brief, background, history and prior-verdict pointers with Commander until the permitted disclosure stage. Supply essential scope, safety and permission limits neutrally; acknowledge only revisions/inputs actually received.
 
 ## Compare the whole task, then choose the next round
 
@@ -21,8 +29,8 @@ Start directly with a command in the user's language, such as "继续完成…".
 - The stable task/window identity where not already unambiguous, the original intended result, and the coherent remaining outcome for this round.
 - Necessary findings with locations/evidence, changed inputs/context revision, and genuine user corrections. Explain the intended correction concretely without micromanaging each tool call.
 - Work and versioned evidence to preserve; affected checks and necessary regressions, not repeated proof refreshes for unchanged accepted work.
-- Applicable write scope/permissions and any changed or still-blocking backup/human prerequisite. Unchanged authority and role are inherited from the saved brief, never expanded by a generated continuation.
-- Where to return the integrated result and a concise receipt per `templates/task-receipt.md`; request remaining blockers/uncertainty rather than a ceremonial report of every step.
+- Applicable write scope/permissions and any changed or still-blocking backup/human prerequisite. Preserve role and traceable effective authority from the saved brief under the New-window read contract; a generated continuation cannot expand either.
+- Where to return the integrated result and a concise receipt per `templates/task-receipt.md`; reference its optional in-phase progress evidence and the changed check/experiment after diagnosis, when relevant. Apply `references/02-commander.md` (In-phase progress checks) for coordination diagnosis, separately from gate revision budgets; request remaining blockers/uncertainty rather than a ceremonial report of every step.
 
 Reference readable absolute brief/evidence paths instead of pasting unchanged contracts. Omit irrelevant fields rather than writing "none". For a same-window instruction, a compact paragraph may suffice; use bullets only to distinguish real outcomes or constraints. A new round may continue the original outcome even after fixing the last-mentioned issue. Same-scope corrections keep the ID and revision history; a materially new goal requires an explicitly authorized contract change/new linked task.
 
@@ -36,7 +44,7 @@ When the whole assigned outcome and required gates are established, stop generat
 
 ## Recovery when the original window is unavailable
 
-Use a fuller opening instruction, still in natural language. Supply the original brief and user-correction provenance, role and applicable references, current input revision/versions, source and output paths, exclusive write scope, effective permissions/gates, backup posture, last durable checkpoint, completed work/evidence, failed approaches and the coherent next outcome. These can be precise file pointers plus the essential inline constraints; verify they are accessible to the replacement window.
+Use a fuller opening instruction, still in natural language, under the New-window read contract above. Supply the original brief and user-correction provenance, current artifacts, backup posture, last durable checkpoint, completed work/evidence, failed approaches and the coherent next outcome. Verify pointers are readable by the replacement window; include the latest progress-check basis and pending diagnostic action when relevant.
 
 Tell the replacement executor to reconstruct from current artifacts before acting. Missing chat history is not a reason to restart all work or assume omitted requirements were finished. Ask for critical missing context without blocking independent safe work. The task ID remains the same; only the window label changes.
 

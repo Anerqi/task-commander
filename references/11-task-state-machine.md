@@ -7,7 +7,7 @@ Machine validation uses `templates/task-state-spec.txt`; it must stay consistent
 ## Sole writer
 
 - The sole writer of `project-status.md` is the Commander.
-- The Context Agent creates the file from `templates/project-status.md` only when initializing a new project, and sets the project phase to `Planning` after delivering the background documents.
+- The Context Agent creates the file from `templates/project-status.md` only when it is absent and the project is genuinely new, and sets that new project's phase to `Planning` after delivering the background documents. Existing projects retain task IDs, revision rounds, phase and history across context repair, continuation and window recovery. A missing status file with surviving project/task records requires evidence-based recovery for Commander integration, not fresh initialization; unresolved history remains explicit.
 - Executor, Reviewer, QA, Risk Manager, Decision Manager, and Backup Manager never modify `project-status.md`; they only give evidence and suggested states in their delivery reports.
 - When parallel tasks complete, the Commander reads the results one by one and updates the status file serially; multiple agents must never write at the same time.
 
@@ -128,5 +128,7 @@ Parallelism only changes dispatch order; it never changes a single task's state 
 ## Optional coordination metadata
 
 The optional Coordination, Active windows, Pending user actions, Backups, and Synchronization sections in `templates/project-status.md` track context revisions, task/window mappings, input versions, ownership and acknowledgment. They do not add states or alter the required task/history columns. Existing projects may add them incrementally.
+
+Optional in-phase progress evidence belongs in task receipts/checkpoints per `templates/task-receipt.md`; continuations reference it. `references/02-commander.md` (In-phase progress checks) owns the diagnostic trigger. These checks add no required fields or states and never imply a transition or gate pass by themselves; use the existing evidence and transaction rules for any actual status change.
 
 Commander checks these optional fields manually; `scripts/validate-project-state.py` validates structure/state names, active blocked-record consistency and task-bound requested transitions, not evidence truth, project-phase readiness, backup restorability, read/write conflicts, acknowledgment, Reviewer/QA evidence or permission enforcement, or full history consistency. A successful CLI result does not replace those checks.

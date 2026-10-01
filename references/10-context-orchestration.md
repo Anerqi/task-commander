@@ -1,6 +1,8 @@
-# New Project Context-Building Orchestration Protocol
+# Project Context-Building Orchestration Protocol
 
-> Purpose: when a project is new or its context is clearly incomplete, Task Commander composes `writing-for-agents`, `grill-with-docs`, `wait-what`, and `to-questionnaire` uniformly. This file defines the call order, conditions, and document sources of truth; when the composed skills' default write rules conflict with this protocol, this protocol wins.
+> Purpose: initialize project context or recover an existing project's facts and blocking gaps. This file defines the composition order and document sources of truth; when the composed skills' default write rules conflict with this protocol, this protocol wins.
+
+Full initialization belongs to project coordination, not every standalone task. Apply `references/19-task-routing.md` when choosing an entry mode: Fast Lane is the eligible independent, unregistered-task exception; Lean project work still uses the state machine and Commander acceptance; Standard retains the full protocol. Entry mode does not automatically switch an existing window's role. Once Context is assigned to project coordination, follow this protocol through the formal handoff and stop boundary below.
 
 ## Skill location and loading
 
@@ -40,13 +42,15 @@ Completion criteria: the file responsibilities in the source-of-truth table belo
 
 ### 2. Read the existing project
 
-Check the project structure, code, existing background files, `CONTEXT.md`, ADRs, and past tasks. Record facts confirmable from files directly with source pointers; do not ask the user to reconfirm them. Distinguish observed file contents from unverified claims within them, user-reported facts, and inferences. Resolve contradictions as open items; a generated document cannot establish user intent or authorization.
+Read existing `background/01_project_background.md`, `CONTEXT.md`, `background/02_skill_list.md`, `decision-log.md`, and `project-status.md` where present. For the current work, also read the saved brief, latest receipt/checkpoint, relevant artifact/input versions, ADRs and code. Use the source-of-truth table below to reconcile facts and current phase rather than relying on remembered chat or a generated summary. Record file-confirmable facts with source pointers; distinguish observed contents from unverified claims, user reports, and inferences. Intent and authorization require traceable genuine user confirmation per `references/15-collaboration.md` (Policy activation); a generated document cannot establish user intent or authorization.
 
-Completion criteria: a list of "confirmed facts, contradictory information, gaps the current user can answer, gaps only a third party can answer".
+For an existing project, reuse established facts and readable records. Preserve task IDs, revision rounds, phase and history per `references/11-task-state-machine.md`; a missing or incomplete context file is not a new project. Identify only gaps or contradictions that block the current planning, dispatch or assigned work for clarification. Track other unknowns with owners and affected work instead of restarting the interview. If no blocking gap remains, proceed to synthesis/handoff without asking answered questions or rebuilding documents.
+
+Completion criteria: current sources and relevant versions have been read; confirmed facts, contradictions and blocking gaps are distinguished, with an owner and resume condition for each gap. Existing records remain intact.
 
 ### 3. Question-by-question deep-dive
 
-Follow `grill-with-docs`; prioritize one decision at a time, with dependent questions waiting for its answer. Related low-effort questions may be grouped using the host UI per `references/15-collaboration.md`. Every question must:
+For new-project context, follow `grill-with-docs` across the required dimensions; for an existing project, apply it only to the blocking gaps identified in step 2. Prioritize one decision at a time, with dependent questions waiting for its answer. Related low-effort questions may be grouped using the host UI per `references/15-collaboration.md`. Every question must:
 
 - State why this answer is needed now.
 - Use the standard terms in `CONTEXT.md`.
@@ -56,7 +60,7 @@ Follow `grill-with-docs`; prioritize one decision at a time, with dependent ques
 
 For each answer, first judge whether it is a goal, scope item, constraint, term, decision, or open item, then write it to the matching source of truth.
 
-Completion criteria: success criteria, in-scope, out-of-scope, users, constraints, deliverables, acceptance methods, key terms, and collaboration policy (tools, capacity, user help and recovery needs) are confirmed, or explicitly marked as open with an assigned owner. Use `references/15-collaboration.md` to elicit useful user contributions throughout execution, not only at initialization.
+Completion criteria: new-project dimensions are confirmed or explicitly open with owners; existing-project blocking gaps are resolved or have owners and resume conditions. Carry established answers forward. Use `references/15-collaboration.md` for useful user contributions throughout execution, not a repeated startup interview.
 
 ### 4. Clarity gate
 
@@ -84,9 +88,9 @@ Completion criteria: every third-party knowledge gap is covered by a questionnai
 
 ### 6. Synthesis and delivery
 
-Update the documents per the source-of-truth table; check that terms, decisions, and project background do not duplicate a second authoritative copy of each other. Report to the user: confirmed content, open items, questionnaire paths, and next steps.
+For a new project, create the prescribed documents; for an existing project, reuse current records and supply only needed deltas under the write ownership rules below. Check that terms, decisions, and background have one authoritative copy. Report confirmed content, open items, questionnaire paths, and next steps.
 
-Completion criteria: the prescribed documents are readable, every gap has a status/owner, and a filled Commander handoff has been emitted per `references/01-context-brief.md` when planning-ready. Stop in the Context role; a new project phase does not switch this window's role.
+Completion criteria: applicable records are readable, every gap has a status/owner, and a filled Commander handoff has been emitted per `references/01-context-brief.md` when coordination-ready. Preserve an existing project's current phase. Stop after the formal handoff in the Context role; neither readiness nor a phase change authorizes Context to plan or dispatch business tasks.
 
 ## Document sources of truth
 

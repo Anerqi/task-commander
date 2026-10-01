@@ -19,7 +19,7 @@ Task Commander takes a different approach: **keep the intelligence in the models
 
 ## What you get
 
-**A lightweight command center for AI-assisted projects:**
+**A lightweight command center for AI-assisted projects, with a direct path for independent small requests:**
 
 `Context Agent → explicit Commander handoff → ready task batches → receipts → acceptance or continuation`
 
@@ -31,6 +31,9 @@ The human remains the final decision-maker. Task Commander handles the structure
 
 ## Features
 
+- **Right-sized entry:** independent, clear, low-risk and reversible requests can use Executor Fast Lane without project initialization. Registered tasks use Lean coordination or Standard workflow while preserving state, permissions and evidence-based acceptance. Risk matters more than file count.
+- **Inherited context:** read authoritative project files and relevant versions before asking again; fill material gaps rather than rebuilding background. Cold-start review keeps its staged disclosure boundary.
+- **Progress-aware continuation:** diagnose repeated lack of substantive progress at coordination checks; useful negative evidence counts as progress. This is not a timer or background monitor.
 - **Explicit handoff:** Context Agent must deliver a filled Commander startup prompt, then remain in its own role.
 - **Ready batches:** one independently copyable prompt per task, several prompts per reply when dependencies and read/write scopes allow it. Proposed default: 3 active primary tasks, adjustable to your capacity.
 - **Useful tools and human help:** project-authorized public research and focused subagents are encouraged; users can supply domain facts, make decisions, log in locally, demonstrate browser flows, or export missing data. Sensitive transfer and external write actions need specific authorization.
@@ -98,6 +101,7 @@ Optional:
   - `16-quality-gates.md` risk-based gates, evidence reuse, revision budgets and experiments
   - `17-cold-start-review.md` neutral review packets, context isolation, independent discovery and later informed reconciliation
   - `18-dynamic-workflow.md` optional sequential DAG command runner, checkpoint recovery and capability boundaries
+  - `19-task-routing.md` Fast Lane eligibility, Lean/Standard selection and safe escalation
   - `host-adapters.md` host installation conventions, capability fallbacks and discovery caveats
   - `runtime.md` cross-platform host execution principles
   - `methodology-fallback.md` built-in methodology fallback (zero-dependency distillation used when the composed external skills are absent)
@@ -125,6 +129,16 @@ Optional:
 
 ## Typical use
 
+### Choose the smallest sufficient process
+
+- **Fast Lane:** ask "Fix this spelling error in README; change only that text and inspect the diff." If the request is independent, unregistered, low-risk and reversible, Executor can deliver directly with a short actual-check result. No background directory, task ID or status file is required.
+- **Lean:** a narrow task already managed by the project keeps its ID, saved contract and legal state path. Commander can explicitly waive independent gates when justified, then perform light acceptance.
+- **Standard:** cross-module dependencies, important uncertainty or elevated risk use the project workflow. Select review and QA by risk, not a fixed role bundle.
+
+See `references/19-task-routing.md` for eligibility and escalation. A one-line access-control change is not a spelling fix. Existing roles do not change automatically, and a broader task cannot be reduced to its last small defect. These modes do not add an agent runtime or automatic acceptance.
+
+### Project workflow
+
 1. Ask Task Commander to clarify the project. Confirm proposed tool/capacity/backup preferences and supply facts only you know.
 2. Paste its explicit handoff into a Commander window. Keep this window for project coordination.
 3. Open the ready batch's task windows. Required backup work comes before its dependent mutation; unrelated tasks can proceed.
@@ -146,6 +160,10 @@ Use the runner only for trusted, explicitly authorized command plans; it is not 
 Dry-run writes simulation-only checkpoints and does not execute task commands, but Python plans still execute on import. A simulated checkpoint cannot certify or skip real work. See `references/18-dynamic-workflow.md` for CLI examples, approval/retry steps, storage/lock limitations and the boundary between command success and required review/QA. `templates/workflow-checkpoint.json` is a render-only example.
 
 ### Existing projects
+
+Read the existing authoritative background, terms, confirmed decisions, status and relevant task evidence before asking for context again; resolve only missing, stale or conflicting information that matters to the work. Handoffs carry essential paths, relevant revisions, the full assigned outcome and effective constraints rather than copying every background document. A stored claim of approval is not new authorization; cold-start review still uses its staged packets.
+
+At coordination checkpoints, compare actual artifacts, valid evidence and remaining unknowns. The adjustable default is diagnosis after two consecutive checks without substantive progress, not after a wall-clock timeout. This is separate from the existing targeted-revision budget. Long-running work and useful negative experiments are not stalled merely because they remain In Progress.
 
 Keep existing task IDs, phases and history. Add the optional coordination sections from `templates/project-status.md`, establish a context revision and project Collaboration policy, and checkpoint active tasks with `templates/task-receipt.md`. Existing status tables remain compatible; no schema migration is required. New defaults do not override previously agreed task permissions or gates; change an active contract explicitly.
 

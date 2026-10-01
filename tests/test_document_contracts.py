@@ -13,6 +13,18 @@ CORE = [p for p in CORE if p.is_file()]
 
 
 class DocumentContracts(unittest.TestCase):
+    def protocol_text(self, source="references/19-task-routing.md"):
+        path = ROOT / source
+        self.assertTrue(path.is_file(), f"Missing protocol: {source}")
+        # Ignore Markdown emphasis, case and wrapping; guard concepts/relations,
+        # not entire paragraphs or a mandatory prompt/output layout.
+        return " ".join(re.sub(r"[`*_]", "", path.read_text(encoding="utf-8")).lower().split())
+
+    def assert_protocol_concepts(self, text, concepts):
+        for concept, pattern in concepts.items():
+            with self.subTest(concept=concept):
+                self.assertRegex(text, pattern, concept)
+
     def test_utf8_lf_without_bom(self):
         for path in CORE:
             with self.subTest(path=path.relative_to(ROOT)):
@@ -402,6 +414,143 @@ class DocumentContracts(unittest.TestCase):
         self.assertIn("Return cross-task facts, constraints, and decision proposals as deltas to Commander", executor)
         self.assertIn("This execution research pattern does not broaden gate-role inputs", template)
         self.assertIn("Public research permission alone does not authorize that transfer", template)
+
+    def test_task_routing_is_authoritative_and_reachable(self):
+        routing = ROOT / "references/19-task-routing.md"
+        self.assertTrue(routing.is_file())
+        # The existing glob already puts the new authority under encoding,
+        # reference-target and obsolete-restriction guards; no duplicate entry.
+        self.assertIn(routing, CORE)
+        raw = routing.read_text(encoding="utf-8")
+        self.assertRegex(raw, r"(?m)^# Task Routing\s*$")
+        self.assert_protocol_concepts(self.protocol_text(), {
+            "Fast Lane route": r"\bfast lane\b",
+            "Lean route": r"\blean\b",
+            "Standard route": r"\bstandard\b",
+        })
+        for source in (
+            "SKILL.md", "README.md", "references/00-overview.md",
+            "references/02-commander.md", "references/03-executor.md",
+            "references/06-task-template.md", "references/10-context-orchestration.md",
+            "references/16-quality-gates.md", "agents/openai.yaml",
+        ):
+            with self.subTest(source=source):
+                self.assertIn("references/19-task-routing.md",
+                              (ROOT / source).read_text(encoding="utf-8"))
+        for target in (
+            "references/10-context-orchestration.md",
+            "references/11-task-state-machine.md",
+            "references/16-quality-gates.md",
+            "references/17-cold-start-review.md",
+        ):
+            with self.subTest(target=target):
+                self.assertIn(target, raw)
+
+    def test_fast_lane_is_a_bounded_unregistered_exception(self):
+        self.assert_protocol_concepts(self.protocol_text(), {
+            "explicit independent request": r"(?:explicit|actual user)[^.]{0,140}request[^.]{0,100}independent|independent[^.]{0,100}(?:explicit|actual user)[^.]{0,80}request",
+            "outside registered tasks": r"\bunregistered\b|\bnot (?:already )?registered\b",
+            "low risk and reversible": r"\blow[- ]risk\b.{0,100}\breversible\b|\breversible\b.{0,100}\blow[- ]risk\b",
+            "no project prerequisites": r"(?:no|without|not require|not need)[^.]{0,160}(?:project[- ]state|project state|background)",
+            "inline contract": r"\binline\b.{0,100}\bcontract\b|\bcontract\b.{0,100}\binline\b",
+            "truthful result": r"\b(?:truthful|actual|honest)\b[^.]{0,100}(?:evidence|outcome|result)",
+            "performed versus unverified checks": r"(?:directly performed|executed|personally checked)[^.]{0,120}unverified",
+            "concise return": r"\b(?:concise|brief)\b.{0,100}(?:evidence|return|result|receipt)",
+            "not project completion": r"(?:not|never|no)[^.]{0,140}project[^.]{0,80}completed|project[^.]{0,100}(?:not|never)[^.]{0,80}completed",
+        })
+
+    def test_routing_preserves_roles_scope_and_risk_priority(self):
+        self.assert_protocol_concepts(self.protocol_text(), {
+            "assigned roles persist": r"(?:assigned|existing|selected)[^.]{0,100}(?:role|window)[^.]{0,140}(?:persist|remain|keep|stay)|(?:keep|retain|preserve)[^.]{0,100}(?:assigned|existing|selected)[^.]{0,50}role",
+            "no automatic role switch": r"(?:no|not|never|does not)[^.]{0,100}(?:automatic|automatically|auto)[^.]{0,80}(?:switch|role)|(?:no|not|never)[^.]{0,80}(?:switch|change)[^.]{0,80}role",
+            "no decomposition escape": r"(?:not|never|no)[^.]{0,140}(?:split|decompos|fragment)[^.]{0,200}(?:evad|bypass|avoid|fast lane|full scope)|(?:split|decompos|fragment)[^.]{0,160}(?:not|never)[^.]{0,120}(?:evad|bypass|avoid|fast lane|full scope)|not[^.]{0,80}carved out[^.]{0,140}(?:broader|unfinished)",
+            "risk priority": r"risk[^.]{0,100}(?:overrides|outweighs|takes precedence)",
+            "file count is not eligibility": r"(?:file count|number of files)[^.]{0,140}(?:not|never|does not)[^.]{0,100}(?:eligibility|risk|qualif)",
+            "whole assigned outcome": r"(?:full|whole|original)[^.]{0,30}(?:scope|request|outcome|objective)",
+        })
+
+    def test_lean_and_standard_keep_existing_acceptance_contracts(self):
+        self.assert_protocol_concepts(self.protocol_text(), {
+            "Lean for existing tasks": r"\blean\b[^.]{0,180}(?:existing|registered)[^.]{0,60}(?:tasks?|work)",
+            "stable task identity": r"(?:preserve|retain|keep)[^.]{0,120}(?:task )?id\b",
+            "unchanged state machine": r"(?:preserve|retain|keep|unchanged|existing)[^.]{0,120}state machine|state machine[^.]{0,100}(?:unchanged|preserved)",
+            "Commander acceptance": r"commander[^.]{0,100}(?:acceptance|accepts)|acceptance[^.]{0,100}commander",
+            "explicit gate waivers": r"explicit[^.]{0,140}(?:waiv|exempt)|(?:waiv|exempt)[^.]{0,140}explicit",
+            "Awaiting Acceptance remains": r"\bawaiting acceptance\b",
+            "Standard uses existing gate protocol": r"\bstandard\b[^.]{0,200}(?:risk[- ]based[^.]{0,100}gates?|existing project protocol)",
+        })
+
+    def test_existing_context_recovery_is_gap_only_without_reset(self):
+        text = self.protocol_text("references/10-context-orchestration.md")
+        self.assert_protocol_concepts(text, {
+            "read current evidence": r"read[^.]{0,160}(?:saved brief|receipt|checkpoint)[^.]{0,100}(?:input|artifact)[^.]{0,50}versions",
+            "source pointers": r"\bsource pointers?\b",
+            "preserve IDs and history": r"preserve[^.]{0,100}task ids[^.]{0,100}(?:phase|history)",
+            "missing files are not a new project": r"(?:missing|incomplete)[^.]{0,100}not a new project",
+            "only blocking gaps": r"only[^.]{0,100}(?:gaps|contradictions)[^.]{0,100}block",
+            "no repeated interview": r"(?:not|without|instead of)[^.]{0,100}(?:restart|repeat)[^.]{0,50}interview",
+            "intent and authorization provenance": r"(?:intent|authorization)[^.]{0,100}(?:traceable|genuine)[^.]{0,100}confirmation",
+        })
+        for source in ("references/01-context-brief.md", "references/02-commander.md"):
+            with self.subTest(source=source):
+                self.assertIn("references/10-context-orchestration.md",
+                              (ROOT / source).read_text(encoding="utf-8"))
+
+    def test_new_window_inheritance_requires_reads_versions_and_effective_permission(self):
+        text = self.protocol_text("templates/task-continuation.md")
+        self.assert_protocol_concepts(text, {
+            "read before acting": r"before acting[^.]{0,140}read[^.]{0,100}absolute paths",
+            "context revision": r"\brelevant context revision\b",
+            "source and output pointers": r"\bsource(?:/| and )output paths\b",
+            "relevant checkpoint and versions": r"relevant (?:receipt/)?checkpoint[^.]{0,100}(?:input|artifact) versions",
+            "permission provenance": r"permissions[^.]{0,100}authorization sources",
+            "pointer is not loaded context": r"pointer[^.]{0,80}not read[^.]{0,80}not loaded context",
+            "reconcile stale inputs": r"(?:reconcile|refresh)[^.]{0,80}stale inputs[^.]{0,80}before acting",
+            "no invented inherited approval": r"not[^.]{0,100}unverified approvals[^.]{0,100}pending proposals",
+            "gaps only": r"ask only[^.]{0,100}(?:missing|gap)[^.]{0,100}blocks?",
+            # A reference path between these concepts contains a '.md' dot.
+            "cold-start takes priority": r"cold[- ]start.{0,120}(?:takes priority|override)",
+            "neutral stage-1 reads": r"stage[- ]1[^.]{0,100}(?:only|neutral packet)[^.]{0,100}allowed inputs",
+        })
+        self.assertIn("references/17-cold-start-review.md", text)
+        self.assertIn("templates/task-continuation.md",
+                      self.protocol_text("references/02-commander.md"))
+
+    def test_stagnation_is_evidence_based_and_separate_from_revision_budget(self):
+        text = self.protocol_text("references/02-commander.md")
+        self.assert_protocol_concepts(text, {
+            "two consecutive coordination checks": r"(?:two|2) consecutive coordination checks",
+            "absence of substantive progress": r"(?:no|without|lack of)[^.]{0,100}substantive progress",
+            "diagnosis at threshold": r"diagnos(?:is|e)[^.]{0,100}(?:two|2) consecutive|(?:two|2) consecutive[^.]{0,160}diagnos(?:is|e)",
+            "agreed adjustable threshold": r"(?:explicit|confirmed|agree(?:d)?)[^.]{0,160}(?:adjust|threshold)",
+            "not elapsed time": r"(?:elapsed|wall[- ]clock)[^.]{0,140}(?:not|never)[^.]{0,80}stagnation",
+            "negative evidence is progress": r"substantive progress[^.]{0,200}(?:hypothesis[^.]{0,40}(?:eliminated|refuted)|negative evidence)",
+            "separate revision budget": r"(?:separate|distinct|independent)[^.]{0,160}targeted[^.]{0,80}revision budget",
+            "diagnosis does not consume rounds": r"diagnosis[^.]{0,100}(?:not|never)[^.]{0,80}consume[^.]{0,40}(?:correction|revision) rounds",
+            "no automatic pass": r"(?:neither|not|no|never)[^.]{0,160}automatic(?:ally)?[^.]{0,80}pass",
+        })
+        gates = self.protocol_text("references/16-quality-gates.md")
+        self.assertRegex(gates, r"(?:two|2) targeted revision rounds")
+        self.assertIn("references/16-quality-gates.md", text)
+        continuation = self.protocol_text("templates/task-continuation.md")
+        self.assertIn("references/02-commander.md", continuation)
+        self.assertRegex(continuation, r"diagnosis[^.]{0,100}separately[^.]{0,100}revision budgets")
+
+    def test_escalation_preserves_partial_evidence_without_acceptance(self):
+        self.assert_protocol_concepts(self.protocol_text(), {
+            "pause affected action": r"pause[^.]{0,80}affected action",
+            "retain valid evidence": r"(?:preserve|retain|keep)[^.]{0,100}artifacts[^.]{0,80}valid evidence",
+            "specific missing prerequisite": r"(?:specific|essential)[^.]{0,50}gap[^.]{0,160}(?:authorization|backup|gate)",
+            "unaffected work continues": r"continue[^.]{0,80}unaffected authorized work",
+            "partial is not complete": r"(?:not|never)[^.]{0,160}partial result[^.]{0,80}completion",
+        })
+
+    def test_routing_behavioral_scenarios_cover_boundary_cases(self):
+        text = (ROOT / "tests/behavioral-scenarios.md").read_text(encoding="utf-8")
+        self.assertIn("references/19-task-routing.md", text)
+        for scenario in range(1, 21):
+            with self.subTest(scenario=scenario):
+                self.assertIn(f"| RT{scenario} |", text)
 
     def test_project_acceptance_requires_all_required_deliveries(self):
         text = (ROOT / "references/11-task-state-machine.md").read_text(encoding="utf-8")

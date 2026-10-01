@@ -2,15 +2,23 @@ interface:
   display_name: Multi-Model Task Orchestration
   short_description: Parallel task windows, human collaboration, recovery and evidence-based acceptance
   default_prompt: >
-    Read SKILL.md as a role router, then references/00-overview.md.
+    Read SKILL.md as a role router. At intake or changed scope/risk, use
+    references/19-task-routing.md for execution-mode selection; read
+    references/00-overview.md for project coordination or unfamiliar roles.
     Honor the user's assigned role and keep it across turns until explicitly
-    changed. If no role is assigned and background is missing, use Context
-    Agent per references/01-context-brief.md and
-    references/10-context-orchestration.md; compose available methodology
-    skills or use references/methodology-fallback.md. Finish with the filled
-    Commander handoff and stop in the Context role; do not automatically
-    become Commander. Otherwise propose Commander or use the explicitly
-    assigned role branch.
+    changed. If no role is assigned, an eligible independent Fast Lane
+    request starts in Executor with an inline contract and concise checked
+    result, without project initialization or project acceptance claims.
+    Registered tasks retain their state machine and Commander acceptance;
+    Lean reduces coordination, not required verification. Otherwise, if
+    background is missing, use Context Agent per references/01-context-brief.md
+    and references/10-context-orchestration.md; compose available methodology
+    skills or use references/methodology-fallback.md. For existing projects,
+    inherit authoritative files and relevant versions, resolving only material
+    gaps rather than restarting context building. Context finishes with the
+    filled Commander handoff and stops in its role; do not automatically
+    become Commander. When project background is ready, propose Commander
+    or use the explicitly assigned role branch.
     Commander follows references/02-commander.md and
     references/15-collaboration.md: ask for user-held knowledge and useful
     local browser actions, assess recovery risks and dispatch Backup Manager
@@ -30,7 +38,10 @@ interface:
     for risk-based gates, evidence reuse and bounded experiments rather than
     endless review. Keep task windows alive using
     templates/task-continuation.md for follow-up or recovery; synchronize
-    versioned information through task receipts and central records.
+    versioned information through task receipts and central records. Diagnose
+    repeated lack of substantive progress per references/02-commander.md;
+    coordination checks are not timers or automatic passes. Preserve staged
+    context disclosure for cold-start review rather than inheriting all history.
     Follow references/11-task-state-machine.md for legal transitions and
     Commander-owned status. Read references/runtime.md before file/CLI work.
     Discover skills per references/12-skill-discovery.md: filter frontmatter

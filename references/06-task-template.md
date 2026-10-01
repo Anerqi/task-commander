@@ -1,12 +1,14 @@
 # Outcome-First Task Prompts
 
-> Read when composing any startup or continuation instruction. This is a composition guide and completeness check, not a form to reproduce. Keep scheduling metadata in the saved task brief; write the executor's instruction in the user's language, as natural, concrete commands. For continuation/recovery-specific decisions, also use `templates/task-continuation.md`.
+> Read when composing any startup or continuation instruction. This is a composition guide and completeness check, not a form to reproduce. For project tasks, keep scheduling metadata in the saved task brief; write the executor's instruction in the user's language, as natural, concrete commands. For continuation/recovery-specific decisions, also use `templates/task-continuation.md`.
 
 ## Separate the contract from the message
 
 The internal contract is durable; the message is tailored to the current window and work. A short prompt must not erase requirements, while a complete contract need not be pasted in full on every round.
 
-Before dispatch, save the contract in the task directory (for example `00_task_brief.md`). Commander may write this coordination brief; that is not executing the task. Keep the original contract and record authorized changes with provenance rather than replacing it with the latest narrow prompt. In a prompt-only environment without file access, include necessary context in the message or refer to explicitly available conversation context; never claim a brief was saved/read if it was not.
+For an eligible independent Fast Lane request, use the inline contract and result rules in `references/19-task-routing.md`; no saved brief or project initialization is required. Existing project tasks, including Lean mode, retain the durable contract below. A narrow prompt inside a broader assignment does not activate this exception.
+
+Before project dispatch, save the contract in the task directory (for example `00_task_brief.md`). Commander may write this coordination brief; that is not executing the task. Keep the original contract and record authorized changes with provenance rather than replacing it with the latest narrow prompt. In a prompt-only environment without file access, include necessary context in the message or refer to explicitly available conversation context; never claim a brief was saved/read if it was not.
 
 For a protective backup before project initialization, use the Pre-initialization protection exception in `references/14-backup-manager.md`: a standalone inline brief and provisional reference replace missing project records and an ordinary task ID. Do not write a saved brief into at-risk assets merely to satisfy this guide; retain explicit permissions, safe output paths and verification requirements.
 
@@ -81,6 +83,6 @@ Examples show composition, not required wording; replace example paths with reso
 - The full user objective and genuine corrections are preserved, while this window's assigned scope and other tasks' ownership stay clear.
 - The proposed round makes substantive progress on the coherent ready remainder; it neither stops at the latest detail nor adds unrelated improvements.
 - Dependencies, effective tools, risk gates, backup readiness, budgets and pending user input are respected. Split for real ownership/dependency/risk reasons, not arbitrary file counts.
-- Essential paths and pointers are usable from the target window; identity, original brief and accepted evidence survive continuation/recovery. Confirm a referenced brief actually exists before dispatching a pointer-only message.
+- For project tasks, essential paths and pointers are usable from the target window; identity, original brief and accepted evidence survive continuation/recovery. Confirm a referenced brief actually exists before dispatching a pointer-only message.
 - Each prompt is independently copyable. Gate windows name the reviewed task/artifact and keep their briefs separate; emitting a prompt alone does not establish pickup, execution, acknowledgment or completion.
 - A cold-start prompt exposes only stage-appropriate inputs, uses a concrete scenario and distinct output paths, and requires a saved independent record before a separate context-release message. Check inherited host/session context rather than claiming blindness from a role name.

@@ -10,6 +10,15 @@
 - Deliverables and current versions (include dirty-file identity when relevant):
 - Completed / remaining / suggested legal next state:
 
+## In-phase progress (optional)
+
+Use when a checkpoint supports the coordination checks in `references/02-commander.md` (In-phase progress checks), not as a periodic reporting requirement.
+
+- Active stage and comparison checkpoint / relevant input versions:
+- Substantive delta and evidence path (artifact advance, new evidence, eliminated hypothesis or reduced unknown); otherwise what remains unchanged:
+- Consecutive no-progress checks / agreed diagnostic threshold, if supplied by Commander:
+- Suspected cause, changed check/experiment or help request; blocker owner and resume condition if genuinely unable to proceed:
+
 ## Acceptance evidence
 
 | Check / criterion | Artifact + relevant input versions | Method / environment or source date | Result + provenance (direct / reused / unverified) | Evidence path / checker |

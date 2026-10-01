@@ -1,6 +1,6 @@
 # Multi-Model Task Orchestration System - Overview
 
-> A project is completed by multiple AI models working together; the Commander handles orchestration and dispatch, while context, execution, review, and QA are each carried by a specialized model.
+> For project coordination, the Commander handles orchestration and dispatch, while context, execution, review, and QA have separate responsibilities. Independent small requests can use the Executor Fast Lane without initializing a project.
 
 ## Role table
 
@@ -8,12 +8,16 @@
 |---|---|---|---|
 | Context Agent | references/01-context-brief.md | Uses the available context methodology to understand the project and turn vague ideas into executable goals | background/01_project_background.md, background/02_skill_list.md |
 | Commander | references/02-commander.md | Schedules ready batches, integrates information, requests human help, accepts evidence | Startup batches and continuation/recovery prompts |
-| Executor | references/03-executor.md | Completes a single task per the task brief and delivers | task-output/01_task_name/ |
+| Executor | references/03-executor.md | Completes the assigned contract and delivers | task-output/01_task_name/ or concise inline result for independent Fast Lane |
 | Reviewer | references/04-reviewer.md | Compliance, completeness, risk, and data review; reviews only, never modifies | 04_review_findings.md |
 | QA | references/05-qa.md | Runs verification, recomputes figures, checks links and sources | 05_qa_validation.md |
 | Risk Manager | references/08-risk-manager.md | Identifies project risks | risk-register.md |
 | Decision Manager | references/09-decision-manager.md | Analyzes major direction options; waits for the user's final decision | 09_decision_analysis.md |
 | Backup Manager | references/14-backup-manager.md | Creates and verifies recovery artifacts before risky work | Backup manifest, verification and recovery receipt |
+
+## Execution modes
+
+Use `references/19-task-routing.md` at intake or changed scope/risk. Fast Lane serves independent eligible requests; Lean keeps project records with reduced coordination overhead; Standard follows the project workflow below. Modes preserve roles, permissions and required verification. The directory/brief conventions below apply to project tasks; independent Fast Lane uses its bounded inline contract and result.
 
 ## Standard workflow
 
@@ -38,7 +42,7 @@ Project status follows `references/11-task-state-machine.md`; skill discovery fo
 ## Task prompt specification
 
 `references/06-task-template.md` owns prompt composition and contract completeness.
-Save coordination metadata in the task brief; send natural outcome-first instructions
+For project tasks, save coordination metadata in the task brief; send natural outcome-first instructions
 with essential pointers and operative constraints, not a mandatory field form.
 The saved contract preserves Reviewer/QA gates and full scope. State updates follow
 `references/11-task-state-machine.md`; a shorter message never waives its requirements.

@@ -4,7 +4,7 @@
 
 ## Choose gates before dispatch
 
-Every task brief states its risk, deliverable version, checkable acceptance criteria, and required Reviewer/QA gates. Choose by impact and reversibility, not by task length.
+Every project task brief states its risk, deliverable version, checkable acceptance criteria, and required Reviewer/QA gates. Choose by impact and reversibility, not by task length. `references/19-task-routing.md` owns execution-mode selection: Fast Lane uses an inline contract and relevant self-check evidence; Lean and Standard retain project acceptance. Coordination complexity and verification risk are separate: Lean may need QA, and Standard does not require every role automatically.
 
 | Risk / task type | Default evidence and gates |
 |---|---|
@@ -13,7 +13,7 @@ Every task brief states its risk, deliverable version, checkable acceptance crit
 | High risk, sensitive data, destructive or hard-to-reverse change | Independent review and relevant QA; verified backup before mutation when data may be lost; critical checks cannot be waived merely to save time |
 | Exploration / feasibility spike | Bounded question, time/resource budget, isolated outputs, method, observed result, and next-step recommendation; a negative result can satisfy the exploration criteria |
 
-Even waived gates must be explicit. Use the existing legal route through Awaiting Acceptance; never jump from In Progress to Completed. A passed experiment does not certify a production implementation. Experiment completion means its question was answered with evidence, not that its hypothesis succeeded.
+For project tasks, even waived gates must be explicit. Use the existing legal route through Awaiting Acceptance; never jump from In Progress to Completed. Independent Fast Lane reports delivery to the user, not a project-state transition or automatic acceptance. Required independent verification disqualifies that path; preserve the gate and escalate per the routing reference. A passed experiment does not certify a production implementation. Experiment completion means its question was answered with evidence, not that its hypothesis succeeded.
 
 Freeze acceptance scope at dispatch. New polish suggestions become follow-up backlog items, not surprise acceptance requirements. A newly discovered serious safety/correctness issue may block release; identify its evidence and impact and explicitly revise the plan rather than silently moving the goalposts.
 
