@@ -6,7 +6,7 @@
 
 | Role | File | Responsibility | Main output |
 |---|---|---|---|
-| Context Agent | references/01-context-brief.md | Uses the available context methodology to understand the project and turn vague ideas into executable goals | background/01_project_background.md, background/02_skill_list.md |
+| Context Agent | references/01-context-brief.md | Uses the available context methodology to understand the project and turn vague ideas into executable goals | background/01_project_background.md, background/02_skill_list.md, AGENTS.md |
 | Commander | references/02-commander.md | Schedules ready batches, integrates information, requests human help, accepts evidence | Startup batches and continuation/recovery prompts |
 | Executor | references/03-executor.md | Completes the assigned contract and delivers | task-output/01_task_name/ or concise inline result for independent Fast Lane |
 | Reviewer | references/04-reviewer.md | Compliance, completeness, risk, and data review; reviews only, never modifies | 04_review_findings.md |
@@ -29,11 +29,12 @@ Use `references/19-task-routing.md` at intake or changed scope/risk. Fast Lane s
 6. Backup Manager verifies required recovery points before dependent risky actions. The user can supply knowledge, local browser actions and judgments throughout, not just carry prompts.
 7. Major direction choices go to Decision Manager when useful; the user decides and Commander records the confirmed conclusion in `decision-log.md`.
 
-Project status follows `references/11-task-state-machine.md`; skill discovery follows `references/12-skill-discovery.md`. Collaboration/permissions/windows/synchronization follow `references/15-collaboration.md`; gate effort and stopping rules follow `references/16-quality-gates.md`.
+Task status follows `references/11-task-state-machine.md`; skill discovery follows `references/12-skill-discovery.md`. Collaboration/permissions/windows/synchronization follow `references/15-collaboration.md`; gate effort and stopping rules follow `references/16-quality-gates.md`. Context Agent generates or reconciles root `AGENTS.md` from confirmed project-specific rules for all AI agents.
 
 ## Directory and numbering conventions
 
-- Background documents live in: `background/`
+- `background/` — context background documents, skill inventory, and pending questionnaires
+- `AGENTS.md` — concise project-level behavioral rules for all AI agents, generated or reconciled from confirmed constraints during context building
 - Task outputs live in: `task-output/`
 - Task ids start at `01`, e.g. `task-output/01_task_name/`
 - Review and QA outputs go into the same task directory: `04_review_findings.md`, `05_qa_validation.md`; preserve revision evidence/history.

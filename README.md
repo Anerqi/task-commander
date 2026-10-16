@@ -32,10 +32,10 @@ The human remains the final decision-maker. Task Commander handles the structure
 ## Features
 
 - **Right-sized entry:** independent, clear, low-risk and reversible requests can use Executor Fast Lane without project initialization. Registered tasks use Lean coordination or Standard workflow while preserving state, permissions and evidence-based acceptance. Risk matters more than file count.
-- **Inherited context:** read authoritative project files and relevant versions before asking again; fill material gaps rather than rebuilding background. Cold-start review keeps its staged disclosure boundary.
+- **Inherited context:** read authoritative project files and relevant versions before asking again; fill material gaps rather than rebuilding background. Context Agent generates or reconciles a concise root `AGENTS.md` from confirmed project-specific rules for all AI agents. Cold-start review keeps its staged disclosure boundary.
 - **Progress-aware continuation:** diagnose repeated lack of substantive progress at coordination checks; useful negative evidence counts as progress. This is not a timer or background monitor.
 - **Explicit handoff:** Context Agent must deliver a filled Commander startup prompt, then remain in its own role.
-- **Ready batches:** one independently copyable prompt per task, several prompts per reply when dependencies and read/write scopes allow it. Proposed default: 3 active primary tasks, adjustable to your capacity.
+- **Ready batches:** one independently copyable prompt per task, several prompts per reply when dependencies and read/write scopes allow it. Batch size adapts to the user's window capacity and actual task readiness; no fixed default cap.
 - **Useful tools and human help:** project-authorized public research and focused subagents are encouraged; users can supply domain facts, make decisions, log in locally, demonstrate browser flows, or export missing data. Sensitive transfer and external write actions need specific authorization.
 - **Risk-based acceptance:** select Reviewer/QA gates before dispatch, reuse fresh unchanged evidence, and recheck affected scope only. After the default 2 targeted revision rounds, replan rather than loop or automatically pass.
 - **Cold-start review:** at selected milestones, give a fresh Reviewer a concrete user/maintainer scenario and neutral facts, not internal rationale or prior verdicts. Save independent findings first, then disclose context in a later message and reconcile every finding with evidence. This complements informed review and QA; it is not an extra role or a guarantee of bias-free judgment.
@@ -60,7 +60,7 @@ Put this directory into a skill location the host loads, or point the agent at i
 - OpenCode: project `.opencode/skills/`, user `~/.config/opencode/skills/`.
 - Other hosts: load the absolute `SKILL.md` path manually and, if needed, pass `--roots` explicitly to the scanner.
 
-The core protocol is host-neutral and does not require a proprietary descriptor or a specific agent runtime: an `AGENTS.md`-style pointer, a manual read of the entry file, or native Skill discovery all work. `agents/openai.yaml` is an optional OpenAI/Codex integration descriptor, not part of the core protocol. Host names select documented conventions, not authorization or proof that a capability is present; confirm the actual environment per `references/host-adapters.md`.
+The core protocol is host-neutral and does not require a proprietary descriptor or a specific agent runtime. A target project's root `AGENTS.md` may carry project-specific rules and point agents to this entry, while native Skill discovery or a manual read of `SKILL.md` can load the protocol. `agents/openai.yaml` is an optional OpenAI/Codex integration descriptor, not part of the core protocol. Host names select documented conventions, not authorization or proof that a capability is present; confirm the actual environment per `references/host-adapters.md`.
 
 The per-host directories are listed as an adaptation table in `references/host-adapters.md` and as runtime adaptation examples in the appendix of `references/12-skill-discovery.md`; `scripts/scan-skills.py` locates them at runtime, filtered by `--host` (default `all`).
 
@@ -106,6 +106,7 @@ Optional:
   - `runtime.md` cross-platform host execution principles
   - `methodology-fallback.md` built-in methodology fallback (zero-dependency distillation used when the composed external skills are absent)
 - `templates/` — project status (including optional coordination sections), state specification, agent registry, decision log, task receipt and continuation/recovery templates
+- `AGENTS.md` — generated in the target project root during Context Agent delivery; not a Task Commander source file
 - `scripts/` — standard-library discovery, validation and optional command-progress helpers
   - `scan-skills.py` scans skill candidates by frontmatter
   - `validate-project-state.py` validates `project-status.md` structure and state transitions

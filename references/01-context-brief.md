@@ -72,9 +72,17 @@ Create the prescribed records for a new project. For an existing project, reuse 
    - Create only when key information is held by a third party
    - Until the reply arrives, never write the questionnaire's questions or assumptions as confirmed facts
 
+7. `<Project Root>/AGENTS.md` — project-level behavioral rules for all AI agents
+   - Generate this file last, after all other documents are complete, so it draws on the fullest available project context.
+   - Extract hard rules from the interview and confirmed project background: technology stack constraints, coding conventions, forbidden patterns, testing requirements, file-structure invariants, naming standards, and any other non-negotiable expectations the user stated or confirmed.
+   - Structure the file with clear headings: Project identity (one-paragraph background), Hard rules (MUST-level), and optionally Preferred conventions (SHOULD-level). Keep it concise — aim for actionable density, not exhaustive repetition of background.
+   - If `AGENTS.md` already exists, read it first, merge new information, preserve rules the user previously confirmed, and flag any conflicts for the user to resolve before writing. Never silently overwrite or drop existing rules.
+   - This file is owned by the project, not by Task Commander. Any role (Commander, Executor, Reviewer, Context Agent) may propose additions when it discovers new constraints during work; the proposal must be confirmed by the user before writing.
+   - Do not paste Task Commander protocol rules into `AGENTS.md`. It captures project-specific behavioral expectations, not orchestration internals.
+
 ## Step four: delivery notes
 
-1. Report created/updated or reused files, proposed deltas, confirmed facts, remaining gaps and owners, and any questionnaire. Confirm readiness for the next coordination step (or state its blocking gap); an existing project need not return to Planning.
+1. Report created/updated or reused files, proposed deltas, confirmed facts, remaining gaps and owners, and any questionnaire. Include `AGENTS.md` in the file list: note whether it was newly created or merged with an existing version. Confirm readiness for the next coordination step (or state its blocking gap); an existing project need not return to Planning.
 2. When ready, output the following complete Commander startup prompt as one separately copyable block. Fill every placeholder, resolve available paths absolutely, mark unavailable records explicitly, and include effective permissions or explicitly pending policy decisions. A recovery-only handoff must identify status reconstruction/validation as blocking business dispatch. Creating documents alone is not completion.
 
 ```text
@@ -92,6 +100,7 @@ Read first:
 - <absolute project root>/background/02_skill_list.md
 - <absolute project root>/decision-log.md
 - <absolute project root>/project-status.md
+- <absolute project root>/AGENTS.md
 Before file/CLI work, read <absolute Skill root>/references/runtime.md.
 Current phase and context revision: <actual current phase; current revision>
 Relevant task briefs, receipts/checkpoints and input versions: <absolute paths and versions needed for the next coordination step; preserve IDs/rounds/history>

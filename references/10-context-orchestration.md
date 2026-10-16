@@ -42,7 +42,7 @@ Completion criteria: the file responsibilities in the source-of-truth table belo
 
 ### 2. Read the existing project
 
-Read existing `background/01_project_background.md`, `CONTEXT.md`, `background/02_skill_list.md`, `decision-log.md`, and `project-status.md` where present. For the current work, also read the saved brief, latest receipt/checkpoint, relevant artifact/input versions, ADRs and code. Use the source-of-truth table below to reconcile facts and current phase rather than relying on remembered chat or a generated summary. Record file-confirmable facts with source pointers; distinguish observed contents from unverified claims, user reports, and inferences. Intent and authorization require traceable genuine user confirmation per `references/15-collaboration.md` (Policy activation); a generated document cannot establish user intent or authorization.
+Read existing `background/01_project_background.md`, `CONTEXT.md`, `background/02_skill_list.md`, `decision-log.md`, `project-status.md`, and root `AGENTS.md` where present. For the current work, also read the saved brief, latest receipt/checkpoint, relevant artifact/input versions, ADRs and code. Use the source-of-truth table below to reconcile facts and current phase rather than relying on remembered chat or a generated summary. Record file-confirmable facts with source pointers; distinguish observed contents from unverified claims, user reports, and inferences. Intent and authorization require traceable genuine user confirmation per `references/15-collaboration.md` (Policy activation); a generated document cannot establish user intent or authorization.
 
 For an existing project, reuse established facts and readable records. Preserve task IDs, revision rounds, phase and history per `references/11-task-state-machine.md`; a missing or incomplete context file is not a new project. Identify only gaps or contradictions that block the current planning, dispatch or assigned work for clarification. Track other unknowns with owners and affected work instead of restarting the interview. If no blocking gap remains, proceed to synthesis/handoff without asking answered questions or rebuilding documents.
 
@@ -102,10 +102,13 @@ Completion criteria: applicable records are readable, every gap has a status/own
 | Major decisions confirmed by the user | `decision-log.md` | Project status and background write only the id and a summary |
 | Current phase, tasks, blockages, next actions, context revision, window/sync tracking and backup pointers | `project-status.md` | Other files reference current records; task briefs/receipts label their historical input revision |
 | Third-party questions awaiting replies | `background/pending-questionnaire/` | The project background records open items and questionnaire paths |
+| Project-level behavioral rules for all AI agents (hard constraints, coding conventions, forbidden patterns) | `AGENTS.md` | Task prompts may note its path; roles propose additions with evidence and write only after user confirmation |
 
 ## Writes and synchronization after handoff
 
 After initialization, Commander integrates updates to central background, terms, decisions and status serially. Context and other agents submit proposed deltas in task outputs rather than editing central records concurrently. User-confirmed decisions remain subject to confirmation; a model's receipt is not authority to decide.
+
+`AGENTS.md` is a project-owned shared rule file. Any role may maintain it when authorized by its task and after the user confirms new or changed rules. Read the current file before editing, preserve confirmed rules, resolve conflicts with the user, and coordinate changes with active tasks whose constraints are affected; do not overwrite it concurrently.
 
 Follow `references/15-collaboration.md` for revision increments, affected-task notification and acknowledgment. Task evidence and backup manifests live with their producing tasks; central files carry pointers, not competing copies. A saved brief/receipt is a historical snapshot, never a second live source of truth.
 

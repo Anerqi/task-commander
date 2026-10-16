@@ -30,7 +30,7 @@
 - Context revision: C1
 - Collaboration policy: background/01_project_background.md (Collaboration policy)
 - Integration owner: Commander
-- Capacity: confirm project policy; proposed default 3 active primary tasks
+- Capacity: confirm project policy; batch size adapts to user's window capacity
 
 These coordination sections are optional for existing projects and manually checked; the CLI does not validate their semantics. Use pointers and versions, not duplicate background content.
 

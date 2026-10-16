@@ -6,7 +6,7 @@
 
 During context building, propose these defaults and record the user's changes in `background/01_project_background.md` under Collaboration policy. In an existing project with no policy, propose it at the next dispatch; do not silently invent prior consent. Host restrictions and explicit user instructions always win.
 
-- Up to 3 active primary tasks, adjustable to the user's window capacity. Each primary may use up to 2 focused subagents when useful; no recursive delegation by default. Count delegated work in the batch resource budget.
+- Batch size adapts to the user's window capacity and actual task readiness; no fixed default cap. Each primary may use up to 2 focused subagents when useful; no recursive delegation by default. Count delegated work in the batch resource budget.
 - Propose support for public read-only research and focused subagents within the task. Use them under effective authorization as defined below when they improve speed, independent checking, or coverage; trivial tasks need neither.
 - Standard risk-based acceptance and a default budget of 2 targeted revision rounds before replanning, per `references/16-quality-gates.md`.
 - Record the user's available time, useful expertise, browser access, and preferred interaction cadence; do not assume the user is only a prompt courier.

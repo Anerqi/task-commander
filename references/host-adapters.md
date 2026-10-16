@@ -6,7 +6,7 @@
 
 The core is `SKILL.md` plus role references, durable project files and optional Python helpers. It does not require a particular model, slash command, agent SDK or message bus. Copy the complete `task-commander/` directory, not just its entry file; relative references and scripts must stay together.
 
-For a host with native Skills, install in a location that host actually loads and invoke its native skill mechanism. Otherwise ask the agent to read the absolute path to `SKILL.md`, then follow its selected role branch. An `AGENTS.md` or other host instruction file may point to that entry with user approval; do not overwrite existing host instructions or paste all role bodies into them.
+For a host with native Skills, install in a location that host actually loads and invoke its native skill mechanism. Otherwise ask the agent to read the absolute path to `SKILL.md`, then follow its selected role branch. A target project's root `AGENTS.md` may point to this entry and carry project-specific rules; when it already exists, Context Agent merges rather than blindly overwrites it. Do not overwrite unrelated host instruction files or paste all role bodies into the target project's `AGENTS.md`.
 
 A file-readable host without native Skills can run the protocol through manual entry loading. A host without workspace access can only draft instructions from supplied material: ask the user to save and verify the durable files before handing off. Do not claim full file-based orchestration, validated status or completed writes from pasted text alone.
 

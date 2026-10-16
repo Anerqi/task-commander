@@ -69,6 +69,21 @@ class DocumentContracts(unittest.TestCase):
         ):
             self.assertIn(marker, text)
 
+    def test_context_agent_generates_and_safely_reconciles_project_agents(self):
+        context = (ROOT / "references/01-context-brief.md").read_text(encoding="utf-8")
+        orchestration = (ROOT / "references/10-context-orchestration.md").read_text(encoding="utf-8")
+        for marker in (
+            "Generate this file last",
+            "Extract hard rules from the interview",
+            "If `AGENTS.md` already exists, read it first, merge new information",
+            "flag any conflicts for the user to resolve before writing",
+            "must be confirmed by the user before writing",
+            "Do not paste Task Commander protocol rules into `AGENTS.md`",
+        ):
+            self.assertIn(marker, context)
+        self.assertIn("root `AGENTS.md` where present", orchestration)
+        self.assertIn("do not overwrite it concurrently", orchestration)
+
     def test_dispatch_and_delivery_have_recovery_and_sync_pointers(self):
         contracts = {
             "SKILL.md": [
