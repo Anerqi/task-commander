@@ -328,7 +328,12 @@ class ScanSkillsTests(unittest.TestCase):
         wanted = [self.project / ".agents/skills", self.directory / ".agents/skills"]
         for path in wanted:
             path.mkdir(parents=True)
-        allowed = {os.path.normcase(str(path.resolve())) for path in wanted}
+        # A raw path and its resolved target both exist on disk. macOS
+        # /var -> /private/var and Windows short paths differ between the two
+        # forms, so the whitelist must accept both.
+        allowed = {os.path.normcase(str(path)) for path in wanted}
+        allowed |= {os.path.normcase(str(path.resolve())) for path in wanted}
+        allowed.add(os.path.normcase(str(self.project)))
         allowed.add(os.path.normcase(str(self.project.resolve())))
         fs_root_candidate = str(pathlib.Path(self.project.anchor) / ".agents/skills")
         for outcome in (FileNotFoundError("git"), subprocess.TimeoutExpired("git", 10),
