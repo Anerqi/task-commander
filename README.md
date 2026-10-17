@@ -23,7 +23,7 @@ Task Commander takes a different approach: **keep the intelligence in the models
 
 `Context Agent → explicit Commander handoff → ready task batches → receipts → acceptance or continuation`
 
-Commander coordinates Executor, Reviewer, QA, Risk Manager, Decision Manager, and Backup Manager. Roles do not automatically switch when a phase ends. The existing [workflow illustration](assets/workflow-section-en.png) shows the original role overview; the protocol below also covers backup, parallel batches, human assistance and persistent windows.
+Commander coordinates Executor, Reviewer, QA, Risk Manager, Decision Manager, and Backup Manager. Roles do not automatically switch when a phase ends. The [workflow illustration](assets/workflow-section-en.png) shows the current pipeline end to end; the protocol below also covers backup, parallel batches, human assistance and persistent windows.
 
 Every task has an explicit owner, scope, dependencies, quality gates, acceptance criteria, and state. The state machine defines what transitions are legal, while the validator script checks the project status instead of trusting the conversation.
 
