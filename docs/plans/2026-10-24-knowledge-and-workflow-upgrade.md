@@ -41,24 +41,26 @@ This iteration adds optional capabilities. It does not add a role, task state, r
 - `git diff --check` is clean; 164 text files are UTF-8/LF without BOM; no temporary artifacts remain.
 - Two independent review rounds covered protocol coherence, migration safety, review-axis ownership and validator edge cases. All blocking/high findings were fixed; the remaining items are documented limitations or low-risk test-coverage notes.
 - One transient Windows file-lock failure occurred in an unrelated workflow test during a full-suite run; it passed in isolation and in the subsequent full run. This is recorded as an environment flake, not a protocol result.
-- The first v2 CI run failed only on macOS because the new POSIX non-UTF-8 filename test could not create its fixture there. Commit `541784e` makes that test skip when the filesystem rejects the name; the release tag is v2.0.1 after the green CI run.
+- The first v2 CI run failed only on macOS because the new POSIX non-UTF-8 filename test could not create its fixture there. Commit `613dd6e` makes that test skip when the filesystem rejects the name; the release tag is v2.0.1 after the green CI run.
 - Manual behavioral scenarios K1–K5 in `tests/behavioral-scenarios.md` cover knowledge closeout, boundary choice, two-axis review, debug loops and branch closure. They are not a live-model certification.
 - A live Commander closeout smoke on an isolated synthetic project passed the knowledge path: valid LOG/topic, status Knowledge update, validator green, graduation candidate flagged, and project `Completed` correctly withheld because the delivery artifact was absent. Evidence: `tests/behavioral-results/2026-10-24-knowledge-closeout/`. This is one host/model observation, not a statistical certification.
-- Final six-case behavioral smoke: run 1 (`df1c67e`) passed 5/6; case 05 failed because it modified the already accepted `slugify` and expanded its test rather than only completing the pending `truncate` work. Commit `0eb2914` added the scope-preservation rule. A fresh 05 rerun (`0eb2914`) passed with `slugify` byte-preserved, the round-1 test retained, and 8/8 tests passing. Overall: **6/6 on the final candidate**. Evidence: `tests/behavioral-results/2026-10-24-v2-final-smoke/`.
+- Final six-case behavioral smoke: run 1 (`a758ab8`) passed 5/6; case 05 failed because it modified the already accepted `slugify` and expanded its test rather than only completing the pending `truncate` work. Commit `00a2ec1` added the scope-preservation rule. A fresh 05 rerun (`00a2ec1`) passed with `slugify` byte-preserved, the round-1 test retained, and 8/8 tests passing. Overall: **6/6 on the final candidate**. Evidence: `tests/behavioral-results/2026-10-24-v2-final-smoke/`.
 
 ## Release points and rollback
 
 The public remote has these relevant points:
 
+> 2026-10-24: repository history and tags were rewritten for identifier anonymization. The commit hashes in this section reflect the rewritten history; evidence manifests and reports retain the original pre-rewrite source hashes.
+
 | Tag | Commit | Meaning |
 |---|---|---|
 | `v1.0.0` | `588e70e` | Last clean remote baseline before the previously uncommitted reliability/onboarding batch |
-| `pre-v2` | `e641299` | Reconstructed snapshot of the pre-v2 working tree (includes reliability/onboarding; excludes v2) |
-| `v2.0.1` | `a37646a` | Current v2 release; six-case smoke 6/6 and green three-platform CI |
+| `pre-v2` | `ccfa9bc` | Reconstructed snapshot of the pre-v2 working tree (includes reliability/onboarding; excludes v2) |
+| `v2.0.1` | `d901391` | Current v2 release; six-case smoke 6/6 and green three-platform CI |
 
 - Review only v2: `git diff pre-v2..v2.0.1`.
-- The failed `v2.0.0` candidate tag and the redundant `snapshot/pre-v2` branch were removed after `v2.0.1` passed; commit `6a350e9` remains in `main` history. No product code changed between the candidate and `v2.0.1`; the fix was a test-fixture skip for macOS.
-- This reference-cleanup note was added on `main` after the release tag; the `v2.0.1` tag remains at `a37646a`.
+- The failed `v2.0.0` candidate tag and the redundant `snapshot/pre-v2` branch were removed after `v2.0.1` passed; commit `c11b46b` remains in `main` history. No product code changed between the candidate and `v2.0.1`; the fix was a test-fixture skip for macOS.
+- This reference-cleanup note was added on `main` after the release tag; the `v2.0.1` tag remains at `d901391`.
 - Roll back to pre-v2: `git switch --detach pre-v2` or create a branch from it.
 - Roll back to the last clean remote baseline: `git switch --detach v1.0.0`.
 - The pre-v2 snapshot was reconstructed from the backup zip; it is a rollback snapshot, not original commit history. The local zip and `backup/pre-optimization-2026-10-24` branch are extra local safety nets, not required for remote users.
