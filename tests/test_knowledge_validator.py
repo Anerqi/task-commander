@@ -529,8 +529,11 @@ class KnowledgeValidatorTests(unittest.TestCase):
         self.add_log(root, LOG_DESCENDING)
         name = os.fsdecode(b"bad-\xff.md")
         path = root / "knowledge" / "topics" / name
-        path.parent.mkdir(parents=True)
-        path.write_text(self.topic_content(), encoding="utf-8", newline="\n")
+        try:
+            path.parent.mkdir(parents=True)
+            path.write_text(self.topic_content(), encoding="utf-8", newline="\n")
+        except OSError:
+            self.skipTest("filesystem rejects non-UTF-8 filenames")
         process = self.run_for(root)
         self.assertEqual(process.stderr, "")
         data = json.loads(process.stdout)
