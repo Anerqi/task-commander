@@ -694,6 +694,15 @@ class DocumentContracts(unittest.TestCase):
                        "blocking edges", "expand–contract", "layer-only"):
             self.assertIn(marker, template)
 
+    def test_scope_preservation_protects_accepted_artifacts(self):
+        executor = (ROOT / "references/03-executor.md").read_text(encoding="utf-8")
+        commander = (ROOT / "references/02-commander.md").read_text(encoding="utf-8")
+        template = (ROOT / "references/06-task-template.md").read_text(encoding="utf-8")
+        self.assertIn("Preserve accepted code, tests and artifacts outside the assigned remainder", executor)
+        self.assertIn("Do not refactor, harden, rename or reformat them as incidental work", executor)
+        self.assertIn("unrequested refactoring or hardening of already accepted code", commander)
+        self.assertIn("Do not treat incidental hardening, renaming or reformatting", template)
+
     def test_retro_upgrade_and_new_behavioral_scenarios(self):
         retro = (ROOT / "references/22-project-retro.md").read_text(encoding="utf-8").lower()
         for marker in ("environment", "automated checks", "agents.md",

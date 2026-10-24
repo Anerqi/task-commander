@@ -19,7 +19,7 @@ Before composing the prompt, shape the assignment as a **tracer bullet**: a narr
 - A completed slice is demoable or verifiable on its own, not merely "the schema is finished" or "three files were edited".
 - Size the slice to fit one fresh window's useful working set. If it cannot fit, split at a real dependency, ownership, risk or capacity boundary.
 - Declare its **blocking edges** (the tasks that must finish first) and its integration owner. A task with unresolved blockers is not a ready dispatch.
-- Prefactor first when a small structural change makes the real change easier; keep the prefactor and the behavior change as separate tasks when they can be verified separately.
+- Prefactor only when it is necessary for the assigned outcome and authorized; keep a prefactor and its behavior change as separate tasks when they can be verified separately. Do not treat incidental hardening, renaming or reformatting of already accepted code as prefactoring; propose it as a linked follow-up instead.
 - For a **wide mechanical refactor** (a rename or shared-type change whose blast radius crosses the codebase), use expand–contract: add the new form beside the old, migrate call sites in verifiable batches, then remove the old form. Do not force it into one vertical slice.
 - Avoid horizontal slices (all schema, then all API, then all UI, then all tests) and per-file microtasks. A task may span multiple turns; verticality is about a complete outcome, not about one prompt.
 - Acceptance criteria must be observable. "Improve the design" is not a finish line.
