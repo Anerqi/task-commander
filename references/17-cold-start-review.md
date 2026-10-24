@@ -12,7 +12,7 @@ Assign an observable task, not just an expert title. Examples:
 - Incoming maintainer: locate a rule, trace its implementation, and explain how to verify a proposed change, without modifying the deliverable.
 - Failure-path tester: exercise a missing input, interrupted operation or conflicting state in an authorized disposable fixture; compare observed and promised behavior.
 
-Cold-start review finds problems without the team's explanation. Informed review checks the full goal, constraints and integration. It complements rather than waives required informed review or QA. The same Reviewer can perform informed reconciliation in stage 2; a separate informed Reviewer is optional when justified by risk. If both run, use the same artifact snapshot and separate report paths; keep their findings separate until both initial records are saved. Both briefs name the reconciliation owner (normally the cold-start Reviewer in stage 2), required combined coverage and report-release point.
+Cold-start review finds problems without the team's explanation. Informed review checks the full goal, constraints and integration. Cold-start is a **Reviewer mode** and normally emphasizes the Spec axis and user-facing behavior; it does not replace required QA or the Standards/behavior axis. It complements rather than waives required informed review or QA. The same Reviewer can perform informed reconciliation in stage 2; a separate informed Reviewer is optional when justified by risk. If both run, use the same artifact snapshot and separate report paths; keep their findings separate until both initial records are saved. Both briefs name the reconciliation owner (normally the cold-start Reviewer in stage 2), required combined coverage and report-release point. In the final report, keep Spec and Standards findings distinguishable even when one reviewer encountered both.
 
 ## Prepare the stage-1 packet
 
@@ -63,6 +63,6 @@ Act on credible safety hazards immediately: pause affected operations and use Bl
 
 ## Continuation and recovery
 
-After stage 2, reuse the now-informed review window for fixes and affected regressions. Do not call it cold again. A later genuinely new first-impression check needs a fresh isolated window and a reason; do not repeat blind reviews until one passes.
+After stage 2, reuse the now-informed review window for re-review and affected regression checks. Implementation fixes return to the Executor window; the review window never edits the deliverable. Do not call it cold again. A later genuinely new first-impression check needs a fresh isolated window and a reason; do not repeat blind reviews until one passes.
 
 For a lost stage-1 window, recover with only the neutral packet, allowed artifact versions and any stage-1 checkpoint; this is resumed discovery, not a new independent sample. Keep withheld records out of recovery prompts. For a lost stage-2 window, include the preserved initial record and disclosed context, and resume as informed reconciliation. Record mode, stage, exposure, input versions, report paths and disposition evidence in the receipt per `templates/task-receipt.md`; acknowledge only the context actually received.

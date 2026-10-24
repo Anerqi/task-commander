@@ -1,6 +1,6 @@
 ---
 name: task-commander
-description: Multi-model task orchestration. Use for context building, parallel task dispatch, persistent task-window collaboration, risk-based review and QA, backup planning, human-assisted work, and project information synchronization; generates copyable start, continuation, and recovery prompts.
+description: Multi-model task orchestration. Use for context building, durable project knowledge, parallel task dispatch, persistent task-window collaboration, window/phase boundaries, risk-based two-axis review and QA, backup planning, human-assisted work, project retro, and information synchronization; generates copyable start, continuation, and recovery prompts.
 ---
 
 # Task Commander
@@ -14,23 +14,24 @@ description: Multi-model task orchestration. Use for context building, parallel 
 
 ## Role branches and completion
 
-- **Context Agent**: read `references/01-context-brief.md` and `references/10-context-orchestration.md`. Clarify gaps, establish collaboration/tool/backup preferences, create or reconcile the prescribed background records, and generate the target project's `AGENTS.md` from confirmed project rules before handoff. Before protected initialization writes, use the Pre-initialization protection handoff in `references/14-backup-manager.md` if a recovery point is needed; missing status does not prevent that narrow backup request or change the Context role. Then initialize status using `references/11-task-state-machine.md` and validate it. Finish by emitting the complete Commander handoff prompt specified in the Context role, tell the user its target window, then stop. Later answers update context or the handoff; they do not activate Commander automatically.
-- **Commander**: read `references/02-commander.md`, `references/15-collaboration.md`, and `references/11-task-state-machine.md`. Read/validate current status; if absent, request the Context handoff rather than inventing background. The standalone Pre-initialization protection path in `references/14-backup-manager.md` remains available before status exists; ordinary business dispatch still waits for initialization. Dispatch ready independent tasks in batches using `references/06-task-template.md`. After receipts, compare progress with the full user objective and genuine corrections, integrate relevant information, accept using evidence, or send a coherent continuation to the proper existing window. Do not shrink broad work to the last-mentioned detail.
-- **Executor**: read `references/03-executor.md`; deliver the assigned task and remain available for follow-up in that window. Independent Fast Lane work follows `references/19-task-routing.md` without creating project records; registered tasks retain their saved contract, state machine and Commander acceptance.
-- **Reviewer / QA**: read `references/04-reviewer.md` or `references/05-qa.md` plus `references/16-quality-gates.md`; assess the required criteria, reuse valid evidence, and report findings without editing the deliverable. When cold-start review is selected, read `references/17-cold-start-review.md` before loading project background or prior verdicts; use an isolated window and staged disclosure, not a new role.
-- **Risk Manager / Decision Manager**: read `references/08-risk-manager.md` or `references/09-decision-manager.md`; report analysis, with final major decisions reserved for the user.
-- **Backup Manager**: read `references/14-backup-manager.md`; create and verify the scoped recovery artifact before dependent risky work. Report limitations rather than claiming an untested restore succeeded.
+- **Context Agent**: read `references/01-context-brief.md` and `references/10-context-orchestration.md`; for an existing project, also `references/23-protocol-upgrade.md`. Clarify gaps, create or reconcile background, generate root `AGENTS.md`, initialize and validate status, and create the optional knowledge layer only under the trigger in `references/20-knowledge-layer.md`. Handle the Pre-initialization protection handoff in `references/14-backup-manager.md` when a recovery point is needed. Emit the filled Commander handoff, name its target window, and stop in role.
+- **Commander**: read `references/02-commander.md`, `references/15-collaboration.md`, and `references/11-task-state-machine.md`. Read/validate status and the relevant knowledge layer; if status is absent, request Context. Dispatch vertical slices, attach two-axis gates, integrate receipts and knowledge deltas, run the milestone knowledge audit when applicable, and use `references/21-window-boundaries.md` at a phase boundary. Do not implement tasks yourself or shrink broad work to the last detail.
+- **Executor**: read `references/03-executor.md`; deliver the assigned vertical slice, build a red-capable loop for hard bugs/performance work per `references/07-verification-guidelines.md`, and propose knowledge deltas in the receipt. Fast Lane follows `references/19-task-routing.md`; registered tasks keep their contract, state machine and Commander acceptance.
+- **Reviewer / QA**: read `references/04-reviewer.md` or `references/05-qa.md` plus `references/16-quality-gates.md`; report without editing. Reviewer owns Spec; QA owns Standards/behavior; keep the axes separate. Cold-start review follows `references/17-cold-start-review.md` before loading project context.
+- **Risk / Decision / Backup**: read `references/08-risk-manager.md`, `references/09-decision-manager.md`, or `references/14-backup-manager.md`; analyze or protect, never make the user's final decision or claim an untested restore.
 
 ## Shared execution rules
 
-- **Project rules**: when working in a target project, read its root `AGENTS.md` if present and follow its confirmed project-specific constraints. Do not assume it exists or invent its contents. Cold-start Reviewer stage 1 receives only the neutral packet and inputs allowed by `references/17-cold-start-review.md`; include only the essential user criteria and safety constraints required for that stage.
-- **Collaboration**: `references/15-collaboration.md` owns ready-batch scheduling, project-level permission inheritance, human actions, persistent windows, and information synchronization. Use it whenever those branches arise. Public read-only research and focused subagents are supported within effective authorization; restrict them for a concrete reason, not by blanket default.
-- **Quality**: `references/16-quality-gates.md` owns gate selection, evidence freshness/reuse, revision budgets and experiments. Choose gates before dispatch; do not keep rechecking unchanged accepted work. Never turn a budget limit into an automatic pass.
-- **Recovery**: before risky mutations or loss-prone milestones, assess coverage per `references/14-backup-manager.md` and proactively dispatch that role when needed. A required verified backup is a dependency, not an optional afterthought.
-- **State**: follow `references/11-task-state-machine.md`. After Context initialization, Commander alone writes central status and integrates shared records; other roles submit deltas and evidence. Only user-confirmed decisions become final decisions.
-- **Prompts**: use `references/06-task-template.md` for outcome-first natural-language instructions, not a mandatory field form. Save the complete coordination contract, then surface the intended result, essential absolute pointers and operative constraints. A reply may contain several independently copyable instructions with minimal window labels. For an existing task use `templates/task-continuation.md`: preserve the full assigned outcome and genuine user corrections, bundle coherent remaining implementation/fixes/integration/validation, and reuse accepted evidence. Stop issuing work when its requested outcome is established; prompt-only/JSON output is opt-in, not a global ban on Commander tools.
-- **Discovery**: when building or refreshing the skill list, read `references/12-skill-discovery.md`; run `scripts/scan-skills.py` to filter frontmatter, then read only candidate bodies. Reuse the curated list at dispatch.
-- **Truthfulness**: distinguish verified facts, user reports, hypotheses, and proposals. Record unresolved gaps with owner and next step. Tool availability, emitted prompts, and successful checks are different facts; never claim execution merely from intent.
+- **Project rules**: read the target project's root `AGENTS.md` when present; cold-start stage 1 gets only its neutral packet.
+- **Collaboration**: `references/15-collaboration.md` owns batches, permissions, windows and synchronization. Public research and focused subagents are allowed within effective authorization.
+- **Quality**: `references/16-quality-gates.md` owns gates. Reviewer=Spec, QA=Standards/behavior; no budget or one axis becomes an automatic pass.
+- **Recovery**: `references/14-backup-manager.md` owns recovery. Knowledge records are durable assets; a required verified backup gates dependent mutation.
+- **State**: `references/11-task-state-machine.md` owns status. Commander is the sole status writer after Context initialization and integrates shared records; only user-confirmed decisions are final. The optional knowledge layer never replaces task state.
+- **Knowledge**: `references/20-knowledge-layer.md` owns the durable layer. Stable conclusions go to topics, short progress to LOG; no empty shells or external copies. Graduation requires user confirmation.
+- **Boundaries**: `references/21-window-boundaries.md` owns phase/window choices; `references/22-project-retro.md` is the optional environment retro after completion, a major incident, or repeated review/QA friction. Do not reset or auto-edit project rules by habit.
+- **Prompts**: `references/06-task-template.md` owns vertical slices and outcome-first instructions. Save the contract, reference paths, bundle coherent work, and stop when the outcome is established.
+- **Discovery**: `references/12-skill-discovery.md` plus `scripts/scan-skills.py`; filter frontmatter, then read only candidate bodies.
+- **Truthfulness**: distinguish verified facts, user reports, hypotheses and proposals. Tool availability, emitted prompts and successful checks are different facts; never claim execution from intent.
 
 ## Artifact navigation
 
@@ -39,12 +40,18 @@ description: Multi-model task orchestration. Use for context building, parallel 
 - Context sources and optional methodology composition: `references/10-context-orchestration.md`
 - Context Agent deliverables and AGENTS.md generation/merge rules: `references/01-context-brief.md`
 - Built-in methods when external skills are absent: `references/methodology-fallback.md`
-- Task prompt and pre-dispatch checklist: `references/06-task-template.md`
-- Domain-specific verification details: `references/07-verification-guidelines.md`
+- Task prompt, vertical slicing and pre-dispatch checklist: `references/06-task-template.md`
+- Domain-specific verification details, including bug/perf feedback loops: `references/07-verification-guidelines.md`
 - Cold-start review packets, isolation and informed reconciliation: `references/17-cold-start-review.md`
+- Durable project knowledge, audit, branch closure and graduation candidates: `references/20-knowledge-layer.md`
+- Window/phase boundary choices: `references/21-window-boundaries.md`
+- Optional project retro and environment improvement: `references/22-project-retro.md`
+- Existing-project protocol version and upgrade: `references/23-protocol-upgrade.md`
 - Status template and machine-readable rules: `templates/project-status.md`, `templates/task-state-spec.txt`
 - Agent capabilities and decision ledger: `templates/agent-registry.md`, `templates/decision-log.md`
+- Knowledge templates: `templates/knowledge-log.md`, `templates/knowledge-topic.md`, `templates/knowledge-roadmap.md`, `templates/knowledge-cited.md`
 - Durable delivery/checkpoint: `templates/task-receipt.md`
-- Continuation and lost-window recovery: `templates/task-continuation.md`
+- Continuation, boundary and lost-window recovery: `templates/task-continuation.md`
+- Optional project retro record: `templates/project-retro.md`
 - Before optional command execution, checkpoint resume or rendering: `references/18-dynamic-workflow.md`, `templates/workflow-plan.template.py`, `templates/workflow-checkpoint.json`. The runner is sequential command progress, not agent dispatch or project acceptance.
-- Structural/status validation: `scripts/validate-project-state.py` (does not prove evidence, permissions, or actual agent behavior)
+- Structural/status validation: `scripts/validate-project-state.py`; knowledge-layer structure: `scripts/validate-knowledge.py` (neither proves evidence, permissions, or actual agent behavior)

@@ -42,7 +42,7 @@ Completion criteria: the file responsibilities in the source-of-truth table belo
 
 ### 2. Read the existing project
 
-Read existing `background/01_project_background.md`, `CONTEXT.md`, `background/02_skill_list.md`, `decision-log.md`, `project-status.md`, and root `AGENTS.md` where present. For the current work, also read the saved brief, latest receipt/checkpoint, relevant artifact/input versions, ADRs and code. Use the source-of-truth table below to reconcile facts and current phase rather than relying on remembered chat or a generated summary. Record file-confirmable facts with source pointers; distinguish observed contents from unverified claims, user reports, and inferences. Intent and authorization require traceable genuine user confirmation per `references/15-collaboration.md` (Policy activation); a generated document cannot establish user intent or authorization.
+Read existing `background/01_project_background.md`, `CONTEXT.md`, `background/02_skill_list.md`, `decision-log.md`, `project-status.md`, and root `AGENTS.md` where present. When the optional knowledge layer exists, read `knowledge/ROADMAP.md` if present, recent `knowledge/LOG.md` entries, and only the topics relevant to the current gap; do not load every topic by default. For the current work, also read the saved brief, latest receipt/checkpoint, relevant artifact/input versions, ADRs and code. Use the source-of-truth table below to reconcile facts and current phase rather than relying on remembered chat or a generated summary. Record file-confirmable facts with source pointers; distinguish observed contents from unverified claims, user reports, and inferences. Intent and authorization require traceable genuine user confirmation per `references/15-collaboration.md` (Policy activation); a generated document cannot establish user intent or authorization.
 
 For an existing project, reuse established facts and readable records. Preserve task IDs, revision rounds, phase and history per `references/11-task-state-machine.md`; a missing or incomplete context file is not a new project. Identify only gaps or contradictions that block the current planning, dispatch or assigned work for clarification. Track other unknowns with owners and affected work instead of restarting the interview. If no blocking gap remains, proceed to synthesis/handoff without asking answered questions or rebuilding documents.
 
@@ -88,9 +88,9 @@ Completion criteria: every third-party knowledge gap is covered by a questionnai
 
 ### 6. Synthesis and delivery
 
-For a new project, create the prescribed documents; for an existing project, reuse current records and supply only needed deltas under the write ownership rules below. Check that terms, decisions, and background have one authoritative copy. Report confirmed content, open items, questionnaire paths, and next steps.
+For a new project, create the prescribed documents; for an existing project, reuse current records and supply only needed deltas under the write ownership rules below. Check that terms, decisions, background and durable knowledge have one authoritative copy. Initialize the optional knowledge layer under the trigger in `references/20-knowledge-layer.md`: a new multi-session project may create `knowledge/LOG.md` (and `ROADMAP.md` when goals outlast one session) at initialization; an existing project waits for the first durable conclusion and user confirmation. Do not pre-create empty topics. Report confirmed content, open items, questionnaire paths, the knowledge-layer choice, and next steps.
 
-Completion criteria: applicable records are readable, every gap has a status/owner, and a filled Commander handoff has been emitted per `references/01-context-brief.md` when coordination-ready. Preserve an existing project's current phase. Stop after the formal handoff in the Context role; neither readiness nor a phase change authorizes Context to plan or dispatch business tasks.
+Completion criteria: applicable records are readable, every gap has a status/owner, the knowledge-layer choice is explicit, and a filled Commander handoff has been emitted per `references/01-context-brief.md` when coordination-ready. Preserve an existing project's current phase. Stop after the formal handoff in the Context role; neither readiness nor a phase change authorizes Context to plan or dispatch business tasks.
 
 ## Document sources of truth
 
@@ -103,12 +103,15 @@ Completion criteria: applicable records are readable, every gap has a status/own
 | Current phase, tasks, blockages, next actions, context revision, window/sync tracking and backup pointers | `project-status.md` | Other files reference current records; task briefs/receipts label their historical input revision |
 | Third-party questions awaiting replies | `background/pending-questionnaire/` | The project background records open items and questionnaire paths |
 | Project-level behavioral rules for all AI agents (hard constraints, coding conventions, forbidden patterns) | `AGENTS.md` | Task prompts may note its path; roles propose additions with evidence and write only after user confirmation |
+| Optional durable knowledge: stable conclusions, timeline, roadmap, external citations | `knowledge/`; `references/20-knowledge-layer.md` owns layout, triggers and conflict priority | Other files keep only paths/summaries; do not duplicate current task state or confirmed decisions |
 
 ## Writes and synchronization after handoff
 
 After initialization, Commander integrates updates to central background, terms, decisions and status serially. Context and other agents submit proposed deltas in task outputs rather than editing central records concurrently. User-confirmed decisions remain subject to confirmation; a model's receipt is not authority to decide.
 
-`AGENTS.md` is a project-owned shared rule file. Any role may maintain it when authorized by its task and after the user confirms new or changed rules. Read the current file before editing, preserve confirmed rules, resolve conflicts with the user, and coordinate changes with active tasks whose constraints are affected; do not overwrite it concurrently.
+`AGENTS.md` is a project-owned shared rule file. Any role may maintain it when authorized by its task and after the user confirms new or changed rules. Read the current file before editing, preserve confirmed rules, resolve conflicts with the user, and coordinate changes with active tasks whose constraints are affected; do not overwrite it concurrently. When the knowledge layer exists, `AGENTS.md` should carry a concise reading order and source-of-truth pointers, not a copy of this protocol.
+
+After initialization, Commander is the integration owner for shared knowledge records as well as background, terms, decisions and status. Other roles propose knowledge deltas in their receipts; Commander integrates them serially after checking evidence. Branch/experiment closure and graduation candidates follow `references/20-knowledge-layer.md`.
 
 Follow `references/15-collaboration.md` for revision increments, affected-task notification and acknowledgment. Task evidence and backup manifests live with their producing tasks; central files carry pointers, not competing copies. A saved brief/receipt is a historical snapshot, never a second live source of truth.
 

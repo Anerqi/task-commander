@@ -15,6 +15,15 @@ Every project task brief states its risk, deliverable version, checkable accepta
 
 For project tasks, even waived gates must be explicit. Use the existing legal route through Awaiting Acceptance; never jump from In Progress to Completed. Independent Fast Lane reports delivery to the user, not a project-state transition or automatic acceptance. Required independent verification disqualifies that path; preserve the gate and escalate per the routing reference. A passed experiment does not certify a production implementation. Experiment completion means its question was answered with evidence, not that its hypothesis succeeded.
 
+When both Reviewer and QA are required, assign and report two axes:
+
+| Axis | Primary gate | Question |
+|---|---|---|
+| **Spec** | Reviewer | Does the delivery implement the original goal, full task scope and genuine user corrections? Anything missing, partial or unrequested? |
+| **Standards / behavior** | QA | Does it work as promised, follow project rules and terminology, and satisfy executable quality checks? |
+
+The axes are reported separately and neither can mask the other. A change can pass Standards while implementing the wrong thing, or pass Spec while breaking project conventions. If only one gate is required, name the axis covered and the axis not covered; do not imply both passed. Cold-start review is a Reviewer mode on the Spec/outside-perspective side and does not replace required QA.
+
 Freeze acceptance scope at dispatch. New polish suggestions become follow-up backlog items, not surprise acceptance requirements. A newly discovered serious safety/correctness issue may block release; identify its evidence and impact and explicitly revise the plan rather than silently moving the goalposts.
 
 ## Select review context
@@ -25,10 +34,10 @@ When using separate cold-start and informed reviewers, preserve both initial ass
 
 ## Divide the checks
 
-- Executor: perform the relevant self-check once for the current delivery; provide commands/results or source evidence.
-- Reviewer: inspect reasoning, scope, design, compliance, and material risks. Reference existing valid test evidence instead of rerunning it automatically.
-- QA: derive checks from acceptance criteria and realistic success/failure scenarios, then execute or recompute relevant results. An Executor's test list is evidence, not the whole test plan. Do not repeat the entire design review.
-- Commander: match criteria to evidence, verify identity/freshness and conclusions, and make the acceptance decision. Do not recreate Reviewer/QA work without an identified evidence gap.
+- Executor: perform the relevant self-check once for the current delivery; provide commands/results or source evidence. For a hard bug/performance task, establish the red-capable feedback loop in `references/07-verification-guidelines.md` before claiming a fix.
+- Reviewer: inspect the **Spec** axis plus reasoning, scope, design and material risks. Reference existing valid test evidence instead of rerunning it automatically. Report project-rule/standard issues it encounters, but do not silently replace QA.
+- QA: own the **Standards/behavior** axis. Derive checks from acceptance criteria, project rules and realistic success/failure scenarios, then execute or recompute relevant results. An Executor's test list is evidence, not the whole test plan. Do not repeat the entire design review or take over the Reviewer's scope judgment.
+- Commander: match criteria to evidence on both axes, verify identity/freshness and conclusions, and make the acceptance decision. Do not recreate Reviewer/QA work without an identified evidence gap.
 
 Independent review means an independent assessment of the evidence, not mandatory duplication of every command. If reviewers disagree, identify a falsifiable disputed claim and run a bounded deciding check or ask the user for a scope/risk decision; do not cycle reviewers indefinitely.
 
@@ -54,6 +63,8 @@ Classify each finding with an ID, evidence location, affected criterion, severit
 Once all required criteria have valid evidence and blocking findings are resolved, accept and move on. Reopen only for new material evidence, changed scope/inputs, or a reported regression. Completed tasks retain their history; new issues after completion become linked follow-up tasks.
 
 Default to at most 2 targeted revision rounds on the same approach. At the budget limit, change strategy: isolate the unknown, reduce scope with user approval, launch alternative experiments, ask for human help, or record a blocker. This is an escalation budget, never an automatic pass, silent waiver, or permission to leave known critical failures in a released result. The user may approve a justified additional round.
+
+At project Acceptance, a structural knowledge audit is a closeout check, not a third review axis. It does not convert a failed Spec or Standards gate into a pass, and its validator only checks structure. If the audit finds required work, create a linked task and keep the project in progress.
 
 ## Parallel experiments
 

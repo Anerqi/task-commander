@@ -23,7 +23,7 @@ When valuable existing assets need protection before `project-status.md` or a us
 ## Inputs to the backup task
 
 - Trigger, dependent task/action, required recovery scope and versions.
-- Sources: tracked files, dirty and untracked work, documents, assets, data stores, and relevant configuration; explicitly identify excluded items and why.
+- Sources: tracked files, dirty and untracked work, documents, assets, data stores, relevant configuration, and durable knowledge records (for example `knowledge/topics/` and `knowledge/LOG.md`); explicitly identify excluded items and why. Git can reconstruct code, but it cannot reconstruct a conclusion that exists only in a knowledge note or a chat window.
 - Approved destination, sensitivity/access policy, expected capacity, and retention policy.
 - Consistency method: freeze the affected writes, use a consistent snapshot, or use the data store's native export mechanism.
 - Recovery objective, verification depth, and conditions requiring user assistance.

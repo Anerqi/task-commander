@@ -17,27 +17,39 @@ Long AI projects usually fail for reasons that have little to do with the model 
 
 Task Commander takes a different approach: **keep the intelligence in the models, but put the process under explicit control.**
 
+## Key terms
+
+- **Vertical slice / tracer bullet** — a narrow but complete task that produces a demoable or independently verifiable outcome, rather than one layer or one file.
+- **Two-axis review** — Reviewer checks the **Spec** (did we build the right thing?); QA checks **Standards/behavior** (does it work and follow the rules?). They report separately.
+- **Knowledge layer** — optional `knowledge/` notes: a short progress LOG and current-truth topics, so stable conclusions do not live only in chat.
+- **Window boundary** — the explicit choice at a phase change: continue, fresh window, handoff, subagent or compaction.
+- **Retro** — an optional look back that improves the environment (checks, rules, navigation) for the next project.
+
 ## What you get
 
 **A lightweight command center for AI-assisted projects, with a direct path for independent small requests:**
 
-`Context Agent → explicit Commander handoff → ready task batches → receipts → acceptance or continuation`
+`Context Agent → explicit Commander handoff → ready vertical slices → receipts → two-axis acceptance → knowledge closeout, continuation or retro`
 
-Commander coordinates Executor, Reviewer, QA, Risk Manager, Decision Manager, and Backup Manager. Roles do not automatically switch when a phase ends. The [workflow illustration](assets/workflow-section-en.png) shows the current pipeline end to end; the protocol below also covers backup, parallel batches, human assistance and persistent windows.
+Commander coordinates Executor, Reviewer, QA, Risk Manager, Decision Manager, and Backup Manager. Roles do not automatically switch when a phase ends. The [workflow illustration](assets/workflow-section-en.png) shows the core task pipeline; the protocol below also covers backup, parallel batches, human assistance, persistent windows, durable knowledge, window boundaries, two-axis review and retro.
 
-Every task has an explicit owner, scope, dependencies, quality gates, acceptance criteria, and state. The state machine defines what transitions are legal, while the validator script checks the project status instead of trusting the conversation.
+Every task should record an explicit owner, scope, dependencies, quality gates, acceptance criteria, and state. The state machine defines what transitions are legal. The validator checks table structure, state names and blocked-record consistency; Commander still checks that fields are complete and gate decisions are meaningful rather than trusting the conversation.
 
 The human remains the final decision-maker. Task Commander handles the structure, not the authority.
 
 ## Features
 
 - **Right-sized entry:** independent, clear, low-risk and reversible requests can use Executor Fast Lane without project initialization. Registered tasks use Lean coordination or Standard workflow while preserving state, permissions and evidence-based acceptance. Risk matters more than file count.
-- **Inherited context:** read authoritative project files and relevant versions before asking again; fill material gaps rather than rebuilding background. Context Agent generates or reconciles a concise root `AGENTS.md` from confirmed project-specific rules for all AI agents. Cold-start review keeps its staged disclosure boundary.
+- **Durable knowledge:** an optional `knowledge/` layer keeps a short reverse-chronological LOG, current-truth topic notes, an optional roadmap, citations and graduation candidates. Stable conclusions stop living only in chat; Commander audits and closes experiments without turning knowledge into a second task-status file. A zero-dependency `validate-knowledge.py` checks structure.
+- **Inherited context:** read authoritative project files and relevant versions before asking again; fill material gaps rather than rebuilding background. Context Agent generates or reconciles a concise root `AGENTS.md` with reading order and source-of-truth pointers for all AI agents. Cold-start review keeps its staged disclosure boundary.
 - **Progress-aware continuation:** diagnose repeated lack of substantive progress at coordination checks; useful negative evidence counts as progress. This is not a timer or background monitor.
-- **Explicit handoff:** Context Agent must deliver a filled Commander startup prompt, then remain in its own role.
+- **Explicit handoff and boundaries:** Context Agent must deliver a filled Commander startup prompt, then remain in its own role. At a phase boundary, choose continue, fresh window, handoff, focused subagent or compaction explicitly rather than resetting by habit.
+- **Vertical slices:** each project task is a demoable tracer bullet sized for one fresh window, with declared blocking edges. Wide mechanical refactors use expand–contract; layer-only and per-file fragments are not dispatched as complete tasks.
 - **Ready batches:** one independently copyable prompt per task, several prompts per reply when dependencies and read/write scopes allow it. Batch size adapts to the user's window capacity and actual task readiness; no fixed default cap.
 - **Useful tools and human help:** project-authorized public research and focused subagents are encouraged; users can supply domain facts, make decisions, log in locally, demonstrate browser flows, or export missing data. Sensitive transfer and external write actions need specific authorization.
-- **Risk-based acceptance:** select Reviewer/QA gates before dispatch, reuse fresh unchanged evidence, and recheck affected scope only. After the default 2 targeted revision rounds, replan rather than loop or automatically pass.
+- **Two-axis, risk-based acceptance:** select Reviewer/QA gates before dispatch; Reviewer owns Spec compliance and QA owns Standards/behavior, reported separately so one axis cannot mask the other. Reuse fresh unchanged evidence and recheck affected scope only. After the default 2 targeted revision rounds, replan rather than loop or automatically pass.
+- **Red-capable debugging:** hard bugs and performance regressions require a fast, deterministic, agent-runnable loop that goes red on the actual symptom before hypotheses or fixes. Regression tests attach to a correct seam; an assumed test pass is not evidence.
+- **Retro and upgrade:** after completion, a major incident, or repeated review/QA friction, an optional environment-focused retro turns friction into checks, standards or navigation pointers. Existing projects adopt optional protocol changes incrementally; the `Protocol version` line records the reconciled version without a schema migration.
 - **Cold-start review:** at selected milestones, give a fresh Reviewer a concrete user/maintainer scenario and neutral facts, not internal rationale or prior verdicts. Save independent findings first, then disclose context in a later message and reconcile every finding with evidence. This complements informed review and QA; it is not an extra role or a guarantee of bias-free judgment.
 - **Bounded experiments:** compare uncertain approaches in isolation; a well-evidenced negative feasibility result is useful delivery, not production success.
 - **Outcome-first prompts:** keep the full contract in a saved brief; send natural instructions in the user's language instead of a rigid field form. Each continuation advances the largest coherent authorized remainder, bundling fixes, integration and relevant validation rather than issuing one prompt per small step. Original user scope and genuine corrections survive generated summaries; a truly narrow request stays narrow.
@@ -102,16 +114,24 @@ Optional:
   - `17-cold-start-review.md` neutral review packets, context isolation, independent discovery and later informed reconciliation
   - `18-dynamic-workflow.md` optional sequential DAG command runner, checkpoint recovery and capability boundaries
   - `19-task-routing.md` Fast Lane eligibility, Lean/Standard selection and safe escalation
+  - `20-knowledge-layer.md` durable LOG/topics/roadmap, audit, branch closure and graduation candidates
+  - `21-window-boundaries.md` continue/fresh/handoff/subagent/compaction decisions
+  - `22-project-retro.md` environment-focused retrospective after completion or incident
+  - `23-protocol-upgrade.md` protocol version, compatibility and existing-project adoption
   - `host-adapters.md` host installation conventions, capability fallbacks and discovery caveats
   - `runtime.md` cross-platform host execution principles
   - `methodology-fallback.md` built-in methodology fallback (zero-dependency distillation used when the composed external skills are absent)
-- `templates/` — project status (including optional coordination sections), state specification, agent registry, decision log, task receipt and continuation/recovery templates
+- `templates/` — project status (including optional coordination and knowledge sections), state specification, agent registry, decision log, task receipt and continuation/recovery templates
+  - `knowledge-log.md`, `knowledge-topic.md`, `knowledge-roadmap.md`, `knowledge-cited.md` — optional knowledge layer
+  - `project-retro.md` — optional retro record
 - `AGENTS.md` — generated in the target project root during Context Agent delivery; not a Task Commander source file
 - `scripts/` — standard-library discovery, validation and optional command-progress helpers
   - `scan-skills.py` scans skill candidates by frontmatter
   - `validate-project-state.py` validates `project-status.md` structure and state transitions
+  - `validate-knowledge.py` validates optional `knowledge/` structure, topic frontmatter and LOG ordering
   - `run-workflow.py` sequentially runs trusted commands; its exit-0 completion is not project acceptance
   - `render-workflow.py` renders command checkpoints or recorded project status
+  - `markdown_table.py` shares status-table cell parsing between validation and rendering (not a CLI)
 - `agents/openai.yaml` — agent configuration
 - `assets/workflow-section-en.png` — workflow overview diagram
 - `.github/workflows/ci.yml` — three-platform CI matrix
@@ -130,6 +150,8 @@ Optional:
 
 ## Typical use
 
+New here? Follow the [first-project walkthrough](examples/first-project/README.md) in a disposable folder. It shows which prompt goes to which window, a same-task revision, and evidence-based acceptance without a running service.
+
 ### Choose the smallest sufficient process
 
 - **Fast Lane:** ask "Fix this spelling error in README; change only that text and inspect the diff." If the request is independent, unregistered, low-risk and reversible, Executor can deliver directly with a short actual-check result. No background directory, task ID or status file is required.
@@ -144,7 +166,9 @@ See `references/19-task-routing.md` for eligibility and escalation. A one-line a
 2. Paste its explicit handoff into a Commander window. Keep this window for project coordination.
 3. Open the ready batch's task windows. Required backup work comes before its dependent mutation; unrelated tasks can proceed.
 4. Return task receipts to Commander. Paste targeted fixes or context updates back into the original windows, rather than restarting tasks.
-5. Accept against evidence, save useful experiment results, and keep non-blocking polish in the backlog.
+5. Accept against evidence on separate Spec and Standards/behavior axes, save useful experiment results, and keep non-blocking polish in the backlog.
+6. At a milestone or project closeout, audit the optional knowledge layer, record stable conclusions, and run `validate-knowledge.py` for structure. Commander judges truth and whether a topic is worth keeping.
+7. After completion, a major incident, or repeated review/QA friction, decide together whether a short environment-focused retro is worth running.
 
 There is no automatic cross-window message bus or backup daemon, and installing this Skill adds no agent runtime: you relay prompts/receipts on hosts without dispatch support, and each capability is used only when the host really provides it. Protocol checks are agent responsibilities, not guarantees from the Python scripts.
 
@@ -162,7 +186,9 @@ Dry-run writes simulation-only checkpoints and does not execute task commands, b
 
 ### Existing projects
 
-Read the existing authoritative background, terms, confirmed decisions, status and relevant task evidence before asking for context again; resolve only missing, stale or conflicting information that matters to the work. Handoffs carry essential paths, relevant revisions, the full assigned outcome and effective constraints rather than copying every background document. A stored claim of approval is not new authorization; cold-start review still uses its staged packets.
+Read the existing authoritative background, terms, confirmed decisions, status, relevant knowledge topics and relevant task evidence before asking for context again; resolve only missing, stale or conflicting information that matters to the work. Handoffs carry essential paths, relevant revisions, the full assigned outcome and effective constraints rather than copying every background document. A stored claim of approval is not new authorization; cold-start review still uses its staged packets.
+
+Protocol version 2 adds optional knowledge, window-boundary, task-shaping, two-axis review, debug-loop and retro capabilities. Existing projects remain valid and adopt them incrementally; see `references/23-protocol-upgrade.md`. Adding `Protocol version: 2` is metadata, not a task transition.
 
 At coordination checkpoints, compare actual artifacts, valid evidence and remaining unknowns. The adjustable default is diagnosis after two consecutive checks without substantive progress, not after a wall-clock timeout. This is separate from the existing targeted-revision budget. Long-running work and useful negative experiments are not stalled merely because they remain In Progress.
 
@@ -183,6 +209,9 @@ Run a transition check **before** updating the state. After changing the task an
 # Check a proposed transition against the current, pre-update task state
 <python> scripts/validate-project-state.py --path <path/to/project-status.md> --task-id 01 --from-state "In Progress" --to-state "QA Pending"
 
+# Validate an optional knowledge layer's structure (frontmatter, LOG order, empty shells)
+<python> scripts/validate-knowledge.py --project-root <project root>
+
 # Scan skill candidates (reads only frontmatter); --host picks the path profile
 <python> <path/to/task-commander>/scripts/scan-skills.py --project-root <project root> --host all --query-terms <query term1> <query term2>
 
@@ -190,4 +219,6 @@ Run a transition check **before** updating the state. After changing the task an
 <python> -m unittest discover -s tests -v
 ```
 
-CI runs the checks on three operating systems. `tests/behavioral-scenarios.md` defines manual model-level scenarios for handoff, parallelism, continued dialogue, tools, review budgets, synchronization, backups, human help and host adaptation. Static/document tests are regression guards, not proof that every model will obey the protocol; host scenarios are documentation-checked, not live six-host certification.
+For a small live-model check, use the [six-case behavioral smoke pack](tests/behavioral-smoke.md). Its copyable fixtures and separate evaluator criteria complement, rather than replace, the automated suite.
+
+CI runs the checks on three operating systems, including the knowledge-layer validator. `tests/behavioral-scenarios.md` defines manual model-level scenarios for handoff, parallelism, continued dialogue, tools, review budgets, synchronization, backups, human help, knowledge closeout and host adaptation. Static/document tests are regression guards, not proof that every model will obey the protocol; host scenarios are documentation-checked, not live six-host certification.

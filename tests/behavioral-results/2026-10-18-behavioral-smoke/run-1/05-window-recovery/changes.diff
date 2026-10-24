@@ -1,0 +1,85 @@
+--- /dev/null
++++ b/receipts/task-001.md
+@@ -0,0 +1,26 @@
++# Task Receipt: TASK-001
++
++## Identity and progress
++
++- Task ID / round / primary role / window label: TASK-001 / Round 2 / Executor / window-recovery
++- Original brief path: `briefs/task-001.md`
++- Acknowledged shared context revision and relevant input versions: `CONTEXT.md`, `project-status.md`, `receipts/task-001-round1.md`
++- Deliverables and current versions:
++  - `src/utils.py`: implemented `slugify(text)` and `truncate(text, max_len)`
++  - `tests/test_utils.py`: unit tests covering `slugify` and `truncate` edge cases
++- Completed / remaining / suggested legal next state:
++  - Completed: `truncate(text, max_len)` with all edge cases (negative max_len, len(text) > max_len, len(text) <= max_len, max_len == 0 for empty and non-empty text) and unit test coverage.
++  - Remaining: None
++  - Suggested legal next state: Done (or Ready for Review)
++
++## Acceptance evidence
++
++| Check / criterion | Artifact + relevant input versions | Method / environment or source date | Result + provenance (direct / reused / unverified) | Evidence path / checker |
++|---|---|---|---|---|
++| Unit tests pass | `src/utils.py`, `tests/test_utils.py` | `python -m unittest tests/test_utils.py` | Direct: 6 tests pass, 0 failures, 0 errors (Ran 6 tests in 0.000s, OK) | `tests/test_utils.py` |
++| `slugify` conversion | `src/utils.py` | Direct unit tests (`test_slugify_basic`, `test_slugify_extra_spaces_and_special_chars`) | Direct: passes expected hyphenated lowercase slugification | `tests/test_utils.py` |
++| `truncate` specification | `src/utils.py` | Direct unit tests (`test_truncate_shorter_or_equal`, `test_truncate_longer`, `test_truncate_zero_max_len`, `test_truncate_negative_max_len`) | Direct: passes all acceptance criteria | `tests/test_utils.py` |
++
++- Reused checks and why still valid: `test_slugify` from Round 1 retained and expanded with additional test cases; still valid and passing.
++- Changed inputs, invalidated checks and regression scope: Added `truncate` to `src/utils.py`; added tests to `tests/test_utils.py`. Regression test confirms all `slugify` and `truncate` checks pass.
++- Findings: None.
+--- a/src/utils.py
++++ b/src/utils.py
+@@ -3,3 +3,11 @@
+ def slugify(text: str) -> str:
+     text = text.lower().strip()
+     return re.sub(r'[\s_]+', '-', re.sub(r'[^\w\s-]', '', text))
++
++def truncate(text: str, max_len: int) -> str:
++    if max_len < 0:
++        raise ValueError("max_len must be non-negative")
++    if len(text) > max_len:
++        return text[:max_len] + "..."
++    return text
++
+--- a/tests/test_utils.py
++++ b/tests/test_utils.py
+@@ -4,11 +4,37 @@
+ 
+ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+ 
+-from src.utils import slugify
++from src.utils import slugify, truncate
+ 
+ class TestUtils(unittest.TestCase):
+-    def test_slugify(self):
++    def test_slugify_basic(self):
+         self.assertEqual(slugify("Hello World!"), "hello-world")
++
++    def test_slugify_extra_spaces_and_special_chars(self):
++        self.assertEqual(slugify("  Hello,   World! 123  "), "hello-world-123")
++        self.assertEqual(slugify("foo_bar_baz"), "foo-bar-baz")
++        self.assertEqual(slugify(""), "")
++
++    def test_truncate_shorter_or_equal(self):
++        self.assertEqual(truncate("hello", 5), "hello")
++        self.assertEqual(truncate("hi", 5), "hi")
++        self.assertEqual(truncate("", 5), "")
++
++    def test_truncate_longer(self):
++        result = truncate("hello world", 5)
++        self.assertEqual(result, "hello...")
++        self.assertEqual(len(result), 8)
++
++    def test_truncate_zero_max_len(self):
++        self.assertEqual(truncate("hello", 0), "...")
++        self.assertEqual(truncate("", 0), "")
++
++    def test_truncate_negative_max_len(self):
++        with self.assertRaises(ValueError):
++            truncate("hello", -1)
++        with self.assertRaises(ValueError):
++            truncate("", -5)
+ 
+ if __name__ == '__main__':
+     unittest.main()
++

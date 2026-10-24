@@ -10,6 +10,8 @@
 - Deliverables and current versions (include dirty-file identity when relevant):
 - Completed / remaining / suggested legal next state:
 
+Before sending a registered-task receipt, read the current recorded state and required gates. Use a verbatim state label from `templates/task-state-spec.txt` and check it against the role's delivery rules and `references/11-task-state-machine.md`. Keep completion of your delivery separate from Commander acceptance; if a next state cannot yet be justified, report the missing work or evidence instead of inventing a label.
+
 ## In-phase progress (optional)
 
 Use when a checkpoint supports the coordination checks in `references/02-commander.md` (In-phase progress checks), not as a periodic reporting requirement.
@@ -44,6 +46,15 @@ Use when a checkpoint supports the coordination checks in `references/02-command
 - Authoritative file to update and affected task IDs:
 - Decision requiring user confirmation (not a final decision until confirmed):
 - Write conflicts, user actions, blockers, owner and resume condition:
+
+## Knowledge delta (when relevant)
+
+- Stable conclusion / lesson / procedure produced (or "none"):
+- Proposed topic path and one-line summary:
+- Evidence / artifact / decision pointer:
+- Scope: project-local / reusable graduation candidate:
+- Conflict with an existing topic or LOG entry:
+- Commander integration required; do not edit shared knowledge records concurrently.
 
 ## Recovery checkpoint (when relevant)
 

@@ -1,0 +1,182 @@
+{
+  "checked_at": "2026-10-20T14:58:02.597728+00:00",
+  "platform": "win32",
+  "commands": [
+    {
+      "label": "py -3 version",
+      "command": [
+        "py",
+        "-3",
+        "--version"
+      ],
+      "exit_code": 0,
+      "version": "Python 3.14.0"
+    },
+    {
+      "label": "py -3 unittest",
+      "command": [
+        "py",
+        "-3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "exit_code": 0,
+      "total": 125,
+      "seconds": 24.624,
+      "skipped": [
+        "test_auto_discovery_dedupes_symlink_roots_across_scopes (test_scripts.ScanSkillsTests.test_auto_discovery_dedupes_symlink_roots_across_scopes) ... skipped \"symlinks unavailable: [WinError 1314] (Windows privilege)\"",
+        "test_symlink_skills_cycles_root_aliases_and_overlaps_are_scanned_once (test_scripts.ScanSkillsTests.test_symlink_skills_cycles_root_aliases_and_overlaps_are_scanned_once) ... skipped \"symlinks unavailable: [WinError 1314] (Windows privilege)\""
+      ],
+      "skipped_count": 2,
+      "passed": 123,
+      "failed": 0,
+      "errors": 0
+    },
+    {
+      "label": "python version",
+      "command": [
+        "python",
+        "--version"
+      ],
+      "exit_code": 0,
+      "version": "Python 3.14.0"
+    },
+    {
+      "label": "python unittest",
+      "command": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "exit_code": 0,
+      "total": 125,
+      "seconds": 24.494,
+      "skipped": [
+        "test_auto_discovery_dedupes_symlink_roots_across_scopes (test_scripts.ScanSkillsTests.test_auto_discovery_dedupes_symlink_roots_across_scopes) ... skipped \"symlinks unavailable: [WinError 1314] (Windows privilege)\"",
+        "test_symlink_skills_cycles_root_aliases_and_overlaps_are_scanned_once (test_scripts.ScanSkillsTests.test_symlink_skills_cycles_root_aliases_and_overlaps_are_scanned_once) ... skipped \"symlinks unavailable: [WinError 1314] (Windows privilege)\""
+      ],
+      "skipped_count": 2,
+      "passed": 123,
+      "failed": 0,
+      "errors": 0
+    },
+    {
+      "label": "scan-skills.py help",
+      "command": [
+        "py",
+        "-3",
+        "scripts/scan-skills.py",
+        "--help"
+      ],
+      "exit_code": 0,
+      "usage_present": true
+    },
+    {
+      "label": "validate-project-state.py help",
+      "command": [
+        "py",
+        "-3",
+        "scripts/validate-project-state.py",
+        "--help"
+      ],
+      "exit_code": 0,
+      "usage_present": true
+    },
+    {
+      "label": "run-workflow.py help",
+      "command": [
+        "py",
+        "-3",
+        "scripts/run-workflow.py",
+        "--help"
+      ],
+      "exit_code": 0,
+      "usage_present": true
+    },
+    {
+      "label": "render-workflow.py help",
+      "command": [
+        "py",
+        "-3",
+        "scripts/render-workflow.py",
+        "--help"
+      ],
+      "exit_code": 0,
+      "usage_present": true
+    },
+    {
+      "label": "status template",
+      "command": [
+        "py",
+        "-3",
+        "scripts/validate-project-state.py",
+        "--path",
+        "templates/project-status.md"
+      ],
+      "exit_code": 0,
+      "valid": true,
+      "task_count": 0,
+      "errors": []
+    },
+    {
+      "label": "explicit-root skill scan",
+      "command": [
+        "py",
+        "-3",
+        "scripts/scan-skills.py",
+        "--roots",
+        ".",
+        "--query-terms",
+        "task-commander"
+      ],
+      "exit_code": 0,
+      "found_task_commander": true,
+      "candidates_returned": 1
+    },
+    {
+      "label": "render status template",
+      "command": [
+        "py",
+        "-3",
+        "scripts/render-workflow.py",
+        "templates/project-status.md",
+        "--format",
+        "json"
+      ],
+      "exit_code": 0,
+      "record_kind": "project-status",
+      "task_count": 0
+    },
+    {
+      "label": "git diff --check",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "encoding": {
+    "files_checked": 116,
+    "errors": []
+  },
+  "syntax": {
+    "files": [
+      "scripts/markdown_table.py",
+      "scripts/render-workflow.py",
+      "scripts/run-workflow.py",
+      "scripts/scan-skills.py",
+      "scripts/validate-project-state.py"
+    ],
+    "errors": []
+  }
+}

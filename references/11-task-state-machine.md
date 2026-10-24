@@ -22,9 +22,13 @@ Machine validation uses `templates/task-state-spec.txt`; it must stay consistent
 | Completed | Project-level acceptance passed | Final acceptance defined by the user or the project passed |
 | Paused | The project as a whole is temporarily stopped | User explicitly paused, or a project-level blockage exists |
 
-Check Acceptance readiness against the original required outcomes and confirmed scope changes, not just the rows already scheduled. Unscheduled required work also prevents entry. Deferring or cancelling a required outcome needs explicit user confirmation recorded in `decision-log.md`; a Cancelled task alone does not remove the requirement. Optional backlog may remain only when it is outside the confirmed required delivery scope. Project-level acceptance checks themselves may run in Acceptance; if they reveal more required delivery work, return to In Progress before dispatching that work. The CLI checks phase names, not this evidence-based readiness judgment.
+Check Acceptance readiness against the original required outcomes and confirmed scope changes, not just the rows already scheduled. Unscheduled required work also prevents entry. Deferring or cancelling a required outcome needs explicit user confirmation recorded in `decision-log.md`; a Cancelled task alone does not remove the requirement. Optional backlog may remain only when it is outside the confirmed required delivery scope. Project-level acceptance checks themselves may run in Acceptance; if they reveal more required delivery work, return to In Progress before dispatching that work. When the optional knowledge layer exists, run its knowledge audit per `references/20-knowledge-layer.md` before final project acceptance; the audit is a closeout check, not a new task state, and a structural validator pass is not a truth judgment. The CLI checks phase names, not this evidence-based readiness judgment.
 
 When a project resumes from `Paused`, the pre-pause phase must be recorded and restored. `Completed` is terminal; new requirements create new tasks or new phases, never erase history.
+
+## Protocol version
+
+`project-status.md` may include an optional `- Protocol version: 2` line in the Project section. It records which Task Commander protocol the project was last reconciled against and supports the upgrade checks in `references/23-protocol-upgrade.md`. It is metadata, not a task state: existing files without it remain valid, and adding it requires neither a transition nor a new task row. The task table, blocked table and state rules are unchanged by protocol version.
 
 ## Required task fields
 
@@ -42,6 +46,8 @@ Every task in `project-status.md` must record:
 - Last updated time
 
 A task id, once used, must never be reassigned to another task. Revision rounds use `<task id>-R1`, `<task id>-R2`, belonging to the original task; never create a new top-level id solely for a same-scope correction. Record rounds in receipts/history, not as duplicate task rows. A new objective or independent experiment may be a linked top-level task.
+
+These are contract fields: the CLI validates table structure, state names and blocked-record consistency, but it does not prove every unused-gate cell is filled or that a gate decision is correct. Commander checks field completeness and gate meaning during dispatch and acceptance.
 
 ## Task states
 
@@ -73,6 +79,10 @@ A task id, once used, must never be reassigned to another task. Revision rounds 
 
 A gate may be skipped only when the task brief explicitly states that Reviewer or QA is not required. Never go directly from `In Progress` to `Completed`.
 
+## Status table cells
+
+Use the existing 11-column task table and 6-column blocked table. Both CLI tools share the same cell parser: start rows with `|`, escape a literal pipe inside a cell as `\|`, and retain empty cells. Surrounding whitespace, an optional closing pipe, and alignment rows such as `| :--- | ---: |` are supported. Other backslashes are preserved; this is not a general Markdown parser. The validator still rejects wrong column counts and inconsistent blocked records; rendering alone is not validation.
+
 ## Status update transaction
 
 Every Commander status update must complete in order:
@@ -84,6 +94,7 @@ Every Commander status update must complete in order:
 5. Append one row to the status history: old state, new state, basis, and operator.
 6. Sync the current blockage, current focus, and project phase. Add a blocked record on entry; remove it on recovery/cancellation, retaining its reason and pre-block state in history. Change the task and active blocked table together before validation.
 7. Run structural validation with `--path` only on the updated file, then re-read it as UTF-8 and confirm the tables, states, and evidence paths. Do not replay the old `--from-state` transition check after the state has already changed.
+8. On the first update after adopting a newer protocol, add or correct the `Protocol version` line in the Project section as metadata. This is not a task transition and must not rewrite task history; see `references/23-protocol-upgrade.md`.
 
 If any step fails, keep the original state and record it as an issue to handle; never write the target state first and add evidence later.
 
@@ -127,7 +138,7 @@ Parallelism only changes dispatch order; it never changes a single task's state 
 
 ## Optional coordination metadata
 
-The optional Coordination, Active windows, Pending user actions, Backups, and Synchronization sections in `templates/project-status.md` track context revisions, task/window mappings, input versions, ownership and acknowledgment. They do not add states or alter the required task/history columns. Existing projects may add them incrementally.
+The optional Coordination, Knowledge, Active windows, Pending user actions, Backups, and Synchronization sections in `templates/project-status.md` track context revisions, durable-knowledge pointers, task/window mappings, input versions, ownership and acknowledgment. They do not add states or alter the required task/history columns. Existing projects may add them incrementally.
 
 Optional in-phase progress evidence belongs in task receipts/checkpoints per `templates/task-receipt.md`; continuations reference it. `references/02-commander.md` (In-phase progress checks) owns the diagnostic trigger. These checks add no required fields or states and never imply a transition or gate pass by themselves; use the existing evidence and transaction rules for any actual status change.
 

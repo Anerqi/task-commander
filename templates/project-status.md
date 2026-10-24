@@ -4,6 +4,7 @@
 
 - Project name: <Project Name>
 - Project phase: Context Building
+- Protocol version: 2
 - Status owner: Commander
 - Pre-pause phase: n/a
 - Last updated: YYYY-MM-DD HH:mm <timezone>
@@ -33,6 +34,15 @@
 - Capacity: confirm project policy; batch size adapts to user's window capacity
 
 These coordination sections are optional for existing projects and manually checked; the CLI does not validate their semantics. Use pointers and versions, not duplicate background content.
+
+## Knowledge
+
+Optional; omit this section when the project has no durable knowledge layer. See `references/20-knowledge-layer.md`.
+
+- Knowledge policy / layer status: see `background/01_project_background.md` (Knowledge retention)
+- Timeline / roadmap pointers: `knowledge/LOG.md`, `knowledge/ROADMAP.md` (if present)
+- Latest audit / graduation candidates:
+- Durable topics that affect current coordination:
 
 ## Active windows
 

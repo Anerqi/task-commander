@@ -40,14 +40,21 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Syntax check (all helpers)
-        run: python -m py_compile scripts/scan-skills.py scripts/validate-project-state.py scripts/run-workflow.py scripts/render-workflow.py
+        run: python -m py_compile scripts/scan-skills.py scripts/validate-project-state.py scripts/validate-knowledge.py scripts/run-workflow.py scripts/render-workflow.py scripts/markdown_table.py
 
       - name: --help smoke test (all helpers; CLI usable, exit code 0)
         run: |
           python scripts/scan-skills.py --help
           python scripts/validate-project-state.py --help
+          python scripts/validate-knowledge.py --help
           python scripts/run-workflow.py --help
           python scripts/render-workflow.py --help
+
+      - name: validate-knowledge.py optional-layer smoke
+        # This repository has no knowledge/ layer; absence is valid and returns
+        # a warning unless --require is passed. The full positive/negative schema
+        # cases live in tests/test_knowledge_validator.py.
+        run: python scripts/validate-knowledge.py --project-root .
 
       - name: Unit and regression tests
         run: python -m unittest discover -s tests -v

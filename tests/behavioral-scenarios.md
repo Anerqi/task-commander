@@ -6,6 +6,8 @@ These are manual acceptance scenarios for a real host/model, not executed model 
 
 Use a temporary fixture project with synthetic files/data, not real credentials or irreplaceable assets. Supply the scenario input to the indicated role using the current Skill. For multi-turn cases keep the same window, send the specified follow-up, and inspect actual prompts/files/tool evidence. Record host/model, Skill commit plus dirty diff identity, input fixture, transcript/evidence path, observed pass/fail, and limitations. Use supported authorized tools only; no real destructive restore or external publication is required.
 
+For a focused, repeatable 6-scenario suite with ready-to-run synthetic fixtures and evaluation rubrics, see [Behavioral Smoke Suite](behavioral-smoke.md) (`tests/fixtures/behavioral-smoke/`).
+
 | ID | Input / follow-up | Observable expected behavior |
 |---|---|---|
 | H1 | Context role finishes a sufficiently specified project | Produces readable background/status and a filled Commander startup prompt with absolute paths; tells the user the target window and stops without dispatching execution tasks |
@@ -142,6 +144,18 @@ These are model-level interpretation checks; command-runner unit tests exercise 
 | RT18 | Two no-progress coordination checks occur before any implementation correction; later two targeted revision rounds on the same approach fail a critical criterion | Tracks the two budgets separately: diagnosis does not consume or reset implementation revision rounds, and a revision-limit escalation does not imply acceptance. Replans/isolates an alternative or requests help; no automatic pass or silent gate waiver |
 | RT19 | Stagnation or revision-limit escalation occurs after some criteria have valid evidence, with a material unresolved criterion and an unverified tool result | Retains valid partial artifacts, task ID/history and unaffected checks; states the exact remaining gap, evidence/limits, owner and next deciding action or user choice. Does not erase progress, claim full completion or elevate the unverified result into a pass |
 | RT20 | Otherwise eligible Fast Lane spelling fix is made, but the host cannot run the requested validation | Gives concise truthful evidence of the observed edit and labels validation not run, with a focused next check where needed; if the gap is essential, pauses/escalates the affected action rather than claiming Fast Lane success. Does not fabricate a passing test, a receipt from another role or project acceptance |
+
+## Knowledge, boundaries and review axes
+
+These scenarios exercise the optional version-2 capabilities: knowledge closeout, boundary decisions, review axes, debug loops and branch closure. Use disposable projects and synthetic knowledge records; do not publish to an external knowledge base. Evaluate actual artifacts and state, not a required response template.
+
+| ID | Input / follow-up | Observable expected behavior |
+|---|---|---|
+| K1 | A completed project task produced a stable, evidence-backed lesson that future work should reuse | Commander integrates a short `knowledge/LOG.md` entry and a current-truth topic with valid frontmatter and pointers; the topic does not duplicate task status or a confirmed decision. The knowledge audit runs before project Acceptance; the external graduation step waits for explicit user confirmation |
+| K2 | A milestone is complete, but the next phase needs the reasoning and decisions from the current window | Chooses to continue the same window rather than resetting by habit; if context is genuinely irrelevant or work must travel, it selects fresh/handoff/subagent/compaction with a readable packet and preserves task identity, evidence and permissions |
+| K3 | A delivery follows every project convention but omits a required user outcome | Reviewer reports a Spec-axis failure and QA's Standards/behavior checks do not mask it; Commander does not accept on the strength of a clean Standards report |
+| K4 | A hard intermittent bug is "fixed" with a claim that all tests are assumed passing, with no reproduction command | Executor/QA establish a red-capable, deterministic, fast loop that reproduces the actual symptom, minimize it, add a correctly scoped regression check, and report the red/green transition; an assumed pass is not acceptance evidence |
+| K5 | An exploration branch is abandoned after proving an approach unworkable | Commander/owner classifies the branch's knowledge as discard, merge-to-knowledge, graduation candidate or archive pointer; a validated negative lesson is preserved instead of disappearing with the branch |
 
 ## Release interpretation
 

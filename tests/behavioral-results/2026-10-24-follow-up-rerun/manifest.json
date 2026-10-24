@@ -1,0 +1,92 @@
+{
+  "created_at": "2026-10-20T14:43:15.330001+00:00",
+  "git_revision": "588e70e7b9fd735e50851956f06bb45b107363af",
+  "source_hashes": {
+    "SKILL.md": "e1bd77bf5be64ad1d1a3f3d39ff9e20471af32fa3a8b020ecb214be955f5d7ab",
+    "references/00-overview.md": "901f4fa072e6b2195cf0b1b2eb7e0f514265b713881ef545d82bf4c5fae18dca",
+    "references/01-context-brief.md": "7437afdf1adb9f70e1f3f562c301d693941db71e752c8bbd7ba227ff17e67c80",
+    "references/02-commander.md": "dd03b8459a9b85826b9225cf8d04a3181b180ab2728353c8aa1500b8af169439",
+    "references/03-executor.md": "8689f8d882580385f7c616555f0f1f3df4b4ada260a162d6158425b702fba496",
+    "references/04-reviewer.md": "628fc23306b404c6860c507205f8f0443a2c3cd97cf513960cf81f9ad3d864df",
+    "references/05-qa.md": "68444f17410db8a8ff1f149e8ad17def94f6bd007928b9dbbd9baf6da1c588a5",
+    "references/06-task-template.md": "ca0b5092eda99c3251ad841306af53dfefb025cfcdf626561be6a1632d8ce8e9",
+    "references/07-verification-guidelines.md": "07087d399897cd7e052a6aff6fd3136a5d947057b86caecf30c98d991bdb1aef",
+    "references/08-risk-manager.md": "1a56b6b42e19efb636fd174c1c5e042084601207a9072780beb7b24370267485",
+    "references/09-decision-manager.md": "57cf6195a359ac431a99a5377cf7a70cb54076ee2b85b61a6c984bf9e9ab1fc1",
+    "references/10-context-orchestration.md": "1c958690348ffeade355523545c77340a661454a4ae6f81404f033929df4cbf6",
+    "references/11-task-state-machine.md": "10f6630a2d74059ff414637f7b30ab096ce604383c7da2714feb49ef3b3b2126",
+    "references/12-skill-discovery.md": "b90b501dedba65171a1a3f93191bfc916546d1970aaa23aa141153eb8aadb322",
+    "references/14-backup-manager.md": "ce95d4b7c172118364fe377fe708ffba97ebb65d18b3442a117eb1090a7b84aa",
+    "references/15-collaboration.md": "e1e964b9a40941df6faf5ff2cfab87c4367d0f01bcd4ae45c5a496cb3a4c0d3e",
+    "references/16-quality-gates.md": "43229fbe299995c227c02b9ac94a34a4061dfd4ae464a9b817ae3926366a039c",
+    "references/17-cold-start-review.md": "ae4aad656345c8daa51e9178e6540850111a94e5f5b069eed214e6386842cb7e",
+    "references/18-dynamic-workflow.md": "1083acc73e649e2c28e291c9e1e2742e119edbcc4580a0669553366622d5d34e",
+    "references/19-task-routing.md": "08cd92c77e0d847a1d3ae9b005fd6bf8f97e34ec4bc8ddfee0b9a8acc33fcf9b",
+    "references/host-adapters.md": "2b2449adb2008e1846ecc52ceabb822a863fc6cfb239863f7a9f9dc0e96720d8",
+    "references/methodology-fallback.md": "da2c5f382ae9bbbb5558c3013088de9589cece9e65a187ee13c8e12867688c10",
+    "references/runtime.md": "e9df0091e86673777eabc07932a66d6f469acbaf44b53d395670df2cfbe9e824",
+    "scripts/markdown_table.py": "fefd4c5f55eec853614eb0b0fa274492740c9f0280a1e89ed2696ba064b2938f",
+    "scripts/render-workflow.py": "01251425d6d81c57b44cbd495ef25bb55f9674f932676d78c7dedeaf1b9ad3ae",
+    "scripts/run-workflow.py": "57d6cc2db7505a87caa6ddf8ecc76556c45ea3185ddc8b078b466eed050f32dc",
+    "scripts/scan-skills.py": "c2fa2d6961d8a00805ebe7a4a5f0732a3bf2f95f938bb324bb712cb4ad198423",
+    "scripts/validate-project-state.py": "22d85e48af56f41d87d41ba763df9228dcb46027cc8254340442a928694cf201",
+    "templates/agent-registry.md": "3d3f0a60a7de29de0d544d0f7587287d62f2d5510e93115302f4f6d6cd499030",
+    "templates/decision-log.md": "28bb1932934da0cfe8b00f81d393ba0391cf65066211ff342a0d9f8e00ca7063",
+    "templates/project-status.md": "0d59c4c9d367be4a7be6c1ec643109f202b352f398deadebfa2c37e56a0298af",
+    "templates/task-continuation.md": "1f5e33675079fa1e3a59f94f0c76474b87ab7869439b01bcdb70ee4e57116218",
+    "templates/task-receipt.md": "30f6d7dbc6540fa1879706007a423b3bdd74e51d5b5e1adedc877aaac9c6bddc",
+    "templates/task-state-spec.txt": "3faab48c496252f417be440ae31bbdccc75950c7c5ec37d204429f8c584ad8ae",
+    "templates/workflow-checkpoint.json": "4fbca2a508faac0411328c5de044f379f4f0682662eb9c3572a0ff351202a3e5",
+    "templates/workflow-plan.template.py": "a8e7eaf1e4b048a25f5e74b666b549a8aa641d06b024c36c35f8467f83d4e5f1"
+  },
+  "cases": {
+    "04-continuation": {
+      "input_sha256": "39e5b29e6bb09faa8d0caf76a9043b7f7b35cdd40eecb7457f463721aa0245cd",
+      "initial_files": {
+        "AGENTS.md": "0260d1a9228da67fd9e1855bd6c6b3fd4d37ea6e380526f449609282b89564ac",
+        "background/01_project_background.md": "11e0ae7e22ce9b104d28d9e20f483e8ac5128b2b86c77b499b2cd30a50423561",
+        "background/02_skill_list.md": "5acd30e51dbba9cf4e037a8041c2f79f2ca4654d73a289cd588e1616d9af628e",
+        "briefs/task-001.md": "33d1d95f3ab9e66c75a7270a850bede6d7225b9c5f4571d52463c4872c438adb",
+        "CONTEXT.md": "02fac77f699ff6d157b9cf693bff7b6e0867fe43d111ab843cfcce32104e4321",
+        "decision-log.md": "a6602e58d8613652d96c7b35f77dc8e32009b7c275c0422508e09ee92c7faef8",
+        "docs/architecture.md": "c005aba264fee86aee3022001a57823f721d685ceaeea8ffe82be6248a8fc46b",
+        "facts.md": "2d8972465cd07134fd4d7d58e98d7c8f047ba34911a4f7075a29ff02ef99fa86",
+        "project-status.md": "1678f3ddf9cb5f4692c6fae95840371e57b30d8048441455ecca9d6b02fb212b",
+        "receipts/task-001-round1.md": "be8fe8f38b1edb8f26d8d802199c27602ea4fd5578ee3ed8304c8fcd2b35ec36"
+      },
+      "normalized_input_sha256": "aa5b470117219e932a5d1ad460a0f931f4d24cf36d94fc0509325a0bfd88fab6"
+    },
+    "05-window-recovery": {
+      "input_sha256": "c7d531ab692bdf07cefd2cccedff94d896f913b460f92edf560684de09697bb6",
+      "initial_files": {
+        "AGENTS.md": "d9522f92a5268ab635f7ad92a63941438522f1d5b048e333225ddcdc8068ab2e",
+        "background/01_project_background.md": "38a135f0f84824484e6e860c78df66fdc19e3707d092f94abae39972bda123da",
+        "background/02_skill_list.md": "5acd30e51dbba9cf4e037a8041c2f79f2ca4654d73a289cd588e1616d9af628e",
+        "briefs/task-001.md": "dd5f232601a145604fc4590639ef55e1b62f85eab401b70cedfdbd61f8a6303d",
+        "CONTEXT.md": "70c722c74c5b833f46097d3257d8eb8e3ca46b041c76d3128f08912ed5553659",
+        "decision-log.md": "f2261fd2e8728071e6502f2f1010ff72972b37f7c9bf92c4c1ef1704a317fe1b",
+        "project-status.md": "95ef59dee03a0e3f78758c8561f260a5699524c5d05afba26416430cf47663fe",
+        "receipts/task-001-round1.md": "321d61331373253abb42780f73a912f694a335ed6354e0453e4a4dd3fb72212e",
+        "src/utils.py": "20266e577e9755ec6c662d7813120933097f0ba69918e4fed51a28fb47d4a19e",
+        "tests/test_utils.py": "01cfb1a9ef04dec404a93fc10c462cb92793311630eb6fdbc6e7a13124af1c40"
+      },
+      "normalized_input_sha256": "9a11efbb5edc0872ff1175ceaed3ee00891fa2e3d8d6b6c2b8eadc6869160260"
+    },
+    "06-missing-evidence": {
+      "input_sha256": "ac075f81bf44543a24bf6396f66aa23830f304f53cbbb7ba7f9fd94e2d77d7a9",
+      "initial_files": {
+        "AGENTS.md": "1c472291bb90c8ff9aa25bb92888178753a8c01812d65238c3a1fe88b7fb303d",
+        "background/01_project_background.md": "e72cb643a651e38279b01429a03a8044251472e8475309cba32a79c7444ed7ba",
+        "background/02_skill_list.md": "5acd30e51dbba9cf4e037a8041c2f79f2ca4654d73a289cd588e1616d9af628e",
+        "briefs/task-001.md": "10ddc56e98a1f0aedc3088f8318205b8436324bd0b2ca36366c343466344f82e",
+        "CONTEXT.md": "0de7a8118f724d4f48605760c7ffbb51f7536bd8216ce8ae2549ede208857570",
+        "decision-log.md": "4849e6f726f319248632e9bdbe66eeca83fff61086a3536ab68b0f979ca22650",
+        "project-status.md": "482070c1d274b30e77c0c4c8c9059746f5bff6fb34488dcbd42770ccea6cf449",
+        "receipts/task-001.md": "27f8c0be99df25d1f4dffc4944180948cea8a6f11072f63b0769c66f6ba580d2",
+        "src/parser.py": "f740720b2a789dc044255e69174769ff957c5ff1f8c94ba8fd6fbccb15ab6a81",
+        "tests/test_parser.py": "1a29ee25fa3f081899c9852769669af1b5ef59eadf115847d7f3b7d5cd0b8f40"
+      },
+      "normalized_input_sha256": "e49fbba23950aeb812aed4becda1e538a1a3f7ec852f88f9e5f094907a7b0d5a"
+    }
+  }
+}

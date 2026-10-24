@@ -28,7 +28,7 @@ Discover actual host capabilities. If a tool is unavailable, say so and use a lo
 
 ## Ready batches
 
-Before dispatch, inspect unfinished dependencies, active work, read/write sets (including source files, data, services, browser sessions, and shared documents), tool capacity, and backup prerequisites.
+Before dispatch, inspect unfinished dependencies, active work, read/write sets (including source files, data, services, browser sessions, and shared documents), tool capacity, and backup prerequisites. Check that each candidate is a demoable vertical slice with declared blocking edges and a plausible single-window fit; split layer-only or per-file fragments before they enter a batch.
 
 A task is ready when its prerequisites are actually satisfied. Tasks may share a batch only when:
 
@@ -63,9 +63,11 @@ Ask the highest-impact question first. Closely related low-effort questions may 
 
 Task identity is independent of conversation identity. Keep a stable task ID and a human-readable window label; a host session ID is optional, never assumed portable.
 
-- **Start**: use `references/06-task-template.md` to compose an outcome-first instruction for a new task or gate window; save its fuller contract separately.
+Before starting, continuing or replacing a window, apply the boundary decision in `references/21-window-boundaries.md`: continue when the next phase needs this reasoning as a primary source; use a fresh window when the context is genuinely irrelevant; hand off only when work must travel; use a focused subagent for a tightly scoped AFK task; compact or checkpoint at a real boundary. An actual context limit is the emergency exception in 21: save a durable checkpoint first and state the loss of primary context. A milestone or task completion alone does not require a reset.
+
+- **Start**: use `references/06-task-template.md` to compose an outcome-first instruction for a new task or gate window; save its fuller contract separately. A project task is a vertical slice with blocking edges, not a layer-only fragment.
 - **Continue**: use `templates/task-continuation.md` for coherent unfinished work, required fixes, clarification, synchronization, or another experiment within the same task objective. Keep the whole assigned outcome in view rather than stopping at the latest finding. Direct the user to the original window.
-- **Recover**: use that template's recovery fields when a window is lost or compacted. Include the original brief and current artifacts; do not trust inaccessible chat history or restart already-proven work.
+- **Recover**: use that template's recovery fields when a window is lost or compacted. Include the original brief, current artifacts and relevant knowledge pointers; do not trust inaccessible chat history or restart already-proven work.
 
 For cold-start Reviewer windows, `references/17-cold-start-review.md` narrows these generic input rules: start with an isolated session and neutral packet, recover only stage-appropriate inputs, and preserve the first independent record before disclosing internal context. Execution continuity does not imply inherited context for a fresh review.
 
@@ -73,13 +75,13 @@ Revisions retain the original task ID and use rounds such as `03-R1`; they are n
 
 ### Gate windows
 
-For delivery acceptance, Reviewer and QA are attached gates on the existing task, not competing primary executions. Record gate windows and report pointers in Active windows metadata, keeping the task row's primary Agent unchanged; do not create a duplicate deliverable row. Start a new gate window with its own role instruction using `references/06-task-template.md`, then continue that gate with `templates/task-continuation.md`. Use the reviewed task ID and save its gate brief under a distinct filename such as `04_review_brief.md` or `05_qa_brief.md`, never over the execution brief or `01_result.md`. The reviewed artifact version, not the review window, owns the finding.
+For delivery acceptance, Reviewer and QA are attached gates on the existing task, not competing primary executions. Reviewer owns the Spec axis; QA owns the Standards/behavior axis when both are required. Record gate windows and report pointers in Active windows metadata, keeping the task row's primary Agent unchanged; do not create a duplicate deliverable row. Start a new gate window with its own role instruction using `references/06-task-template.md`, then continue that gate with `templates/task-continuation.md`. Use the reviewed task ID and save its gate brief under a distinct filename such as `04_review_brief.md` or `05_qa_brief.md`, never over the execution brief or `01_result.md`. The reviewed artifact version, not the review window, owns the finding.
 
 A separately requested standalone review or QA investigation may have its own task ID and Reviewer/QA primary; its deliverable is the assessment, not implementation. It does not automatically satisfy another task's acceptance gate: Commander must match its scope, artifact versions and evidence to that gate. Merely opening a gate window is not a standalone task request.
 
-Record Reviewer mode/stage, exposure limitations and packet/report pointers in the gate's coordination metadata. If cold-start and informed windows run concurrently, give each distinct brief and report paths under the reviewed task directory; keep the primary Agent and task row unchanged. The stage-1 checkpoint is not a gate pass or a new task state. After informed reconciliation, that window can handle targeted revisions but is no longer cold.
+Record Reviewer mode/stage, exposure limitations and packet/report pointers in the gate's coordination metadata. If cold-start and informed windows run concurrently, give each distinct brief and report paths under the reviewed task directory; keep the primary Agent and task row unchanged. The stage-1 checkpoint is not a gate pass or a new task state. After informed reconciliation, that window can re-review targeted revisions but is no longer cold; implementation fixes return to the Executor window.
 
-Gate follow-ups keep the gate role in its own window (a revision round may return to the Executor window while Reviewer/QA recheck affected items). Same-scope fixes and coherent remaining implementation return to the original execution window with the task ID; only materially new scope becomes a new task. Gates report suggested states; Commander decides and records the transition.
+Gate follow-ups keep the gate role in its own window; a revision round returns implementation to the Executor window while Reviewer/QA recheck affected items. Gate windows never edit the deliverable. Same-scope fixes and coherent remaining implementation return to the original execution window with the task ID; only materially new scope becomes a new task. Gates report suggested states; Commander decides and records the transition.
 
 Every continuation must convey the intended remaining outcome and applicable delta without losing scope or authority. Target identity, current versions, issue/evidence locations and inherited constraints can use precise saved-brief/receipt pointers; surface critical limits and material changes inline. These are completeness obligations, not mandatory visible labels. Use the user's language and direct commands per `references/06-task-template.md`. A continuation is a prompt to paste, not evidence that another window received it.
 
@@ -87,9 +89,11 @@ Every continuation must convey the intended remaining outcome and applicable del
 
 Keep the source-of-truth table in `references/10-context-orchestration.md`. Do not create a second shared prose summary that competes with background, terminology, decisions, or status.
 
-`project-status.md` holds coordination pointers: a monotonic context revision (for example C1), active window labels, each task's input revision/read-write scope, pending user actions, latest backup references, and pending/acknowledged synchronization. These are coordination metadata, not new task states. Existing status files may add the optional sections in `templates/project-status.md` without changing their task/history tables.
+`project-status.md` holds coordination pointers: a monotonic context revision (for example C1), durable-knowledge pointers, active window labels, each task's input revision/read-write scope, pending user actions, latest backup references, and pending/acknowledged synchronization. These are coordination metadata, not new task states. Existing status files may add the optional sections in `templates/project-status.md` without changing their task/history tables.
 
-Use `templates/task-receipt.md` for concise deliveries and information deltas. It may be a section of the existing result file; no extra file is required. Record newly evidenced facts, disproved assumptions, interface changes, proposed decisions, affected tasks, and precise source/version pointers. Distinguish verified facts, user reports, hypotheses, and proposals.
+Use `templates/task-receipt.md` for concise deliveries and information deltas. It may be a section of the existing result file; no extra file is required. Record newly evidenced facts, disproved assumptions, interface changes, proposed decisions, affected tasks, and precise source/version pointers. Distinguish verified facts, user reports, hypotheses, and proposals. When the work produced a stable conclusion, lesson, procedure or solved pitfall, include a **Knowledge delta** for Commander integration; do not write shared knowledge topics or LOG concurrently.
+
+The optional knowledge layer follows the source hierarchy in `references/20-knowledge-layer.md`: status owns current task state, `decision-log.md` owns confirmed decisions, topic notes own stable conclusions, LOG owns the short timeline, and receipts own delivery evidence. On a shared knowledge change, increment the context revision only when shared meaning changes; a task-local detail does not. Branch/experiment closure and graduation candidates are recorded as proposals, not automatic external writes.
 
 The Commander is the integration owner for shared records after initialization:
 

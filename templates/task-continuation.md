@@ -4,9 +4,13 @@
 
 For a cold-start Reviewer, read `references/17-cold-start-review.md` before composing or loading recovery inputs; its isolation and staged-disclosure rules override generic continuity.
 
+## Window boundary check
+
+Before composing, apply `references/21-window-boundaries.md` at the phase boundary. Continue in the existing window when the next phase needs this reasoning as a primary source. Use a fresh window when the context is genuinely irrelevant, a handoff when work must travel, a focused subagent for a tightly scoped AFK task, and compaction or a durable checkpoint only near a real context limit. A completed task or milestone alone does not require a reset. Keep task identity, role, accepted evidence and effective permissions stable across the chosen move.
+
 ## New-window read contract
 
-Apply this contract to project task/gate startup and recovery windows, including a replacement Commander. Before acting, the recipient must read the accessible absolute paths supplied for its role: role rules (and runtime rules before file/CLI work), saved brief or handoff, applicable authoritative project records, latest relevant receipt/checkpoint, and current input/artifact versions. State the task/window identity, relevant context revision, source/output paths, read/write scope, effective permissions with their authorization sources, and critical gates/backup limits in the instruction or readable contract. A pointer supplied but not read is not loaded context; compare relevant revisions and reconcile stale inputs before acting, rather than rerunning established work wholesale.
+Apply this contract to project task/gate startup and recovery windows, including a replacement Commander. Before acting, the recipient must read the accessible absolute paths supplied for its role: role rules (and runtime rules before file/CLI work), saved brief or handoff, applicable authoritative project records, relevant knowledge topics when the project has a knowledge layer, latest relevant receipt/checkpoint, and current input/artifact versions. State the task/window identity, relevant context revision, source/output paths, read/write scope, effective permissions with their authorization sources, and critical gates/backup limits in the instruction or readable contract. A pointer supplied but not read is not loaded context; compare relevant revisions and reconcile stale inputs before acting, rather than rerunning established work wholesale.
 
 Inherit sourced facts and traceable effective authorization, not unverified approvals or pending proposals; apply `references/15-collaboration.md` (Policy activation) where authority is uncertain. Ask only for missing context or permission that blocks the next action, and continue independent authorized work. Preserve the saved task identity, history and role.
 
@@ -30,7 +34,8 @@ Start directly with a command in the user's language, such as "继续完成…".
 - Necessary findings with locations/evidence, changed inputs/context revision, and genuine user corrections. Explain the intended correction concretely without micromanaging each tool call.
 - Work and versioned evidence to preserve; affected checks and necessary regressions, not repeated proof refreshes for unchanged accepted work.
 - Applicable write scope/permissions and any changed or still-blocking backup/human prerequisite. Preserve role and traceable effective authority from the saved brief under the New-window read contract; a generated continuation cannot expand either.
-- Where to return the integrated result and a concise receipt per `templates/task-receipt.md`; reference its optional in-phase progress evidence and the changed check/experiment after diagnosis, when relevant. Apply `references/02-commander.md` (In-phase progress checks) for coordination diagnosis, separately from gate revision budgets; request remaining blockers/uncertainty rather than a ceremonial report of every step.
+- Relevant knowledge pointers when a stable conclusion, prior lesson or open question affects this round. Do not paste whole topics; point to the readable topic and state the delta or conflict.
+- Where to return the integrated result and a concise receipt per `templates/task-receipt.md`; include a Knowledge delta when the round produced a durable conclusion. Reference optional in-phase progress evidence and the changed check/experiment after diagnosis, when relevant. Apply `references/02-commander.md` (In-phase progress checks) for coordination diagnosis, separately from gate revision budgets; request remaining blockers/uncertainty rather than a ceremonial report of every step.
 
 Reference readable absolute brief/evidence paths instead of pasting unchanged contracts. Omit irrelevant fields rather than writing "none". For a same-window instruction, a compact paragraph may suffice; use bullets only to distinguish real outcomes or constraints. A new round may continue the original outcome even after fixing the last-mentioned issue. Same-scope corrections keep the ID and revision history; a materially new goal requires an explicitly authorized contract change/new linked task.
 
@@ -44,7 +49,7 @@ When the whole assigned outcome and required gates are established, stop generat
 
 ## Recovery when the original window is unavailable
 
-Use a fuller opening instruction, still in natural language, under the New-window read contract above. Supply the original brief and user-correction provenance, current artifacts, backup posture, last durable checkpoint, completed work/evidence, failed approaches and the coherent next outcome. Verify pointers are readable by the replacement window; include the latest progress-check basis and pending diagnostic action when relevant.
+Use a fuller opening instruction, still in natural language, under the New-window read contract above. Supply the original brief and user-correction provenance, current artifacts, backup posture, last durable checkpoint, completed work/evidence, failed approaches, relevant knowledge topics or open questions, and the coherent next outcome. Verify pointers are readable by the replacement window; include the latest progress-check basis and pending diagnostic action when relevant.
 
 Tell the replacement executor to reconstruct from current artifacts before acting. Missing chat history is not a reason to restart all work or assume omitted requirements were finished. Ask for critical missing context without blocking independent safe work. The task ID remains the same; only the window label changes.
 

@@ -567,6 +567,14 @@ class DocumentContracts(unittest.TestCase):
             with self.subTest(scenario=scenario):
                 self.assertIn(f"| RT{scenario} |", text)
 
+    def test_receipt_uses_the_authoritative_state_labels_and_gates(self):
+        text = self.protocol_text("templates/task-receipt.md")
+        self.assertIn("templates/task-state-spec.txt", text)
+        self.assertIn("references/11-task-state-machine.md", text)
+        self.assertRegex(text, r"(?:exact|verbatim)[^.]{0,40}state label")
+        self.assertRegex(text, r"current[^.]{0,40}state[^.]{0,40}required gates")
+        self.assertRegex(text, r"delivery[^.]{0,60}separate[^.]{0,60}commander acceptance")
+
     def test_project_acceptance_requires_all_required_deliveries(self):
         text = (ROOT / "references/11-task-state-machine.md").read_text(encoding="utf-8")
         row = next(line for line in text.splitlines() if line.startswith("| Acceptance |"))
@@ -577,6 +585,134 @@ class DocumentContracts(unittest.TestCase):
         self.assertIn("Unscheduled required work also prevents entry", text)
         self.assertIn("a Cancelled task alone does not remove the requirement", text)
         self.assertIn("return to In Progress before dispatching that work", text)
+        self.assertIn("knowledge audit", text)
+        self.assertIn("not a new task state", text)
+
+    def test_knowledge_layer_is_optional_but_bounded(self):
+        knowledge = (ROOT / "references/20-knowledge-layer.md").read_text(encoding="utf-8")
+        for marker in (
+            "Optional durable knowledge",
+            "knowledge/LOG.md",
+            "knowledge/topics/",
+            "knowledge/ROADMAP.md",
+            "Engineering assets stay in the code tree",
+            "Commander is the integration owner",
+            "knowledge audit",
+            "Branch and experiment closure",
+            "Graduation candidates",
+            "human confirmation",
+            "scripts/validate-knowledge.py",
+            "No empty topic shells",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, knowledge)
+        self.assertIn("create a second competing summary", knowledge)
+        self.assertIn("Never auto-publish to an external knowledge base", knowledge)
+
+        command = (ROOT / "references/02-commander.md").read_text(encoding="utf-8")
+        self.assertIn("knowledge layer", command)
+        self.assertIn("scripts/validate-knowledge.py", command)
+        self.assertIn("knowledge audit", command)
+        self.assertIn("Knowledge delta", command)
+
+        context = (ROOT / "references/01-context-brief.md").read_text(encoding="utf-8")
+        for marker in ("knowledge/LOG.md", "knowledge/ROADMAP.md", "Reading order",
+                       "knowledge/LOG.md (if present"):
+            self.assertIn(marker, context)
+
+        orchestration = (ROOT / "references/10-context-orchestration.md").read_text(encoding="utf-8")
+        for marker in ("Optional durable knowledge", "references/20-knowledge-layer.md",
+                       "knowledge/", "integration owner for shared knowledge records"):
+            self.assertIn(marker, orchestration)
+
+        status = (ROOT / "templates/project-status.md").read_text(encoding="utf-8")
+        self.assertIn("Protocol version: 2", status)
+        self.assertIn("## Knowledge", status)
+
+        receipt = (ROOT / "templates/task-receipt.md").read_text(encoding="utf-8")
+        self.assertIn("## Knowledge delta (when relevant)", receipt)
+        self.assertIn("do not edit shared knowledge records concurrently", receipt)
+
+        self.assertIn("scripts/validate-knowledge.py",
+                      (ROOT / "README.md").read_text(encoding="utf-8"))
+        self.assertIn("references/20-knowledge-layer.md",
+                      (ROOT / "SKILL.md").read_text(encoding="utf-8"))
+
+    def test_window_boundaries_are_explicit_and_role_safe(self):
+        text = (ROOT / "references/21-window-boundaries.md").read_text(encoding="utf-8")
+        for marker in (
+            "Continue in this window",
+            "Start a fresh window",
+            "Hand off",
+            "Send a focused subagent",
+            "Compact or summarize",
+            "Boundary, not mid-phase",
+            "Do not compact or replace a window mid-phase",
+            "Keep the task ID, role and accepted evidence stable",
+            "It does not assume automatic `clear`, `compact` or cross-window messaging",
+            "cold-start Reviewer",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, text)
+        self.assertIn("references/21-window-boundaries.md",
+                      (ROOT / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertIn("references/21-window-boundaries.md",
+                      (ROOT / "references/02-commander.md").read_text(encoding="utf-8"))
+        self.assertIn("references/21-window-boundaries.md",
+                      (ROOT / "references/15-collaboration.md").read_text(encoding="utf-8"))
+        continuation = (ROOT / "templates/task-continuation.md").read_text(encoding="utf-8")
+        self.assertIn("## Window boundary check", continuation)
+        self.assertIn("references/21-window-boundaries.md", continuation)
+
+    def test_two_axis_review_and_debug_feedback_loop(self):
+        reviewer = (ROOT / "references/04-reviewer.md").read_text(encoding="utf-8")
+        qa = (ROOT / "references/05-qa.md").read_text(encoding="utf-8")
+        gates = (ROOT / "references/16-quality-gates.md").read_text(encoding="utf-8")
+        for marker in ("Two axes: Spec (Reviewer) and Standards/behavior (QA)",
+                       "Spec axis", "Standards/behavior axis",
+                       "do not merge or rerank", "cannot close the Standards/behavior gate"):
+            self.assertIn(marker, reviewer)
+        for marker in ("Two axes: Standards/behavior and Spec", "Standards/behavior",
+                       "does not silently replace the Reviewer", "**Spec observations**"):
+            self.assertIn(marker, qa)
+        self.assertIn("| **Spec** | Reviewer |", gates)
+        self.assertIn("| **Standards / behavior** | QA |", gates)
+        self.assertIn("neither can mask the other", gates)
+
+        verification = (ROOT / "references/07-verification-guidelines.md").read_text(encoding="utf-8")
+        for marker in ("build a feedback loop first", "Red-capable", "Deterministic",
+                       "goes **red**", "3–5 ranked, falsifiable hypotheses",
+                       "correct seam", "temporary instrumentation"):
+            self.assertIn(marker, verification)
+        self.assertIn("references/07-verification-guidelines.md",
+                      (ROOT / "references/03-executor.md").read_text(encoding="utf-8"))
+        self.assertIn("references/07-verification-guidelines.md",
+                      (ROOT / "references/05-qa.md").read_text(encoding="utf-8"))
+
+        template = (ROOT / "references/06-task-template.md").read_text(encoding="utf-8")
+        for marker in ("## Shape the work into a vertical slice", "tracer bullet",
+                       "blocking edges", "expand–contract", "layer-only"):
+            self.assertIn(marker, template)
+
+    def test_retro_upgrade_and_new_behavioral_scenarios(self):
+        retro = (ROOT / "references/22-project-retro.md").read_text(encoding="utf-8").lower()
+        for marker in ("environment", "automated checks", "agents.md",
+                       "mechanical", "judgment", "human-confirmed", "not a new task state"):
+            self.assertIn(marker, retro)
+        upgrade = (ROOT / "references/23-protocol-upgrade.md").read_text(encoding="utf-8")
+        for marker in ("Current protocol version: 2", "protocol_version",
+                       "Existing `project-status.md` files may omit",
+                       "backward-compatible", "This is metadata, not a task transition"):
+            self.assertIn(marker, upgrade)
+        self.assertIn("references/22-project-retro.md",
+                      (ROOT / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertIn("references/23-protocol-upgrade.md",
+                      (ROOT / "README.md").read_text(encoding="utf-8"))
+        scenarios = (ROOT / "tests/behavioral-scenarios.md").read_text(encoding="utf-8")
+        for scenario in ("K1", "K2", "K3", "K4", "K5"):
+            self.assertIn(f"| {scenario} |", scenarios)
+        self.assertIn("knowledge closeout", scenarios.lower())
+        self.assertIn("Spec-axis failure", scenarios)
 
 
 if __name__ == "__main__":

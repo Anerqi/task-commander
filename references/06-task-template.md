@@ -12,10 +12,23 @@ Before project dispatch, save the contract in the task directory (for example `0
 
 For a protective backup before project initialization, use the Pre-initialization protection exception in `references/14-backup-manager.md`: a standalone inline brief and provisional reference replace missing project records and an ordinary task ID. Do not write a saved brief into at-risk assets merely to satisfy this guide; retain explicit permissions, safe output paths and verification requirements.
 
+## Shape the work into a vertical slice
+
+Before composing the prompt, shape the assignment as a **tracer bullet**: a narrow but complete path through every layer needed for a user-visible or independently verifiable outcome.
+
+- A completed slice is demoable or verifiable on its own, not merely "the schema is finished" or "three files were edited".
+- Size the slice to fit one fresh window's useful working set. If it cannot fit, split at a real dependency, ownership, risk or capacity boundary.
+- Declare its **blocking edges** (the tasks that must finish first) and its integration owner. A task with unresolved blockers is not a ready dispatch.
+- Prefactor first when a small structural change makes the real change easier; keep the prefactor and the behavior change as separate tasks when they can be verified separately.
+- For a **wide mechanical refactor** (a rename or shared-type change whose blast radius crosses the codebase), use expand–contract: add the new form beside the old, migrate call sites in verifiable batches, then remove the old form. Do not force it into one vertical slice.
+- Avoid horizontal slices (all schema, then all API, then all UI, then all tests) and per-file microtasks. A task may span multiple turns; verticality is about a complete outcome, not about one prompt.
+- Acceptance criteria must be observable. "Improve the design" is not a finish line.
+- This shaping applies to newly dispatched or explicitly revised tasks. An active task keeps its saved contract and gates; propose a versioned update and obtain user confirmation before changing them.
+
 ### Internal contract (save, do not mechanically print)
 
 - **Objective and provenance**: the original user request, the saved objective in context, genuine later user corrections, their source pointers, and this task's contribution to the whole project. A short saved objective is an index to the full request, not a substitute for it. Keep agent suggestions and unconfirmed scope changes separate.
-- **Assignment**: task ID, primary role, target window, priority/risk/kind, original brief location, concrete intended outcome, and explicit in/out-of-scope boundaries. For an attached acceptance gate, retain the reviewed task's primary owner and ID, and name the window's Reviewer/QA role separately. Identify remaining substantive work as well as already accepted results.
+- **Assignment**: task ID, primary role, target window, priority/risk/kind, original brief location, concrete intended outcome, vertical-slice shape, blocking edges, single-window fit, and explicit in/out-of-scope boundaries. For an attached acceptance gate, retain the reviewed task's primary owner and ID, and name the window's Reviewer/QA role separately. Identify remaining substantive work as well as already accepted results.
 - **Inputs and ownership**: shared context revision, relevant input/artifact versions, absolute role/source/output paths, satisfied dependencies, read/write scope, isolation, integration owner and active-task conflicts. Include relevant terms, decisions and skill pointers, not every document by default.
 - **Authority and recovery**: effective network/subagent/skill permissions and their policy source, resource/experiment/revision budgets, concrete reasons for restrictions, backup coverage/prerequisites, and pending human actions. Research permission does not authorize sensitive transfer, publishing, payment or destructive actions.
 - **Acceptance and return**: observable criteria, original quality bar, required Reviewer/QA gates and reasons, existing valid evidence, material unresolved findings, output paths and a concise receipt per `templates/task-receipt.md`.
@@ -82,7 +95,8 @@ Examples show composition, not required wording; replace example paths with reso
 
 - The full user objective and genuine corrections are preserved, while this window's assigned scope and other tasks' ownership stay clear.
 - The proposed round makes substantive progress on the coherent ready remainder; it neither stops at the latest detail nor adds unrelated improvements.
+- Each project task is a vertical, demoable slice with declared blocking edges and a plausible single-window fit; layer-only fragments and per-file microtasks were merged or rejected. Wide refactors use expand–contract rather than one impossible slice.
 - Dependencies, effective tools, risk gates, backup readiness, budgets and pending user input are respected. Split for real ownership/dependency/risk reasons, not arbitrary file counts.
 - For project tasks, essential paths and pointers are usable from the target window; identity, original brief and accepted evidence survive continuation/recovery. Confirm a referenced brief actually exists before dispatching a pointer-only message.
-- Each prompt is independently copyable. Gate windows name the reviewed task/artifact and keep their briefs separate; emitting a prompt alone does not establish pickup, execution, acknowledgment or completion.
+- Each prompt is independently copyable. Gate windows name the reviewed task/artifact and keep their briefs separate; Reviewer addresses the Spec axis and QA the Standards/behavior axis when both are required. Emitting a prompt alone does not establish pickup, execution, acknowledgment or completion.
 - A cold-start prompt exposes only stage-appropriate inputs, uses a concrete scenario and distinct output paths, and requires a saved independent record before a separate context-release message. Check inherited host/session context rather than claiming blindness from a role name.
