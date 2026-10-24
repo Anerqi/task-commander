@@ -141,6 +141,7 @@ Optional:
 
 - Python 3.10+ (standard library only, zero third-party dependencies). Use the current runtime interpreter when available; otherwise try `py -3` then `python` on Windows, or `python3` then `python` on macOS/Linux, and verify the reported version.
 - A host that can read and write the project files and, for the automated checks, run Python. Native Skill support is convenient but not required; see `references/host-adapters.md`.
+- Keep the `scripts/` directory together: `validate-project-state.py` and `render-workflow.py` import `markdown_table.py`. Copying one script alone produces a clear import error rather than a silent fallback.
 - Project files use UTF-8 without BOM
 
 ## Triggering

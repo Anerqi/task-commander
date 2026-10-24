@@ -16,7 +16,13 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List
 
-from markdown_table import is_separator_row, split_markdown_row
+try:
+    from markdown_table import is_separator_row, split_markdown_row
+except ImportError as exc:
+    raise SystemExit(
+        'markdown_table.py must be alongside this script; copy the whole '
+        'scripts/ directory. (' + str(exc) + ')'
+    ) from None
 
 
 def load_state_data(source_path: Path) -> Dict[str, Any]:
