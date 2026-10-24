@@ -43,6 +43,8 @@ import os
 import re
 import sys
 
+from markdown_table import is_separator_row, split_markdown_row
+
 
 def contains_ci(sequence, value):
     """List membership with case-insensitive comparison."""
@@ -189,15 +191,16 @@ def main():
     if task_section:
         for line_number, line in enumerate(
                 re.split(r'\r\n|\r|\n', task_section.group(1)), start=1):
+            line = line.strip()
             if not line.startswith('|'):
                 continue
-            cells = [cell.strip() for cell in line.strip('|').split('|')]
+            cells = split_markdown_row(line)
             if len(cells) != task_column_count:
                 errors.append('Malformed task table row ' + str(line_number)
                               + ': expected ' + str(task_column_count)
                               + ' columns, found ' + str(len(cells)))
                 continue
-            if contains_ci((settings['task_id_header'], '---', ''), cells[0]):
+            if is_separator_row(cells) or contains_ci((settings['task_id_header'], ''), cells[0]):
                 continue
             parsed_task_id = cells[0]
             state = cells[2]
@@ -219,15 +222,16 @@ def main():
     if blocked_match:
         for line_number, line in enumerate(
                 re.split(r'\r\n|\r|\n', blocked_match.group(1)), start=1):
+            line = line.strip()
             if not line.startswith('|'):
                 continue
-            cells = [cell.strip() for cell in line.strip('|').split('|')]
+            cells = split_markdown_row(line)
             if len(cells) != blocked_column_count:
                 errors.append('Malformed blocked table row ' + str(line_number)
                               + ': expected ' + str(blocked_column_count)
                               + ' columns, found ' + str(len(cells)))
                 continue
-            if contains_ci((settings['blocked_id_header'], '---'), cells[0]):
+            if is_separator_row(cells) or contains_ci((settings['blocked_id_header'],), cells[0]):
                 continue
             task_key = cells[0].strip().casefold()
             if not task_key:

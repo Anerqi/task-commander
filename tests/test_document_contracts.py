@@ -567,6 +567,14 @@ class DocumentContracts(unittest.TestCase):
             with self.subTest(scenario=scenario):
                 self.assertIn(f"| RT{scenario} |", text)
 
+    def test_receipt_uses_the_authoritative_state_labels_and_gates(self):
+        text = self.protocol_text("templates/task-receipt.md")
+        self.assertIn("templates/task-state-spec.txt", text)
+        self.assertIn("references/11-task-state-machine.md", text)
+        self.assertRegex(text, r"(?:exact|verbatim)[^.]{0,40}state label")
+        self.assertRegex(text, r"current[^.]{0,40}state[^.]{0,40}required gates")
+        self.assertRegex(text, r"delivery[^.]{0,60}separate[^.]{0,60}commander acceptance")
+
     def test_project_acceptance_requires_all_required_deliveries(self):
         text = (ROOT / "references/11-task-state-machine.md").read_text(encoding="utf-8")
         row = next(line for line in text.splitlines() if line.startswith("| Acceptance |"))

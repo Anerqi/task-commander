@@ -1,0 +1,107 @@
+{
+  "source_deltas": [],
+  "cases": {
+    "01-fast-lane": {
+      "added": [],
+      "modified": [
+        "docs/overview.md"
+      ],
+      "deleted": [],
+      "exact_typo_only": true
+    },
+    "02-context-handoff": {
+      "added": [],
+      "modified": [
+        "CONTEXT.md",
+        "project-status.md"
+      ],
+      "deleted": [],
+      "status_validation": {
+        "exit_code": 0,
+        "output": {
+          "valid": true,
+          "path": "<project-root>\\project-status.md",
+          "task_count": 0,
+          "errors": []
+        }
+      }
+    },
+    "03-parallel-ownership": {
+      "added": [],
+      "modified": [
+        "project-status.md"
+      ],
+      "deleted": [],
+      "status_validation": {
+        "exit_code": 0,
+        "output": {
+          "valid": true,
+          "path": "<project-root>\\project-status.md",
+          "task_count": 3,
+          "errors": []
+        }
+      }
+    },
+    "04-continuation": {
+      "added": [
+        "receipts/task-001-round2.md",
+        "receipts/task-001.md"
+      ],
+      "modified": [
+        "docs/architecture.md"
+      ],
+      "deleted": [],
+      "status_validation": {
+        "exit_code": 0,
+        "output": {
+          "valid": true,
+          "path": "<project-root>\\project-status.md",
+          "task_count": 1,
+          "errors": []
+        }
+      }
+    },
+    "05-window-recovery": {
+      "added": [
+        "receipts/task-001.md",
+        "tests/__init__.py"
+      ],
+      "modified": [
+        "src/utils.py",
+        "tests/test_utils.py"
+      ],
+      "deleted": [],
+      "status_validation": {
+        "exit_code": 0,
+        "output": {
+          "valid": true,
+          "path": "<project-root>\\project-status.md",
+          "task_count": 1,
+          "errors": []
+        }
+      },
+      "slugify_source_preserved": true,
+      "parent_test_verification": {
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": "test_slugify_basic (tests.test_utils.TestUtils.test_slugify_basic) ... ok\ntest_slugify_extra_spaces_and_special_chars (tests.test_utils.TestUtils.test_slugify_extra_spaces_and_special_chars) ... ok\ntest_truncate_longer (tests.test_utils.TestUtils.test_truncate_longer) ... ok\ntest_truncate_negative_max_len (tests.test_utils.TestUtils.test_truncate_negative_max_len) ... ok\ntest_truncate_shorter_or_equal (tests.test_utils.TestUtils.test_truncate_shorter_or_equal) ... ok\ntest_truncate_zero_max_len (tests.test_utils.TestUtils.test_truncate_zero_max_len) ... ok\n\n----------------------------------------------------------------------\nRan 6 tests in 0.000s\n\nOK\n"
+      }
+    },
+    "06-missing-evidence": {
+      "added": [],
+      "modified": [
+        "project-status.md"
+      ],
+      "deleted": [],
+      "status_validation": {
+        "exit_code": 0,
+        "output": {
+          "valid": true,
+          "path": "<project-root>\\project-status.md",
+          "task_count": 1,
+          "errors": []
+        }
+      }
+    }
+  }
+}

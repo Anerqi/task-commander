@@ -1,0 +1,93 @@
+--- a/docs/architecture.md
++++ b/docs/architecture.md
+@@ -1,5 +1,26 @@
+ # System Architecture
+ 
+-## 1. Overveiw
++## 1. Overview
+ 
+-The synthetic system consists of a web frontend and a background worker.
++The synthetic platform implements a lightweight, decoupled data processing pipeline consisting of three primary components: Gateway -> Worker -> Store.
++
++### Component Roles & Topology
++- **Local Gateway**: The ingress interface for incoming data. It listens exclusively on `127.0.0.1:8080` and ingests raw text payloads via HTTP POST requests to `/ingest`.
++- **Worker Engine**: The core processing unit. It receives queued raw text from the Gateway, strips all non-ASCII characters, and normalizes casing to lowercase.
++- **Persistent Store**: The storage layer. It receives processed records from the Worker Engine and appends them to a local append-only JSON file (`data/records.json`).
++
++## 2. Data Flow
++
++Data moves unidirectionally across the three pipeline stages:
++
++1. **Ingestion**: External clients on the host submit raw text payloads by issuing HTTP POST requests to `http://127.0.0.1:8080/ingest`. The Local Gateway validates and accepts the payload into the processing queue.
++2. **Processing**: The Worker Engine dequeues the raw text payload, applies data sanitization by stripping non-ASCII characters, and normalizes the text into lowercase format.
++3. **Persistence**: The Worker Engine forwards the normalized records to the Persistent Store, which appends the structured record entries into `data/records.json`.
++
++## 3. Security Model
++
++The architecture enforces strict least-privilege boundaries and isolation constraints:
++
++- **Network Interface**: All network listeners bind strictly to the loopback interface (`127.0.0.1`). There is zero external network exposure or remote interface binding.
++- **Storage Security**: Persistent storage assets, specifically `data/records.json`, are restricted via filesystem permissions to the local operating system user (mode `0600`).
++- **Privilege Level**: The system operates entirely under unprivileged execution; no root or administrative permissions are required or granted.
+--- /dev/null
++++ b/receipts/task-001-round2.md
+@@ -0,0 +1,28 @@
++# Task Receipt: TASK-001 (Round 2)
++
++## Identity and progress
++
++- Task ID / round / primary role / window label: TASK-001 / Round 2 / Executor / main
++- Original brief path: `briefs/task-001.md`
++- Prior receipt path: `receipts/task-001-round1.md`
++- Acknowledged shared context revision and relevant input versions: `facts.md`, `briefs/task-001.md`, round 1 review feedback
++- Deliverables and current versions: `docs/architecture.md` (complete 3-section specification)
++- Completed / remaining / suggested legal next state:
++  - Completed:
++    1. Fixed Section 1 heading typo (`Overveiw` -> `Overview`).
++    2. Completed Section 1: Overview of system topology and component roles (Local Gateway listening on `127.0.0.1:8080`, Worker Engine, Persistent Store appending to `data/records.json`).
++    3. Completed Section 2: Data Flow across components (Ingestion via HTTP POST `/ingest`, normalization and processing by Worker Engine, persistent append by Persistent Store).
++    4. Completed Section 3: Security Model and access boundaries (loopback `127.0.0.1` binding, mode `0600` storage security, unprivileged execution).
++  - Remaining: None
++  - Suggested state: Done
++
++## Acceptance evidence
++
++| Check / criterion | Artifact + relevant input versions | Method / environment or source date | Result + provenance (direct / reused / unverified) | Evidence path / checker |
++|---|---|---|---|---|
++| Section 1 Header Typo Fix | `docs/architecture.md` | Verification against round 1 review feedback | Passed (`## 1. Overview`) / direct | `docs/architecture.md` (line 3) |
++| Section 1 Topology & Roles | `docs/architecture.md`, `facts.md` | Fact consistency check against `facts.md` section 1 | Passed (Gateway -> Worker -> Store fully documented) / direct | `docs/architecture.md` (lines 3-11) |
++| Section 2 Data Flow | `docs/architecture.md`, `facts.md` | Verification of end-to-end data pipeline flow | Passed (Ingestion -> Processing -> Persistence) / direct | `docs/architecture.md` (lines 13-21) |
++| Section 3 Security Model | `docs/architecture.md`, `facts.md` | Fact consistency check against `facts.md` section 2 | Passed (Loopback 127.0.0.1, mode 0600, unprivileged) / direct | `docs/architecture.md` (lines 23-31) |
++
++- Prior-round evidence retained: Round 1 drafted initial Section 1 and disclosed defect (`receipts/task-001-round1.md`). Round 2 resolves the defect and completes all three authorized sections.
+--- /dev/null
++++ b/receipts/task-001.md
+@@ -0,0 +1,28 @@
++# Task Receipt: TASK-001 (Round 2)
++
++## Identity and progress
++
++- Task ID / round / primary role / window label: TASK-001 / Round 2 / Executor / main
++- Original brief path: `briefs/task-001.md`
++- Prior receipt path: `receipts/task-001-round1.md`
++- Acknowledged shared context revision and relevant input versions: `facts.md`, `briefs/task-001.md`, round 1 review feedback
++- Deliverables and current versions: `docs/architecture.md` (complete 3-section specification)
++- Completed / remaining / suggested legal next state:
++  - Completed:
++    1. Fixed Section 1 heading typo (`Overveiw` -> `Overview`).
++    2. Completed Section 1: Overview of system topology and component roles (Local Gateway listening on `127.0.0.1:8080`, Worker Engine, Persistent Store appending to `data/records.json`).
++    3. Completed Section 2: Data Flow across components (Ingestion via HTTP POST `/ingest`, normalization and processing by Worker Engine, persistent append by Persistent Store).
++    4. Completed Section 3: Security Model and access boundaries (loopback `127.0.0.1` binding, mode `0600` storage security, unprivileged execution).
++  - Remaining: None
++  - Suggested state: Done
++
++## Acceptance evidence
++
++| Check / criterion | Artifact + relevant input versions | Method / environment or source date | Result + provenance (direct / reused / unverified) | Evidence path / checker |
++|---|---|---|---|---|
++| Section 1 Header Typo Fix | `docs/architecture.md` | Verification against round 1 review feedback | Passed (`## 1. Overview`) / direct | `docs/architecture.md` (line 3) |
++| Section 1 Topology & Roles | `docs/architecture.md`, `facts.md` | Fact consistency check against `facts.md` section 1 | Passed (Gateway -> Worker -> Store fully documented) / direct | `docs/architecture.md` (lines 3-11) |
++| Section 2 Data Flow | `docs/architecture.md`, `facts.md` | Verification of end-to-end data pipeline flow | Passed (Ingestion -> Processing -> Persistence) / direct | `docs/architecture.md` (lines 13-21) |
++| Section 3 Security Model | `docs/architecture.md`, `facts.md` | Fact consistency check against `facts.md` section 2 | Passed (Loopback 127.0.0.1, mode 0600, unprivileged) / direct | `docs/architecture.md` (lines 23-31) |
++
++- Prior-round evidence retained: Round 1 drafted initial Section 1 and disclosed defect (`receipts/task-001-round1.md`). Round 2 resolves the defect and completes all three authorized sections.

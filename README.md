@@ -112,6 +112,7 @@ Optional:
   - `validate-project-state.py` validates `project-status.md` structure and state transitions
   - `run-workflow.py` sequentially runs trusted commands; its exit-0 completion is not project acceptance
   - `render-workflow.py` renders command checkpoints or recorded project status
+  - `markdown_table.py` shares status-table cell parsing between validation and rendering (not a CLI)
 - `agents/openai.yaml` — agent configuration
 - `assets/workflow-section-en.png` — workflow overview diagram
 - `.github/workflows/ci.yml` — three-platform CI matrix
@@ -129,6 +130,8 @@ Optional:
 - Requests expressing context building, task breakdown, multi-model collaboration, review, and QA acceptance
 
 ## Typical use
+
+New here? Follow the [first-project walkthrough](examples/first-project/README.md) in a disposable folder. It shows which prompt goes to which window, a same-task revision, and evidence-based acceptance without a running service.
 
 ### Choose the smallest sufficient process
 
@@ -189,5 +192,7 @@ Run a transition check **before** updating the state. After changing the task an
 # Automated unit/regression tests
 <python> -m unittest discover -s tests -v
 ```
+
+For a small live-model check, use the [six-case behavioral smoke pack](tests/behavioral-smoke.md). Its copyable fixtures and separate evaluator criteria complement, rather than replace, the automated suite.
 
 CI runs the checks on three operating systems. `tests/behavioral-scenarios.md` defines manual model-level scenarios for handoff, parallelism, continued dialogue, tools, review budgets, synchronization, backups, human help and host adaptation. Static/document tests are regression guards, not proof that every model will obey the protocol; host scenarios are documentation-checked, not live six-host certification.

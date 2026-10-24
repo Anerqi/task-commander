@@ -16,19 +16,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List
 
-
-def split_markdown_row(line: str) -> List[str]:
-    """Split unescaped pipe delimiters, retaining escaped pipes inside cells."""
-    cells, current, backslashes = [], [], 0
-    for character in line:
-        if character == "|" and backslashes % 2 == 0:
-            cells.append("".join(current).strip())
-            current = []
-        else:
-            current.append(character)
-        backslashes = backslashes + 1 if character == "\\" else 0
-    cells.append("".join(current).strip())
-    return [cell.replace("\\|", "|") for cell in cells[1:-1]]
+from markdown_table import is_separator_row, split_markdown_row
 
 
 def load_state_data(source_path: Path) -> Dict[str, Any]:
@@ -62,9 +50,9 @@ def load_state_data(source_path: Path) -> Dict[str, Any]:
                     current_section = line_str[3:].strip()
                     continue
 
-                if current_section == "Task list" and line_str.startswith("|") and not line_str.startswith("|---"):
+                if current_section == "Task list" and line_str.startswith("|"):
                     parts = split_markdown_row(line_str)
-                    if len(parts) >= 6 and parts[0] != "ID" and not all(set(p) <= set("-: ") for p in parts):
+                    if len(parts) >= 6 and parts[0] not in ("ID", "") and not is_separator_row(parts):
                         tid, name, status, priority, agent = parts[0], parts[1], parts[2], parts[3], parts[4]
                         deps = [d.strip() for d in parts[5].split(",") if d.strip() and d.strip() != "-"]
                         tasks[tid] = {
@@ -75,9 +63,9 @@ def load_state_data(source_path: Path) -> Dict[str, Any]:
                             "depends_on": deps,
                         }
 
-                elif current_section == "Blocked" and line_str.startswith("|") and not line_str.startswith("|---"):
+                elif current_section == "Blocked" and line_str.startswith("|"):
                     parts = split_markdown_row(line_str)
-                    if len(parts) >= 5 and parts[0] != "Task" and not all(set(p) <= set("-: ") for p in parts):
+                    if len(parts) >= 5 and parts[0] != "Task" and not is_separator_row(parts):
                         blocked.append({
                             "task": parts[0],
                             "reason": parts[2],

@@ -1,0 +1,108 @@
+--- a/docs/architecture.md
++++ b/docs/architecture.md
+@@ -1,5 +1,62 @@
+ # System Architecture
+ 
+-## 1. Overveiw
++## 1. Overview
+ 
+-The synthetic system consists of a web frontend and a background worker.
++The system is a three-stage local text-processing pipeline: Gateway -> Worker -> Store. A gateway receives raw text over loopback HTTP, a worker engine normalizes it, and a persistent store appends the result to a local JSON file.
++
++### Component roles
++
++| Stage | Component | Role |
++|---|---|---|
++| 1 | Local Gateway | Single ingress point. Listens on `127.0.0.1:8080` and ingests raw text payloads via HTTP POST `/ingest`. |
++| 2 | Worker Engine | Processes queued text, strips non-ASCII characters, and normalizes casing to lowercase. |
++| 3 | Persistent Store | Appends normalized records to the local append-only JSON file `data/records.json`. |
++
++### Topology
++
++`Client -> Gateway (127.0.0.1:8080, POST /ingest) -> Worker Engine -> Persistent Store (data/records.json)`
++
++The pipeline is local and unidirectional: raw text enters at the Gateway, is transformed once by the Worker Engine, and is persisted by the Store. The only declared network listener is the Gateway, bound to the loopback interface.
++
++## 2. Data Flow
++
++1. **Ingest.** A client sends an HTTP POST to `/ingest` on `127.0.0.1:8080` carrying a raw text payload. The Local Gateway accepts the payload and queues the text for processing.
++2. **Normalize.** The Worker Engine processes the queued text: it strips non-ASCII characters and normalizes casing to lowercase.
++3. **Persist.** The Persistent Store appends the normalized record to `data/records.json`. The file is append-only: existing records are retained and new records are added at the end.
++
++### Flow summary
++
++| Step | Source -> Destination | Transformation |
++|---|---|---|
++| Ingest | Client -> Local Gateway | Raw text accepted via HTTP POST `/ingest` on `127.0.0.1:8080` |
++| Normalize | Local Gateway -> Worker Engine | Non-ASCII characters stripped; casing normalized to lowercase |
++| Persist | Worker Engine -> Persistent Store | Normalized record appended to `data/records.json` |
++
++## 3. Security Model and Access Boundaries
++
++### Network boundary
++
++- The Local Gateway binds only to the loopback interface at `127.0.0.1:8080`; the pipeline has zero external network exposure.
++- The Worker Engine and Persistent Store declare no network listener and are reachable only as local pipeline stages.
++
++### Storage boundary
++
++- `data/records.json` is protected by file permissions restricted to the local operating system user, with mode `0600` (owner read/write only).
++
++### Privilege boundary
++
++- The entire pipeline executes unprivileged; no root or administrative access is required.
++
++### Access matrix
++
++| Component | Network boundary | Storage boundary | Privilege level |
++|---|---|---|---|
++| Local Gateway | Loopback only, `127.0.0.1:8080` | None declared | Unprivileged |
++| Worker Engine | No listener declared | None declared | Unprivileged |
++| Persistent Store | No listener declared | `data/records.json`, mode `0600`, local OS user only | Unprivileged |
++
++### Security invariants
++
++- Only traffic arriving over the loopback interface can reach the ingress at `127.0.0.1:8080`.
++- Records are readable and writable only by the owning local operating system user, enforced by mode `0600`.
++- No stage of the pipeline requires root or administrative privileges.
+--- /dev/null
++++ b/receipts/task-001.md
+@@ -0,0 +1,38 @@
++# Task Receipt: TASK-001 (Round 2)
++
++## Identity and progress
++
++- Task ID / round / primary role / window label: TASK-001 / round 2 / Executor / 04-continuation Executor window
++- Original brief path: `briefs/task-001.md`
++- Acknowledged shared context revision and relevant input versions: `project-status.md` last updated 2026-10-18 11:00 UTC (TASK-001 In Progress); `facts.md` as of 2026-10-18; round 1 receipt preserved at `receipts/task-001-round1.md`
++- Deliverables and current versions: `docs/architecture.md` (round 2, 3220 bytes, UTF-8 without BOM, LF line endings, all three sections)
++- Completed / remaining / suggested legal next state: All three sections complete and self-checked / none remaining / suggest `Awaiting Acceptance`
++
++## Acceptance evidence
++
++| Check / criterion | Artifact + relevant input versions | Method / environment or source date | Result + provenance | Evidence path / checker |
++|---|---|---|---|---|
++| Section 1 present: topology and roles (Gateway -> Worker -> Store) | `docs/architecture.md` round 2 vs `facts.md` section 1 | Direct read of final file; content mapped against facts | PASS (direct) | `docs/architecture.md` |
++| Section 2 present: data flow across components | `docs/architecture.md` round 2 vs `facts.md` section 1 | Direct read; ingest -> normalize -> persist flow mapped to facts | PASS (direct) | `docs/architecture.md` |
++| Section 3 present: security model and access boundaries | `docs/architecture.md` round 2 vs `facts.md` section 2 | Direct read; network, storage, and privilege boundaries mapped to facts | PASS (direct) | `docs/architecture.md` |
++| Round 1 typo fixed: `# Overveiw` -> `## 1. Overview` | `docs/architecture.md` round 2 | String check on final file; `Overveiw` absent | PASS (direct) | `docs/architecture.md` |
++| Round 1 content inaccuracy corrected | `docs/architecture.md` round 2 vs `facts.md` section 1 | Confirmed the removed text ("web frontend and a background worker") is absent; replaced with verified three-stage topology | PASS (direct) | `docs/architecture.md` |
++| Fact coverage: `127.0.0.1:8080`, HTTP POST `/ingest`, non-ASCII stripping, lowercase normalization, `data/records.json`, append-only | `docs/architecture.md` round 2 vs `facts.md` section 1 | 18-string automated check, all matched | PASS (direct) | Python 3.13.9 check on final file |
++| Fact coverage: loopback-only, zero external exposure, mode `0600`, local OS user only, unprivileged, no root/admin | `docs/architecture.md` round 2 vs `facts.md` section 2 | Same automated check plus direct read of section 3 | PASS (direct) | Python 3.13.9 check on final file |
++| Encoding: UTF-8, no BOM, LF endings | `docs/architecture.md` round 2 | Byte-level inspection | PASS (direct) | Python 3.13.9 check on final file |
++
++- Reused checks: none; round 1 evidence was limited to Section 1 and the disclosed typo.
++- Changed inputs, invalidated checks and regression scope: Document rewritten in full, so all checks were run against the round 2 final file.
++- Findings: round 1 typo (non-blocking) resolved; round 1 Section 1 factual mismatch with `facts.md` (blocking, would have misstated the architecture) resolved. No open findings.
++
++## Shared-information delta
++
++- New facts with evidence: none; no facts beyond `facts.md` were introduced. All statements in the document trace to `facts.md` sections 1-2.
++- Disproved assumptions: the round 1 Section 1 description of a "web frontend and a background worker" is not supported by `facts.md`; the verified topology is Gateway -> Worker -> Store.
++- Authoritative file to update and affected task IDs: none required beyond the completed deliverable; affects TASK-001 only.
++- Decision requiring user confirmation: none.
++- Write conflicts, user actions, blockers, owner and resume condition: none.
++
++## Recovery checkpoint
++
++- Last durable work checkpoint: `docs/architecture.md` round 2 complete and verified; this receipt. No experimental artifacts or temp files left behind.

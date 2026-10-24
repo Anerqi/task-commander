@@ -6,6 +6,8 @@ These are manual acceptance scenarios for a real host/model, not executed model 
 
 Use a temporary fixture project with synthetic files/data, not real credentials or irreplaceable assets. Supply the scenario input to the indicated role using the current Skill. For multi-turn cases keep the same window, send the specified follow-up, and inspect actual prompts/files/tool evidence. Record host/model, Skill commit plus dirty diff identity, input fixture, transcript/evidence path, observed pass/fail, and limitations. Use supported authorized tools only; no real destructive restore or external publication is required.
 
+For a focused, repeatable 6-scenario suite with ready-to-run synthetic fixtures and evaluation rubrics, see [Behavioral Smoke Suite](behavioral-smoke.md) (`tests/fixtures/behavioral-smoke/`).
+
 | ID | Input / follow-up | Observable expected behavior |
 |---|---|---|
 | H1 | Context role finishes a sufficiently specified project | Produces readable background/status and a filled Commander startup prompt with absolute paths; tells the user the target window and stops without dispatching execution tasks |

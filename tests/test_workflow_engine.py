@@ -19,7 +19,9 @@ TEMPLATES_DIR = ROOT / "templates"
 def load_script(name):
     spec = importlib.util.spec_from_file_location(name.replace("-", "_"), SCRIPTS_DIR / name)
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    # Match direct CLI imports without leaving the scripts directory on sys.path.
+    with patch.object(sys, "path", [str(SCRIPTS_DIR), *sys.path]):
+        spec.loader.exec_module(module)
     return module
 
 

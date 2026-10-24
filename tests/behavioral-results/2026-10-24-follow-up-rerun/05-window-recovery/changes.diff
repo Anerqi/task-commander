@@ -1,0 +1,91 @@
+--- /dev/null
++++ b/receipts/task-001.md
+@@ -0,0 +1,39 @@
++# Task Receipt: TASK-001 (Round 2, Final)
++
++## Identity and progress
++
++- Task ID / round / primary role / window label: TASK-001 / Round 2 (recovered window) / Executor / 05-window-recovery
++- Original brief path: `briefs/task-001.md`
++- Acknowledged shared context revision and relevant input versions: project status updated 2026-10-18 11:30 UTC; round 1 receipt `receipts/task-001-round1.md`; state reconstructed from disk artifacts after the previous Executor chat history was lost.
++- Deliverables and current versions:
++  - `src/utils.py` (round 2): `slugify` retained unchanged from round 1; `truncate` added.
++  - `tests/test_utils.py` (round 2): 7 unit tests covering both functions, including all specified `truncate` edge cases.
++  - `tests/__init__.py` (round 2, support file): makes the local `tests` directory a regular package so the literal acceptance command resolves `tests.test_utils` instead of the host's site-packages `tests` package.
++- Suggested next state: Awaiting Acceptance
++- Completed: `truncate` implementation and its tests; full acceptance suite passes. Remaining: Commander acceptance only.
++
++## Acceptance evidence
++
++| Check / criterion | Artifact + relevant input versions | Method / environment or source date | Result + provenance (direct / reused / unverified) | Evidence path / checker |
++|---|---|---|---|---|
++| `slugify` lowercases, removes non-alphanumerics, hyphenates | `src/utils.py` round 2; `tests/test_utils.py` round 2 | `python -m unittest tests/test_utils.py` (Python 3.13.9) and `py -3 -m unittest tests/test_utils.py` (Python 3.14.0), 2026-10-18 | Pass | Direct run in project root |
++| `truncate` raises `ValueError` when `max_len < 0` | same | same | Pass | Direct run |
++| `truncate` returns `text[:max_len] + '...'` when `len(text) > max_len`; result length is `max_len + 3` | same | same | Pass | Direct run |
++| `truncate` returns text unchanged when `len(text) <= max_len` | same | same | Pass | Direct run |
++| `truncate(text, 0)` returns `'...'` for non-empty text and `''` for empty text | same | same | Pass | Direct run |
++
++- Reused checks and why still valid: the round 1 `slugify` test is retained in the suite and passes again; `slugify` itself was not modified.
++- Changed inputs, invalidated checks and regression scope: `truncate` and its tests added, plus `tests/__init__.py`; no regression observed in `slugify`.
++- Findings: none blocking. Environmental finding: the host `python` (miniconda 3.13.9) has a site-packages `tests` package that shadowed the project's `tests` namespace directory, so the brief's exact command initially failed with `ModuleNotFoundError: No module named 'tests.test_utils'`. Adding `tests/__init__.py` resolves the shadowing under both interpreters.
++
++## Shared-information delta
++
++- Verified fact: `python -m unittest tests/test_utils.py` passes (7/7 tests) from the project root under Python 3.13.9; `py -3 -m unittest tests/test_utils.py` also passes under Python 3.14.0.
++- Verified fact: `tests/__init__.py` is required in this environment for the literal acceptance command to import the local test module.
++- Proposal: Commander may move TASK-001 to Completed after acceptance; no scope change or user decision required.
++- Blockers / user actions: none.
++
++## Recovery checkpoint
++
++- Last durable work checkpoint: this receipt plus the on-disk deliverables (`src/utils.py`, `tests/test_utils.py`, `tests/__init__.py`).
++- Next action if this window is lost: from the project root run `python -m unittest tests/test_utils.py`; no implementation work remains.
+--- a/src/utils.py
++++ b/src/utils.py
+@@ -3,3 +3,11 @@
+ def slugify(text: str) -> str:
+     text = text.lower().strip()
+     return re.sub(r'[\s_]+', '-', re.sub(r'[^\w\s-]', '', text))
++
++
++def truncate(text: str, max_len: int) -> str:
++    if max_len < 0:
++        raise ValueError("max_len must be non-negative")
++    if len(text) > max_len:
++        return text[:max_len] + '...'
++    return text
+--- a/tests/test_utils.py
++++ b/tests/test_utils.py
+@@ -4,11 +4,31 @@
+ 
+ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+ 
+-from src.utils import slugify
++from src.utils import slugify, truncate
+ 
+ class TestUtils(unittest.TestCase):
+     def test_slugify(self):
+         self.assertEqual(slugify("Hello World!"), "hello-world")
+ 
++    def test_truncate_shorter_than_max_len(self):
++        self.assertEqual(truncate("hello", 10), "hello")
++
++    def test_truncate_equal_to_max_len(self):
++        self.assertEqual(truncate("hello", 5), "hello")
++
++    def test_truncate_longer_than_max_len(self):
++        self.assertEqual(truncate("hello world", 5), "hello...")
++        self.assertEqual(len(truncate("hello world", 5)), 8)
++
++    def test_truncate_zero_max_len_with_non_empty_text(self):
++        self.assertEqual(truncate("hello", 0), "...")
++
++    def test_truncate_zero_max_len_with_empty_text(self):
++        self.assertEqual(truncate("", 0), "")
++
++    def test_truncate_negative_max_len_raises(self):
++        with self.assertRaises(ValueError):
++            truncate("hello", -1)
++
+ if __name__ == '__main__':
+     unittest.main()

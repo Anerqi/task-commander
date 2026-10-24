@@ -40,7 +40,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Syntax check (all helpers)
-        run: python -m py_compile scripts/scan-skills.py scripts/validate-project-state.py scripts/run-workflow.py scripts/render-workflow.py
+        run: python -m py_compile scripts/scan-skills.py scripts/validate-project-state.py scripts/run-workflow.py scripts/render-workflow.py scripts/markdown_table.py
 
       - name: --help smoke test (all helpers; CLI usable, exit code 0)
         run: |

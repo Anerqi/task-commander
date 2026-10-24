@@ -10,6 +10,8 @@
 - Deliverables and current versions (include dirty-file identity when relevant):
 - Completed / remaining / suggested legal next state:
 
+Before sending a registered-task receipt, read the current recorded state and required gates. Use a verbatim state label from `templates/task-state-spec.txt` and check it against the role's delivery rules and `references/11-task-state-machine.md`. Keep completion of your delivery separate from Commander acceptance; if a next state cannot yet be justified, report the missing work or evidence instead of inventing a label.
+
 ## In-phase progress (optional)
 
 Use when a checkpoint supports the coordination checks in `references/02-commander.md` (In-phase progress checks), not as a periodic reporting requirement.

@@ -1,0 +1,44 @@
+--- a/CONTEXT.md
++++ b/CONTEXT.md
+@@ -2,4 +2,4 @@
+ 
+ - Project: Config Parser
+ - Phase: In Progress
+-- Status: TASK-001 receipt submitted; pending Commander acceptance review.
++- Status: TASK-001 revision R1 required; submitted receipt is missing the mandatory verbatim test execution output.
+--- a/project-status.md
++++ b/project-status.md
+@@ -6,14 +6,14 @@
+ - Project phase: In Progress
+ - Status owner: Commander
+ - Pre-pause phase: n/a
+-- Last updated: 2026-10-18 12:00 UTC
+-- Current focus: Awaiting acceptance evidence for TASK-001
++- Last updated: 2026-10-24 07:27 UTC
++- Current focus: TASK-001 revision R1: mandatory verbatim test execution output missing
+ 
+ ## Task list
+ 
+ | ID | Name | Status | Priority | Agent | Depends | Parallel | Reviewer | QA | Output dir | Updated |
+ |---|---|---|---|---|---|---|---|---|---|---|
+-| TASK-001 | Key-Value Config Parser | In Progress | P1 | Executor | - | no | - | QA | src/ | 2026-10-18 12:00 UTC |
++| TASK-001 | Key-Value Config Parser | Needs Revision | P1 | Executor | - | no | - | QA | src/ | 2026-10-24 07:27 UTC |
+ 
+ ## Blocked
+ 
+@@ -22,7 +22,9 @@
+ 
+ ## Next steps
+ 
+-1. Evaluate TASK-001 receipt and verify test execution evidence.
++1. Return TASK-001 revision R1 to the Executor window: execute `python tests/test_parser.py` and resubmit the receipt with the verbatim execution output; fix any failure before resubmitting.
++2. On receipt of valid test evidence, move TASK-001 to QA Pending and dispatch the required QA gate.
++3. After QA passes, Commander light acceptance; then assess project-level Acceptance.
+ 
+ ## Milestones
+ 
+@@ -33,3 +35,4 @@
+ | When | Target | From state | To state | Basis | By |
+ |---|---|---|---|---|---|
+ | 2026-10-18 11:30 UTC | TASK-001 | TODO | In Progress | Dispatched to Executor | Commander |
++| 2026-10-24 07:27 UTC | TASK-001 | In Progress | Needs Revision | Revision round R1: receipt at `receipts/task-001.md` omits the brief's mandatory verbatim test execution output ("actual execution output omitted"); self-declaration does not satisfy DEC-001 or the project quality policy | Commander |

@@ -73,6 +73,10 @@ A task id, once used, must never be reassigned to another task. Revision rounds 
 
 A gate may be skipped only when the task brief explicitly states that Reviewer or QA is not required. Never go directly from `In Progress` to `Completed`.
 
+## Status table cells
+
+Use the existing 11-column task table and 6-column blocked table. Both CLI tools share the same cell parser: start rows with `|`, escape a literal pipe inside a cell as `\|`, and retain empty cells. Surrounding whitespace, an optional closing pipe, and alignment rows such as `| :--- | ---: |` are supported. Other backslashes are preserved; this is not a general Markdown parser. The validator still rejects wrong column counts and inconsistent blocked records; rendering alone is not validation.
+
 ## Status update transaction
 
 Every Commander status update must complete in order:
