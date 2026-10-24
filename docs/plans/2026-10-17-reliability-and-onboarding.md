@@ -18,7 +18,7 @@
 - Command success, structural validation and model self-reports are not project acceptance.
 - This iteration does not change command execution, add roles, initialize this repository as a managed project, or create an issue tracker.
 - Work only in this repository and explicitly scoped disposable fixtures; no installation, external writes, commits or pushes.
-- Use `Model A` for simple delegated checks/documentation; record actual model/session limitations.
+- Use a fast delegated model for simple checks/documentation; record actual model/session limitations.
 
 ## Review Focus
 
@@ -70,7 +70,7 @@ Observed red: valid escaped task/blocked cells were counted as 12/8 columns inst
 - [x] Distinguish an observed live-model result from a static fixture check or illustrative walkthrough; keep unverified cases explicit.
 - [x] Use findings to decide whether any small routing-pointer adjustment is justified. Defer broad protocol pruning if the observations do not support it.
 
-Completion note (2026-10-24): run 1 exercised all six cases on Host A / Model A; case 06 was interrupted by a provider error and is archived as INCOMPLETE. The follow-up rerun exercised 04–06 on Host B subagents; all three passed primary behavior and receipt checks. The observed receipt-label defect was addressed by the `templates/task-receipt.md` pointer; no routing-pointer change was justified. Evidence: `tests/behavioral-results/2026-10-18-behavioral-smoke/` and `tests/behavioral-results/2026-10-24-follow-up-rerun/`.
+Completion note (2026-10-24): run 1 exercised all six cases on Host A with Model A; case 06 was interrupted by a provider error and is archived as INCOMPLETE. The follow-up rerun exercised 04–06 on Host B subagents; all three passed primary behavior and receipt checks. The observed receipt-label defect was addressed by the `templates/task-receipt.md` pointer; no routing-pointer change was justified. Evidence: `tests/behavioral-results/2026-10-18-behavioral-smoke/` and `tests/behavioral-results/2026-10-24-follow-up-rerun/`.
 
 ### Task 4: Provide a complete newcomer walkthrough
 
@@ -94,5 +94,5 @@ Completion note (2026-10-24): the walkthrough exists at `examples/first-project/
 
 - **Implemented:** shared status-table parser `scripts/markdown_table.py` used by the validator and renderer; CLI regression coverage for escaped pipes, empty cells, optional borders, alignment rows and malformed rows; a receipt-template pointer to the authoritative state labels and gates; the six-scenario behavioral smoke pack with fixtures; the first-project walkthrough; README, CI and `.gitattributes` updates.
 - **Verification:** Python 3.14.0 and 3.13.9 each passed 125 tests (2 symlink tests skipped on Windows); all four CLI `--help` checks pass; the status template validates; render and skill-scan smoke checks pass; `git diff --check` is clean; 127 text files are UTF-8/LF without BOM; the temporary behavioral workspaces were removed after their evidence was archived.
-- **Behavioral coverage:** run 1 exercised all six scenarios on Host A / Model A (case 06 was INCOMPLETE after a provider error; cases 04/05 had receipt-label failures). The follow-up rerun exercised 04–06 on Host B subagents, with all primary behaviors and receipt checks passing. The parent-side review found no blocking findings; it is not a separate human review.
+- **Behavioral coverage:** run 1 exercised all six scenarios on Host A with Model A (case 06 was INCOMPLETE after a provider error; cases 04/05 had receipt-label failures). The follow-up rerun exercised 04–06 on Host B subagents, with all primary behaviors and receipt checks passing. The parent-side review found no blocking findings; it is not a separate human review.
 - **Deferred:** runner timeout/logging improvements, broader protocol pruning, a same-model six-case rerun, and live six-host certification. This iteration does not measure token or latency savings and does not establish host-wide integration.

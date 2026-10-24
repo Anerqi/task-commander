@@ -3,7 +3,7 @@
 ## Environment and evidence
 
 - Date: 2026-10-18.
-- Model: `Model A`, thinking override `high`.
+- Model: Model A (identifier withheld), thinking override `high`.
 - Host: Host A (agent tool), Windows; exact host version unmeasured.
 - Source base: commit `588e70e` plus the reliability/onboarding working changes. Source-file SHA-256 identities are preserved in each run's `manifest.json`; neither run is a clean-commit certification.
 - Method: fresh general-purpose Agent session per input; separate disposable project copy, with the committed Skill source read-only. Only the case input was attached; evaluator criteria and other cases were outside the permitted reads. This is contextual/workspace separation, not an OS sandbox.
