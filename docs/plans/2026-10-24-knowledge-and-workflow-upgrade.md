@@ -54,11 +54,10 @@ The public remote has these relevant points:
 |---|---|---|
 | `v1.0.0` | `588e70e` | Last clean remote baseline before the previously uncommitted reliability/onboarding batch |
 | `pre-v2` | `e641299` | Reconstructed snapshot of the pre-v2 working tree (includes reliability/onboarding; excludes v2) |
-| `v2.0.0` | `6a350e9` | First v2 release candidate; macOS CI failed because the POSIX non-UTF-8 filename test could not create its fixture |
-| `v2.0.1` | this release commit (includes the macOS skip fix and this note) | Current v2 release |
+| `v2.0.1` | the release commit containing this note | Current v2 release; six-case smoke 6/6 and green three-platform CI |
 
 - Review only v2: `git diff pre-v2..v2.0.1`.
-- The v2.0.0 tag is retained as a historical candidate; v2.0.1 supersedes it with a test-only macOS skip fix. No product code changed between them.
+- The failed `v2.0.0` candidate tag and the redundant `snapshot/pre-v2` branch were removed after `v2.0.1` passed; commit `6a350e9` remains in `main` history. No product code changed between the candidate and `v2.0.1`; the fix was a test-fixture skip for macOS.
 - Roll back to pre-v2: `git switch --detach pre-v2` or create a branch from it.
 - Roll back to the last clean remote baseline: `git switch --detach v1.0.0`.
 - The pre-v2 snapshot was reconstructed from the backup zip; it is a rollback snapshot, not original commit history. The local zip and `backup/pre-optimization-2026-10-24` branch are extra local safety nets, not required for remote users.
