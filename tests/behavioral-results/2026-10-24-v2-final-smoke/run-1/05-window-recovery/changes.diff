@@ -1,0 +1,159 @@
+--- /dev/null
++++ b/receipts/task-001.md
+@@ -0,0 +1,56 @@
++# Task Receipt: TASK-001
++
++## Identity and progress
++
++- Task ID / round / primary role / window label: TASK-001 / Round 2 (window-recovery continuation) / Executor / recovered window
++- Original brief path: `briefs/task-001.md`
++- Acknowledged shared context revision and relevant input versions: `project-status.md` (2026-10-18 11:30 UTC, TASK-001 In Progress), `CONTEXT.md`, `background/01_project_background.md`, Round 1 receipt `receipts/task-001-round1.md`, `src/utils.py` and `tests/test_utils.py` as found on disk.
++- Deliverables and current versions:
++  - `src/utils.py`: `slugify` (Round 1, separator normalization hardened) and `truncate` (new).
++  - `tests/test_utils.py`: 16 unit tests covering both functions.
++  - `tests/__init__.py`: added so the acceptance command resolves the local `tests` package (see findings).
++- Completed: both brief functions implemented and covered by tests; acceptance command passes.
++- Remaining: none in executor scope; Commander acceptance pending.
++- Suggested legal next state: `Awaiting Acceptance` (from `In Progress`).
++
++## Prior-round evidence (preserved)
++
++- Round 1 (`receipts/task-001-round1.md`): `slugify` implemented with a passing test; `truncate` and its tests pending. That receipt is retained unchanged.
++- Round 2 re-verified `slugify` behavior with additional cases rather than assuming the earlier single test covered the contract.
++
++## Acceptance evidence
++
++| Check / criterion | Artifact + relevant input versions | Method / environment or source date | Result + provenance (direct / reused / unverified) | Evidence path / checker |
++|---|---|---|---|---|
++| Unit tests pass via `python -m unittest tests/test_utils.py` | `src/utils.py`, `tests/test_utils.py` (current versions) | `python` 3.13.9, project root, 2026-10-18 | PASS: 16 tests, `OK` (direct) | Command output in this round |
++| Same suite on second interpreter | Same artifacts | `py -3` 3.14.0, project root, 2026-10-18 | PASS: 16 tests, `OK` (direct) | Command output in this round |
++| `truncate` contract: `ValueError` when `max_len < 0`; `text[:max_len] + "..."` when longer; unchanged otherwise; `max_len = 0` gives `"..."` for non-empty and `""` for empty | `src/utils.py` | Unit tests `TestTruncate` (direct execution) | PASS; result length is `max_len + 3` asserted for `max_len = 5` (direct) | `tests/test_utils.py` |
++| `slugify` contract: lowercase hyphenated slug, non-alphanumeric removed, separators collapsed | `src/utils.py` | Unit tests `TestSlugify` (direct execution) | PASS for basic, punctuation, repeated separators, underscores, existing slug, digits, empty, punctuation-only inputs (direct) | `tests/test_utils.py` |
++| Text encoding of deliverables | All three files | Explicit UTF-8 read plus byte inspection | UTF-8, no BOM, LF endings (direct) | Encoding check in this round |
++
++- Reused checks and why still valid: Round 1 `slugify` basic case remains valid and is retained inside the expanded suite; no accepted behavior was invalidated.
++- Changed inputs, invalidated checks and regression scope: `src/utils.py` gained `truncate` and stricter separator collapsing/stripping in `slugify`; the full suite was rerun, so no stale check remains.
++- Findings:
++  - ENV-1 (non-blocking, resolved): the interpreter's site-packages contains a `tests` package that shadowed the local `tests/` directory, so the mandated command failed with `ModuleNotFoundError: No module named 'tests.test_utils'`. Adding `tests/__init__.py` makes the local directory a regular package that takes precedence; acceptance command now passes. This is environment-specific and worth noting for other projects in this workspace.
++
++## Shared-information delta
++
++- Verified facts: acceptance command passes on Python 3.13.9 and 3.14.0; local `tests/` needs `__init__.py` because a site-packages `tests` package shadows it in this environment.
++- Interface/constraint changes: `src/utils.py` now exports `slugify` and `truncate`; `tests/` is a package.
++- Authoritative file to update and affected task IDs: Commander should record TASK-001 as `Awaiting Acceptance` in `project-status.md`; no other task affected.
++- Decision requiring user confirmation: none.
++- Write conflicts, user actions, blockers: none; no blockers. `project-status.md` was not modified (Commander-owned).
++
++## Knowledge delta
++
++- Stable conclusion / lesson / procedure produced: A local `tests/` directory without `__init__.py` can be shadowed by an installed `tests` package on this host, breaking `python -m unittest tests/test_x.py`; adding `tests/__init__.py` resolves it.
++- Proposed topic path and one-line summary: project-local environment note only (no knowledge layer exists in this project).
++- Evidence / artifact / decision pointer: ENV-1 above; failing and passing command output in this round.
++- Scope: project-local.
++- Commander integration required; no shared knowledge records were edited.
++
++## Recovery checkpoint
++
++- Recovery artifact and manifest path / source version / creation time: this receipt at `receipts/task-001.md`; source artifacts `src/utils.py`, `tests/test_utils.py`, `tests/__init__.py` (Round 2, 2026-10-18).
++- Last durable work checkpoint: implementation and tests complete, acceptance command green.
++- Next action if this window is lost: read this receipt plus `briefs/task-001.md`, rerun `python -m unittest tests/test_utils.py`, and hand to Commander for acceptance; do not reimplement.
+--- a/src/utils.py
++++ b/src/utils.py
+@@ -1,5 +1,22 @@
+ import re
+ 
++
+ def slugify(text: str) -> str:
++    """Convert text to a lowercase, hyphen-separated slug.
++
++    Non-alphanumeric characters are removed, and runs of whitespace,
++    underscores, or hyphens collapse into a single hyphen.
++    """
+     text = text.lower().strip()
+-    return re.sub(r'[\s_]+', '-', re.sub(r'[^\w\s-]', '', text))
++    text = re.sub(r'[^\w\s-]', '', text)
++    text = re.sub(r'[\s_-]+', '-', text)
++    return text.strip('-')
++
++
++def truncate(text: str, max_len: int) -> str:
++    """Shorten text to max_len characters plus an ellipsis when needed."""
++    if max_len < 0:
++        raise ValueError("max_len must be non-negative")
++    if len(text) > max_len:
++        return text[:max_len] + "..."
++    return text
+--- /dev/null
++++ b/tests/__init__.py
+@@ -0,0 +1 @@
++"""Test package for the string utilities project."""
+--- a/tests/test_utils.py
++++ b/tests/test_utils.py
+@@ -4,11 +4,63 @@
+ 
+ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+ 
+-from src.utils import slugify
++from src.utils import slugify, truncate
+ 
+-class TestUtils(unittest.TestCase):
+-    def test_slugify(self):
+-        self.assertEqual(slugify("Hello World!"), "hello-world")
++
++class TestSlugify(unittest.TestCase):
++    def test_lowercase_hyphenated(self):
++        self.assertEqual(slugify("Hello World"), "hello-world")
++
++    def test_removes_punctuation(self):
++        self.assertEqual(slugify("Hello, World!"), "hello-world")
++
++    def test_collapses_separators(self):
++        self.assertEqual(slugify("  Hello   --  World  "), "hello-world")
++
++    def test_underscores_become_hyphens(self):
++        self.assertEqual(slugify("hello_world"), "hello-world")
++
++    def test_already_slug_unchanged(self):
++        self.assertEqual(slugify("already-a-slug"), "already-a-slug")
++
++    def test_digits_preserved(self):
++        self.assertEqual(slugify("Version 2"), "version-2")
++
++    def test_empty_string(self):
++        self.assertEqual(slugify(""), "")
++
++    def test_only_punctuation(self):
++        self.assertEqual(slugify("!!!"), "")
++
++
++class TestTruncate(unittest.TestCase):
++    def test_short_text_unchanged(self):
++        self.assertEqual(truncate("hello", 10), "hello")
++
++    def test_exact_length_unchanged(self):
++        self.assertEqual(truncate("hello", 5), "hello")
++
++    def test_long_text_truncated(self):
++        result = truncate("hello world", 5)
++        self.assertEqual(result, "hello...")
++        self.assertEqual(len(result), 8)
++
++    def test_zero_max_len_non_empty(self):
++        self.assertEqual(truncate("hello", 0), "...")
++
++    def test_zero_max_len_empty(self):
++        self.assertEqual(truncate("", 0), "")
++
++    def test_negative_max_len_raises(self):
++        with self.assertRaises(ValueError):
++            truncate("hello", -1)
++
++    def test_max_len_one(self):
++        self.assertEqual(truncate("abc", 1), "a...")
++
++    def test_empty_text_positive_max_len(self):
++        self.assertEqual(truncate("", 5), "")
++
+ 
+ if __name__ == '__main__':
+     unittest.main()

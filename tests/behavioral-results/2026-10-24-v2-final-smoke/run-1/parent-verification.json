@@ -1,0 +1,134 @@
+{
+  "run": "run-1",
+  "git_revision": "df1c67e0eb689693577f05ee76b5ebf69ccce365",
+  "cases": {
+    "01-fast-lane": {
+      "added": [],
+      "modified": [
+        "docs/overview.md"
+      ],
+      "deleted": [],
+      "exact_typo_only": true,
+      "governance_files_created": false
+    },
+    "02-context-handoff": {
+      "added": [],
+      "modified": [
+        "AGENTS.md",
+        "CONTEXT.md",
+        "background/01_project_background.md",
+        "background/02_skill_list.md",
+        "project-status.md"
+      ],
+      "deleted": [],
+      "status_validation": {
+        "exit_code": 0,
+        "output": {
+          "valid": true,
+          "path": "<project-root>\\project-status.md",
+          "task_count": 0,
+          "errors": []
+        }
+      },
+      "phase_planning": true,
+      "implementation_files_created": false,
+      "status_valid": true
+    },
+    "03-parallel-ownership": {
+      "added": [],
+      "modified": [
+        "project-status.md"
+      ],
+      "deleted": [],
+      "status_validation": {
+        "exit_code": 0,
+        "output": {
+          "valid": true,
+          "path": "<project-root>\\project-status.md",
+          "task_count": 3,
+          "errors": []
+        }
+      },
+      "task_states": [
+        "TODO",
+        "TODO",
+        "TODO"
+      ],
+      "all_tasks_todo": true,
+      "deliverables_created": false
+    },
+    "04-continuation": {
+      "added": [
+        "receipts/task-001.md"
+      ],
+      "modified": [
+        "docs/architecture.md"
+      ],
+      "deleted": [],
+      "status_validation": {
+        "exit_code": 0,
+        "output": {
+          "valid": true,
+          "path": "<project-root>\\project-status.md",
+          "task_count": 1,
+          "errors": []
+        }
+      },
+      "sections": [
+        "## 1. Overview",
+        "## 2. Data Flow",
+        "## 3. Security Model and Access Boundaries"
+      ],
+      "typo_absent": true,
+      "status_unchanged": true,
+      "receipt_suggests_awaiting": true
+    },
+    "05-window-recovery": {
+      "added": [
+        "receipts/task-001.md",
+        "tests/__init__.py"
+      ],
+      "modified": [
+        "src/utils.py",
+        "tests/test_utils.py"
+      ],
+      "deleted": [],
+      "status_validation": {
+        "exit_code": 0,
+        "output": {
+          "valid": true,
+          "path": "<project-root>\\project-status.md",
+          "task_count": 1,
+          "errors": []
+        }
+      },
+      "slugify_source_preserved": false,
+      "tests": {
+        "exit_code": 0,
+        "count": 16,
+        "output": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+      },
+      "status_unchanged": true,
+      "receipt_suggests_awaiting": true
+    },
+    "06-missing-evidence": {
+      "added": [],
+      "modified": [
+        "CONTEXT.md",
+        "project-status.md"
+      ],
+      "deleted": [],
+      "status_validation": {
+        "exit_code": 0,
+        "output": {
+          "valid": true,
+          "path": "<project-root>\\project-status.md",
+          "task_count": 1,
+          "errors": []
+        }
+      },
+      "needs_revision": true,
+      "status_valid": true
+    }
+  }
+}

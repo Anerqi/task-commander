@@ -35,15 +35,15 @@ This iteration adds optional capabilities. It does not add a role, task state, r
 
 ## Verification
 
-- `python -m unittest discover -s tests -q`: **162 tests ran on Windows: 158 passed, 4 skipped** on both Python 3.14.0 and 3.13.9. An independent Linux review run had 1 platform skip. Skips are platform-specific: 2 Windows symlink-privilege cases plus validator cases that run only on their matching OS (Windows file lock / POSIX surrogate filename).
+- `python -m unittest discover -s tests -q`: **163 tests ran on Windows: 159 passed, 4 skipped** on both Python 3.14.0 and 3.13.9. An independent Linux review run had 1 platform skip. Skips are platform-specific: 2 Windows symlink-privilege cases plus validator cases that run only on their matching OS (Windows file lock / POSIX surrogate filename).
 - `python scripts/validate-knowledge.py --project-root .`: optional-layer smoke (absent layer is valid with a warning).
 - All five CLI `--help` checks, status-template validation, status rendering and skill scanning pass.
-- `git diff --check` is clean; 143 text files are UTF-8/LF without BOM; no temporary artifacts remain.
+- `git diff --check` is clean; 164 text files are UTF-8/LF without BOM; no temporary artifacts remain.
 - Two independent review rounds covered protocol coherence, migration safety, review-axis ownership and validator edge cases. All blocking/high findings were fixed; the remaining items are documented limitations or low-risk test-coverage notes.
 - One transient Windows file-lock failure occurred in an unrelated workflow test during a full-suite run; it passed in isolation and in the subsequent full run. This is recorded as an environment flake, not a protocol result.
 - Manual behavioral scenarios K1–K5 in `tests/behavioral-scenarios.md` cover knowledge closeout, boundary choice, two-axis review, debug loops and branch closure. They are not a live-model certification.
 - A live Commander closeout smoke on an isolated synthetic project passed the knowledge path: valid LOG/topic, status Knowledge update, validator green, graduation candidate flagged, and project `Completed` correctly withheld because the delivery artifact was absent. Evidence: `tests/behavioral-results/2026-10-24-knowledge-closeout/`. This is one host/model observation, not a statistical certification.
-- The final six-case behavioral smoke will be rerun against the tagged v2 candidate, not the earlier `588e70e` working tree. Results will be archived under `tests/behavioral-results/` and recorded below when the run completes.
+- Final six-case behavioral smoke: run 1 (`df1c67e`) passed 5/6; case 05 failed because it modified the already accepted `slugify` and expanded its test rather than only completing the pending `truncate` work. Commit `0eb2914` added the scope-preservation rule. A fresh 05 rerun (`0eb2914`) passed with `slugify` byte-preserved, the round-1 test retained, and 8/8 tests passing. Overall: **6/6 on the final candidate**. Evidence: `tests/behavioral-results/2026-10-24-v2-final-smoke/`.
 
 ## Release points and rollback
 
@@ -53,7 +53,7 @@ The public remote has these relevant points:
 |---|---|---|
 | `v1.0.0` | `588e70e` | Last clean remote baseline before the previously uncommitted reliability/onboarding batch |
 | `pre-v2` | `e641299` | Reconstructed snapshot of the pre-v2 working tree (includes reliability/onboarding; excludes v2) |
-| `v2.0.0` | final v2 commit after the six-case smoke passes | Current v2 release |
+| `v2.0.0` | this results commit (after the six-case smoke passes) | Current v2 release |
 
 - Review only v2: `git diff pre-v2..v2.0.0` (or `git diff pre-v2..main` before the final tag is created).
 - Roll back to pre-v2: `git switch --detach pre-v2` or create a branch from it.

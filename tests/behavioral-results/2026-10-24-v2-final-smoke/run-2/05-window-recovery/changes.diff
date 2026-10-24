@@ -1,0 +1,105 @@
+--- /dev/null
++++ b/receipts/task-001.md
+@@ -0,0 +1,51 @@
++# Task Receipt: TASK-001 (Round 2, Final)
++
++## Identity and progress
++
++- Task ID / round / primary role / window label: TASK-001 / Round 2 / Executor / 05-window-recovery (fresh window recovery)
++- Original brief path: `briefs/task-001.md`
++- Prior receipt preserved: `receipts/task-001-round1.md` (Round 1: `slugify` completed; `truncate` pending)
++- Acknowledged shared context: `project-status.md` last updated 2026-10-18 11:30 UTC, TASK-001 In Progress; `CONTEXT.md`; `AGENTS.md`; DEC-001 (standard library only)
++- Deliverables and current versions:
++  - `src/utils.py` (346 bytes, sha256 b999315a7c6360e2..., UTF-8 no BOM, LF): `slugify` unchanged from Round 1; `truncate` added.
++  - `tests/test_utils.py` (1069 bytes, sha256 7c4a3f9ca37652d4..., UTF-8 no BOM, LF): Round 1 `slugify` test preserved; 7 `truncate` tests added.
++  - `tests/__init__.py` (empty): added so the local test package resolves correctly under the literal acceptance command on this host.
++- Completed / remaining / suggested legal next state: all brief deliverables completed; none remaining; suggested state `Awaiting Acceptance` (In Progress -> Awaiting Acceptance is a legal transition). Commander remains the sole status writer.
++
++## Acceptance evidence
++
++| Check / criterion | Artifact + relevant input versions | Method / environment or source date | Result + provenance | Evidence path / checker |
++|---|---|---|---|---|
++| Unit tests pass via `python -m unittest tests/test_utils.py` | `src/utils.py` b999315a..., `tests/test_utils.py` 7c4a3f9c..., `tests/__init__.py` empty | Python 3.13.9 (`python` on PATH), cwd = project root, 2026-10-18 | 8 tests ran, all OK, exit 0; direct | Executor terminal run |
++| Same suite under alternate runtime | same artifacts | Python 3.14.0 (`py -3`), cwd = project root, 2026-10-18 | 8 tests ran, all OK, exit 0; direct | Executor terminal run |
++| `truncate` boundary behavior | `src/utils.py` b999315a... | Direct call probe, Python 3.13.9 | `truncate('abcdef',3)='abc...'`, `truncate('abc',3)='abc'`, `truncate('ab',3)='ab'`, `truncate('x',0)='...'`, `truncate('',0)=''`, `truncate('abcdef',1)='a...'`, `truncate('x',-5)` raises ValueError; direct | Executor terminal probe |
++| Brief spec: negative `max_len` raises | `tests/test_utils.py` | `test_truncate_negative_max_len_raises` | OK; direct | Unit test |
++| Brief spec: truncated result length = `max_len + 3` | `tests/test_utils.py` | `test_truncate_result_length` | OK; direct | Unit test |
++| Brief spec: `max_len = 0` edge cases | `tests/test_utils.py` | `test_truncate_zero_max_len_non_empty`, `test_truncate_zero_max_len_empty` | OK; direct | Unit test |
++| Round 1 `slugify` check preserved and re-run | `src/utils.py`, `tests/test_utils.py` | `test_slugify` in full suite | OK; direct | Unit test |
++
++- Reused checks and why still valid: Round 1 `slugify` test is unchanged and was re-run in the final suite, so its green result is fresh, not merely reused.
++- Changed inputs, invalidated checks and regression scope: `src/utils.py` gained `truncate` only; `slugify` body untouched. Full suite re-run, so no separate regression scope remains.
++- Findings: none blocking. Non-blocking environment finding: before `tests/__init__.py` existed, the literal command under Python 3.13.9 failed with `ModuleNotFoundError: No module named 'tests.test_utils'` because a regular `tests` package exists in site-packages and outranked the local namespace directory. Adding the empty `tests/__init__.py` resolved it; both runtimes now pass.
++
++## Shared-information delta
++
++- Verified fact: the project test suite now contains 8 passing tests (1 `slugify`, 7 `truncate`) and passes the brief's acceptance command under both available Python runtimes on this host.
++- Verified fact: this host has a site-packages `tests` package; a local `tests/__init__.py` is required for `python -m unittest tests/test_utils.py` to target the project tests. Authoritative file if recorded: `project-status.md` notes or project background; affected task: TASK-001 only.
++- Proposal (not a decision): Commander records TASK-001 transition In Progress -> Awaiting Acceptance after reviewing this receipt.
++- No user decision required; no write conflicts; no blockers.
++
++## Knowledge delta
++
++- Stable conclusion: on hosts whose site-packages includes a regular `tests` package, a project's local `tests/` directory needs `__init__.py` for path-based `unittest` invocation to resolve the project package.
++- Proposed topic path: project-local note (no knowledge layer exists); one-line summary as above.
++- Evidence: failed run traceback plus passing runs after adding `tests/__init__.py`.
++- Scope: project-local / environment-specific; not proposed for graduation.
++- No existing topic or LOG entry to conflict with. Commander integration required.
++
++## Recovery checkpoint
++
++- Durable state: brief, Round 1 receipt, final source, tests, and this receipt are all on disk under the project root; no `_tmp` files were created.
++- Last work checkpoint: acceptance suite green under both `python` (3.13.9) and `py -3` (3.14.0), 8/8 tests OK.
++- If this window is lost: read `briefs/task-001.md`, `receipts/task-001-round1.md`, and this file; re-run `python -m unittest tests/test_utils.py` from the project root; no implementation work remains.
++- Tried approaches: none discarded; the only obstacle was the `tests` package collision, resolved as described.
+--- a/src/utils.py
++++ b/src/utils.py
+@@ -3,3 +3,11 @@
+ def slugify(text: str) -> str:
+     text = text.lower().strip()
+     return re.sub(r'[\s_]+', '-', re.sub(r'[^\w\s-]', '', text))
++
++
++def truncate(text: str, max_len: int) -> str:
++    if max_len < 0:
++        raise ValueError("max_len must be non-negative")
++    if len(text) > max_len:
++        return text[:max_len] + '...'
++    return text
+--- a/tests/test_utils.py
++++ b/tests/test_utils.py
+@@ -4,11 +4,33 @@
+ 
+ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+ 
+-from src.utils import slugify
++from src.utils import slugify, truncate
+ 
+ class TestUtils(unittest.TestCase):
+     def test_slugify(self):
+         self.assertEqual(slugify("Hello World!"), "hello-world")
+ 
++    def test_truncate_longer_text(self):
++        self.assertEqual(truncate("hello world", 5), "hello...")
++
++    def test_truncate_exact_length(self):
++        self.assertEqual(truncate("hello", 5), "hello")
++
++    def test_truncate_shorter_text(self):
++        self.assertEqual(truncate("hi", 5), "hi")
++
++    def test_truncate_zero_max_len_non_empty(self):
++        self.assertEqual(truncate("hello", 0), "...")
++
++    def test_truncate_zero_max_len_empty(self):
++        self.assertEqual(truncate("", 0), "")
++
++    def test_truncate_negative_max_len_raises(self):
++        with self.assertRaises(ValueError):
++            truncate("hello", -1)
++
++    def test_truncate_result_length(self):
++        self.assertEqual(len(truncate("abcdef", 3)), 6)
++
+ if __name__ == '__main__':
+     unittest.main()

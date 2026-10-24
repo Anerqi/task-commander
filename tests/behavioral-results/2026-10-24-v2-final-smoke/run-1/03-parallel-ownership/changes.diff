@@ -1,0 +1,25 @@
+--- a/project-status.md
++++ b/project-status.md
+@@ -6,8 +6,8 @@
+ - Project phase: Planning
+ - Status owner: Commander
+ - Pre-pause phase: n/a
+-- Last updated: 2026-10-18 10:00 UTC
+-- Current focus: Select ready batch and dispatch documentation tasks
++- Last updated: 2026-10-18 10:15 UTC
++- Current focus: Batch 1 prompts for TASK-001 and TASK-002 emitted; awaiting window pickup confirmation. TASK-003 held for write-scope overlap.
+ 
+ ## Task list
+ 
+@@ -24,8 +24,9 @@
+ 
+ ## Next steps
+ 
+-1. Select ready batch respecting write scopes and user capacity.
+-2. Emit separate dispatch instructions for active windows.
++1. Paste the TASK-001 and TASK-002 instructions into two separate Executor windows; confirm pickup so both can move to In Progress.
++2. On confirmed pickup, record In Progress with window mapping; integrate each receipt serially.
++3. After both complete and writes to `docs/guide/` and `docs/api/` have stopped, dispatch TASK-003 (P2).
+ 
+ ## Milestones
+ 

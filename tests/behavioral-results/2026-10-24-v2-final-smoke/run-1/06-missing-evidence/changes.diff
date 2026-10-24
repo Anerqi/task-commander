@@ -1,0 +1,44 @@
+--- a/CONTEXT.md
++++ b/CONTEXT.md
+@@ -2,4 +2,4 @@
+ 
+ - Project: Config Parser
+ - Phase: In Progress
+-- Status: TASK-001 receipt submitted; pending Commander acceptance review.
++- Status: TASK-001 in Needs Revision (R1) — executed test output missing; current state in `project-status.md`.
+--- a/project-status.md
++++ b/project-status.md
+@@ -6,14 +6,14 @@
+ - Project phase: In Progress
+ - Status owner: Commander
+ - Pre-pause phase: n/a
+-- Last updated: 2026-10-18 12:00 UTC
+-- Current focus: Awaiting acceptance evidence for TASK-001
++- Last updated: 2026-10-18 13:30 UTC
++- Current focus: TASK-001 revision R1 — missing verbatim test execution evidence blocks the QA gate
+ 
+ ## Task list
+ 
+ | ID | Name | Status | Priority | Agent | Depends | Parallel | Reviewer | QA | Output dir | Updated |
+ |---|---|---|---|---|---|---|---|---|---|---|
+-| TASK-001 | Key-Value Config Parser | In Progress | P1 | Executor | - | no | - | QA | src/ | 2026-10-18 12:00 UTC |
++| TASK-001 | Key-Value Config Parser | Needs Revision | P1 | Executor | - | no | - | QA | src/ | 2026-10-18 13:30 UTC |
+ 
+ ## Blocked
+ 
+@@ -22,7 +22,9 @@
+ 
+ ## Next steps
+ 
+-1. Evaluate TASK-001 receipt and verify test execution evidence.
++1. Executor R1: run `python tests/test_parser.py` in the project root and paste the verbatim command line, exit code, and full stdout/stderr into `receipts/task-001.md`; replace the "assumed passing" self-check with the recorded result.
++2. After the receipt carries the execution evidence, run the required QA gate over that output.
++3. Commander accepts only if the executed tests pass and QA confirms the output; otherwise continue revision.
+ 
+ ## Milestones
+ 
+@@ -33,3 +35,4 @@
+ | When | Target | From state | To state | Basis | By |
+ |---|---|---|---|---|---|
+ | 2026-10-18 11:30 UTC | TASK-001 | TODO | In Progress | Dispatched to Executor | Commander |
++| 2026-10-18 13:30 UTC | TASK-001 | In Progress | Needs Revision | Receipt `receipts/task-001.md` states tests are "assumed passing; actual execution output omitted", missing the brief's blocking verbatim-output criterion (DEC-001); QA gate cannot run without it | Commander |

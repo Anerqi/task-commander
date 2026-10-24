@@ -1,0 +1,191 @@
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -1,5 +1,32 @@
+-# Project Agents & Roles
++# Agent Guide
+ 
+-- Context Agent: Context initialization and handoff.
+-- Commander: Central planning and coordination.
+-- Executor: Primary deliverable implementation.
++## Project identity
++
++This project writes Markdown documentation for a synthetic local microservice: a quickstart/installation/configuration Guide (`docs/guide.md`) and a REST API reference (`docs/api.md`). Readers are internal developers and operational engineers. The product is fictional; documented behavior comes only from confirmed product facts.
++
++## Reading order and sources of truth
++
++1. `background/01_project_background.md` — goal, product facts, deliverables, acceptance, permissions, backup posture.
++2. `CONTEXT.md` — standard terms and avoided synonyms.
++3. `decision-log.md` — user-confirmed decisions (DEC-001, DEC-002).
++4. `project-status.md` — current phase, tasks, blockers, next actions.
++
++Saved task briefs and receipts are historical snapshots, never live sources of truth. No durable knowledge layer exists yet; if one is created, follow `references/20-knowledge-layer.md` from the Task Commander skill root.
++
++## Hard rules (MUST)
++
++- Write all documentation in Markdown (DEC-001).
++- Deliver only `docs/guide.md` and `docs/api.md`; do not create a monolithic README (DEC-002).
++- Document only the product facts confirmed in background §3. Do not invent endpoints, flags, defaults, versions, or payload fields.
++- Describe the product as Python 3.10+ standard library with zero external dependencies, started with `python service.py`; installation must not require installing packages.
++- Use no external network access and install no packages.
++- Keep every internal link resolvable and Markdown syntax clean; verify before delivery.
++- Executor self-checks each deliverable; Reviewer checks the final deliverables.
++- Work only inside this project root. Revise by preserving earlier drafts; the unchanged source fixture is the recovery copy and no Git repository is assumed.
++- Record a decision in `decision-log.md` only after the user confirms it.
++
++## Preferred conventions (SHOULD)
++
++- Use the terms in `CONTEXT.md` and avoid the listed alternatives.
++- Keep each fact in one place: values and acceptance in the background, terminology in `CONTEXT.md`, decisions in the decision log.
++- Fence commands and JSON payloads in code blocks with a language tag.
+--- a/CONTEXT.md
++++ b/CONTEXT.md
+@@ -1,5 +1,26 @@
+ # Project Context
+ 
+-- Project: Synthetic Microservice Documentation
+-- Current Phase: Context Building
+-- Status: All core facts, deliverables, policies, and decisions are established and confirmed with the user. Zero pending items. Ready for Commander handoff.
++Sole source of truth for standard terms, avoided terms, and domain relations. Product facts, scope, and policies live in `background/01_project_background.md`.
++
++## Terms
++
++| Term | Definition | Avoid |
++|---|---|---|
++| Service | The local microservice that this project documents, started with `python service.py`. | app, server, backend |
++| Guide | The `docs/guide.md` deliverable: installation, startup, and configuration content. | README, manual, quickstart doc |
++| API reference | The `docs/api.md` deliverable: the endpoint reference. | API docs, Swagger, spec |
++| Health endpoint | `GET /health`; reports whether the Service is alive. | healthcheck route, ping endpoint |
++| Status endpoint | `GET /status`; reports the Service's uptime and version. | metrics endpoint, info endpoint |
++| Uptime | Whole seconds the Service has been running; an integer field of the status response. | runtime, lifetime, duration |
++| Version | The Service release identifier; a string field of the status response. | build number, release tag |
++| Configuration flag | An environment variable that changes Service runtime behavior. | option, setting, config key |
++| `PORT` | Configuration flag for the Service's listening port. | port number, listen port |
++| `LOG_LEVEL` | Configuration flag for logging verbosity. | log mode, verbosity setting |
++| Deliverable | A document in the confirmed delivery scope of this project. | artifact, output |
++
++## Domain relations
++
++- The Service exposes the Health endpoint and the Status endpoint.
++- Configuration flags configure the Service; `PORT` and `LOG_LEVEL` are the confirmed flags.
++- The Guide owns installation, startup, and configuration language; the API reference owns endpoint language.
++- The Status endpoint reports Uptime and Version; the Health endpoint reports only liveness.
+--- a/background/01_project_background.md
++++ b/background/01_project_background.md
+@@ -21,17 +21,32 @@
+ - Verification gates: Self-check by Executor; Reviewer check on final deliverables.
+ 
+ ## 5. Tool Permissions & Operations
+-- Local workspace file read/write within `<project-root>`.
++- Effective permissions (source: Synthetic Project Owner, 2026-10-18 task authorization): local workspace file read/write within `<project-root>`.
+ - Standard local CLI file commands permitted.
+-- No external network access or package installation required.
++- Read-only outside the project: the Task Commander skill repository; do not edit its files.
++- Out of scope: sibling fixture directories and Task Commander test/evaluation material.
++- No external network access or package installation required. No pending permission proposals.
+ 
+ ## 6. Capacity and Coordination
+ - User execution window capacity: 2 concurrent execution windows.
+ - Approval authority: Synthetic Project Owner.
++- Acceptance/revision budget: no numeric budget established by the user; apply `references/16-quality-gates.md` defaults and confirm with the user if a task needs more than one revision round.
++- User assistance: the user works through separate agent windows and can perform local file and window actions; no browser or account actions are required.
+ 
+ ## 7. Data Sensitivity & Backup Posture
+ - Data sensitivity: Public synthetic code/docs only. Zero credentials, personal data, or sensitive assets.
+ - Recovery: The unchanged source fixture is the recovery copy; work only in its disposable duplicate and preserve earlier drafts during revisions. No Git repository is assumed. There are no valuable pre-existing assets, external services, or live databases.
+ 
+ ## 8. Open Items & Decisions
+-- Pending decisions: None. All scope, technology, and architectural questions are confirmed in `decision-log.md`.
++- Open questions: none.
++- Blocking gaps: none as of 2026-10-18.
++- Pending decisions: none. All scope and format questions are confirmed in `decision-log.md` (DEC-001, DEC-002).
++- Third-party questionnaires: none; no required information sits with a third party.
++
++## 9. Core Terminology
++Core terms: Service, Guide, API reference, Health endpoint, Status endpoint, Uptime, Version, Configuration flag, `PORT`, `LOG_LEVEL`. Definitions, avoided synonyms, and domain relations are authoritative in `CONTEXT.md`; product values remain authoritative in §3.
++
++## 10. Knowledge Retention
++- Optional durable knowledge layer: deferred at context handoff (reversible Context Agent choice). Rationale: a two-document, single-session deliverable with no durable conclusions yet.
++- If durable conclusions appear, enable the layer per `references/20-knowledge-layer.md` with user confirmation: `knowledge/LOG.md`, plus `knowledge/ROADMAP.md` when goals outlast one session. No topic files are pre-created.
++
+--- a/background/02_skill_list.md
++++ b/background/02_skill_list.md
+@@ -1,3 +1,6 @@
+ # Discovered Skills
+ 
+-No external skills required for this synthetic project.
++- Curated decision (2026-10-18): no external skill is required. The deliverables are two Markdown documents authored from confirmed product facts; default host file tools and the project records cover the work.
++- Network: not needed. Plugin: not needed. Subagent: not needed.
++- No duplicate skill install paths apply.
++- If later work needs new tooling, run `scripts/scan-skills.py` per `references/12-skill-discovery.md` before dispatch, keeping candidates at 30 or fewer.
+--- a/project-status.md
++++ b/project-status.md
+@@ -3,11 +3,12 @@
+ ## Project
+ 
+ - Project name: Synthetic Microservice Documentation
+-- Project phase: Context Building
+-- Status owner: Context Agent
++- Project phase: Planning
++- Protocol version: 2
++- Status owner: Commander
+ - Pre-pause phase: n/a
+-- Last updated: 2026-10-18 09:00 UTC
+-- Current focus: Complete context stage and emit Commander handoff
++- Last updated: 2026-10-18 09:30 UTC
++- Current focus: Commander initialization and first dispatch
+ 
+ ## Task list
+ 
+@@ -21,12 +22,45 @@
+ 
+ ## Next steps
+ 
+-1. Emit the filled Commander handoff block.
+-2. User opens the Commander window with the handoff prompt.
++1. Commander reads the context records, validates status, and confirms the protocol version.
++2. Commander assesses user input and backup needs, then proposes a ready batch.
++3. Commander dispatches ready independent tasks, each with its own prompt.
++
++## Coordination
++
++- Context revision: C1
++- Collaboration policy: `background/01_project_background.md` §5 (permissions) and §6 (capacity, budget)
++- Integration owner: Commander
++- Capacity: 2 concurrent execution windows
++
++## Knowledge
++
++- Knowledge policy / layer status: deferred; see `background/01_project_background.md` §10
++- Timeline / roadmap pointers: not present
++- Latest audit / graduation candidates: n/a
++- Durable topics that affect current coordination: none
++
++## Active windows
++
++| Task | Window label / optional host session | Input revision / versions | Read scope | Exclusive write scope / isolation | Integration owner | Last receipt |
++|---|---|---|---|---|---|---|
++
++## Pending user actions
++
++| ID | Affected tasks | Question / local action | Expected safe return | Owner | Resume condition / fallback |
++|---|---|---|---|---|---|
++
++## Backups
++
++| Backup task / ID | Source version / coverage | Manifest / recovery artifact pointer | Integrity / restore-test evidence | Dependent action | Remaining gaps |
++|---|---|---|---|---|---|
++
++No backup required: the project contains synthetic documentation only, and the unchanged source fixture is the recovery copy (`background/01_project_background.md` §7).
+ 
+ ## Milestones
+ 
+ - [x] Background facts and collaboration policy established
++- [x] Context records reconciled and validated
+ - [ ] Commander initialized and tasks dispatched
+ 
+ ## Status history
+@@ -34,3 +68,4 @@
+ | When | Target | From state | To state | Basis | By |
+ |---|---|---|---|---|---|
+ | 2026-10-18 09:00 UTC | Project | Not initialized | Context Building | Initial context gathered | Context Agent |
++| 2026-10-18 09:30 UTC | Project | Context Building | Planning | Background, CONTEXT, decisions and AGENTS.md meet delivery bar; Commander handoff emitted | Context Agent |
