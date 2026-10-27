@@ -1,0 +1,53 @@
+# skill-up eval suite for Task Commander (ported from tests/behavioral-smoke.md)
+# Run locally:  skill-up validate evals/eval.yaml && skill-up run evals/eval.yaml   (see evals/README.md)
+schema_version: v1alpha1
+
+# `none` = run in the current host/container. In CI the skill-up Action already runs
+# inside its own Docker container, which is the sandbox. Locally, prefer running inside
+# a throwaway container: agents get full write access to the case workspace.
+environment:
+  type: none
+
+# Install the Skill WITHOUT tests/ — this physically enforces the smoke rule
+# "do not inspect sibling fixtures, evaluation criteria, or run results".
+skills:
+  - source: local_path
+    path: .
+    include:
+      - SKILL.md
+      - agents/**
+      - references/**
+      - templates/**
+      - scripts/*.py
+    exclude:
+      - "**/__pycache__/**"
+
+engine:
+  name: opencode           # override with --engine (claude_code, codex, qwen_code, ...)
+  model:                   # supplied per run, so no host/model identity is committed
+    provider: ${EVAL_PROVIDER}
+    name: ${EVAL_MODEL}
+    base_url: ${EVAL_BASE_URL}   # OpenAI-compatible endpoint of the provider
+
+cases:
+  files:
+    - evals/cases/01-fast-lane.yaml
+    - evals/cases/02-context-handoff.yaml
+    - evals/cases/03-parallel-ownership.yaml
+    - evals/cases/04-continuation.yaml
+    - evals/cases/05-window-recovery.yaml
+    - evals/cases/06-missing-evidence.yaml
+  defaults:
+    timeout_seconds: 600
+    max_turns: 30
+    collect_artifacts:      # keep what the agent wrote, for the run report
+      - "**/*.md"
+      - "src/**"
+      - "tests/**"
+  parallelism: 1            # serial by default; cases are independent, raise if quota allows
+  retry_policy:
+    max_retries: 0          # smoke rule: a provider error is INCOMPLETE; keep the failed attempt
+
+report:
+  formats: [json, junit, html]
+  artifacts: [transcript]

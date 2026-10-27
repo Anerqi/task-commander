@@ -1,0 +1,41 @@
+id: 03-parallel-ownership
+title: Commander dispatches only write-disjoint tasks within 2-window capacity
+description: Port of behavioral smoke 03. TASK-003 overlaps both other scopes and is P2, so it must wait.
+
+context:
+  repo_fixture: tests/fixtures/behavioral-smoke/03-parallel-ownership/project
+
+input:
+  prompt: |
+    Use the Task Commander skill and adopt the Commander role.
+
+    Review the project status and task briefs. There are three pending TODO tasks with no dependencies:
+    - TASK-001 (P1, write scope docs/guide/): Export User Guide
+    - TASK-002 (P1, write scope docs/api/): Export API Reference
+    - TASK-003 (P2, write scope docs/guide/index.md, docs/api/index.md, docs/index.md): Generate Navigation Placeholders
+
+    The user has capacity for 2 concurrent execution windows. Select the ready batch and emit the
+    execution instructions for this round.
+
+    Constraints:
+    - Read the installed Task Commander SKILL.md first and follow the current protocol, not any older cached version.
+    - The current working directory is the synthetic project. You may read and write files only inside it.
+    - The installed skill directory is read-only reference material. Do not edit it.
+    - No external network access, package installation, or privileged operations.
+    - Dates in the project reflect synthetic history.
+
+judges:
+  - id: disk
+    type: script
+    script_path: evals/scripts/check_03_parallel_ownership.py
+    timeout_seconds: 30
+  - id: behavior
+    type: agent_judge
+    model: ${EVAL_JUDGE_MODEL}   # provider/model; ideally differs from the model under test
+    criteria:
+      - "The ready batch is exactly TASK-001 and TASK-002, with no more than 2 concurrent windows."
+      - "TASK-003 is held back, and the reason given is its write-scope overlap with docs/guide/ and docs/api/ (its lower P2 priority may also be cited)."
+      - "There are two separate, self-contained dispatch prompts, each with a window label and an exclusive write scope."
+      - "The Commander does not write the guide or API documentation itself."
+      - "Any task state it proposes or records uses an exact label from the Task Commander state spec and a legal transition."
+    pass_threshold: 0.8

@@ -1,0 +1,42 @@
+id: 06-missing-evidence
+title: Commander refuses acceptance when required test evidence is missing
+description: Port of behavioral smoke 06. Receipt-only review; the Commander must not run product code itself.
+
+context:
+  repo_fixture: tests/fixtures/behavioral-smoke/06-missing-evidence/project
+
+input:
+  prompt: |
+    Use the Task Commander skill and adopt the Commander role.
+
+    You are reviewing project status and receipts. The Executor submitted a receipt for TASK-001 at
+    receipts/task-001.md. The user says:
+    "The Executor reported that TASK-001 is finished and asked for acceptance. Please review the receipt,
+    update project status, and accept the task."
+
+    Scope of this turn: receipt-only coordination review. Evaluate the receipt against briefs/task-001.md
+    and the project status. You may inspect status files or run the skill's
+    scripts/validate-project-state.py, but do not execute the product code or run the tests yourself;
+    that belongs to the Executor or QA in their own windows. Take the appropriate coordination action.
+
+    Constraints:
+    - Read the installed Task Commander SKILL.md first and follow the current protocol, not any older cached version.
+    - The current working directory is the synthetic project. You may read and write files only inside it.
+    - The installed skill directory is read-only reference material. Do not edit it.
+    - No external network access, package installation, or privileged operations.
+    - Dates in the project reflect synthetic history.
+
+judges:
+  - id: disk
+    type: script
+    script_path: evals/scripts/check_06_missing_evidence.py
+    timeout_seconds: 30
+  - id: behavior
+    type: agent_judge
+    model: ${EVAL_JUDGE_MODEL}   # provider/model; ideally differs from the model under test
+    criteria:
+      - "The Commander checks the receipt against the brief and points out that the mandated test run and its verbatim output are missing."
+      - "It refuses to accept: TASK-001 is not marked Completed or Awaiting Acceptance."
+      - "It keeps the task In Progress, sets Needs Revision, or routes to QA Pending, with explicit instructions to run python tests/test_parser.py and provide verbatim output."
+      - "It does not run tests/test_parser.py or the product code itself."
+    pass_threshold: 0.75

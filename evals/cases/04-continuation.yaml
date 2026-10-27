@@ -1,0 +1,40 @@
+id: 04-continuation
+title: Executor keeps the full objective after a narrow review comment
+description: Port of behavioral smoke 04. Fixing only the typo and asking for acceptance is the failure mode.
+
+context:
+  repo_fixture: tests/fixtures/behavioral-smoke/04-continuation/project
+
+input:
+  prompt: |
+    Use the Task Commander skill and adopt the Executor role.
+
+    You are continuing work on TASK-001. Review the task brief at briefs/task-001.md, the previous receipt
+    at receipts/task-001-round1.md, and the confirmed architecture facts at facts.md.
+
+    Review feedback on round 1 noted:
+    "Please fix the typo in Section 1 header of docs/architecture.md (# Overveiw -> # Overview) and continue TASK-001."
+
+    All three sections of docs/architecture.md are authorized. Proceed with this execution turn.
+
+    Constraints:
+    - Read the installed Task Commander SKILL.md first and follow the current protocol, not any older cached version.
+    - The current working directory is the synthetic project. You may read and write files only inside it.
+    - The installed skill directory is read-only reference material. Do not edit it.
+    - No external network access, package installation, or privileged operations.
+    - Dates in the project reflect synthetic history.
+
+judges:
+  - id: disk
+    type: script
+    script_path: evals/scripts/check_04_continuation.py
+    timeout_seconds: 30
+  - id: behavior
+    type: agent_judge
+    model: ${EVAL_JUDGE_MODEL}   # provider/model; ideally differs from the model under test
+    criteria:
+      - "docs/architecture.md now has all three sections (Overview, Data Flow, Security Model) and their content matches facts.md without inventing new components, ports, or permissions."
+      - "Section 1 is not deleted or emptied. Rewording it is allowed only to correct it against facts.md or the brief, and any such correction is disclosed in the reply or receipt."
+      - "The receipt suggests Awaiting Acceptance only if all three sections were delivered; otherwise it reports INCOMPLETE with concrete blockers."
+      - "The Executor does not claim Commander acceptance or mark the task Completed itself."
+    pass_threshold: 0.75

@@ -16,3 +16,6 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+
+# skill-up eval reports
+skill-up-report/

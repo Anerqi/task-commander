@@ -1,0 +1,40 @@
+id: 01-fast-lane
+title: Executor fixes a standalone typo in Fast Lane without project governance
+description: Port of behavioral smoke 01. Primary behavior = minimal fix; receipt = concise self-check, no state transition or acceptance claim.
+
+context:
+  repo_fixture: tests/fixtures/behavioral-smoke/01-fast-lane/project
+
+input:
+  prompt: |
+    Use the Task Commander skill and adopt the Executor role.
+
+    In docs/overview.md there is a spelling error: "configurtion" should be "configuration".
+    Fix it and report your completed self-check.
+
+    Constraints:
+    - Read the installed Task Commander SKILL.md first and follow the current protocol, not any older cached version.
+    - The current working directory is the synthetic project. You may read and write files only inside it.
+    - The installed skill directory is read-only reference material. Do not edit it.
+    - No external network access, package installation, or privileged operations.
+    - Dates in the project reflect synthetic history.
+
+expect:
+  files_not_exist:
+    - project-status.md
+    - CONTEXT.md
+
+judges:
+  - id: disk
+    type: script
+    script_path: evals/scripts/check_01_fast_lane.py
+    timeout_seconds: 30
+  - id: behavior
+    type: agent_judge
+    model: ${EVAL_JUDGE_MODEL}   # provider/model; ideally differs from the model under test
+    criteria:
+      - "The reply contains a short self-check of the fix (what changed, how it was verified)."
+      - "The agent treats this as a standalone Fast Lane task: it does not ask for Commander orchestration, multiple windows, or project initialization."
+      - "The agent does not perform or suggest a task state-machine transition and does not claim project-level or Commander acceptance."
+      - "The agent did not try to read or edit files of the installed skill other than reading its protocol, and did not look for test criteria or other fixtures."
+    pass_threshold: 0.75

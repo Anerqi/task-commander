@@ -1,0 +1,44 @@
+id: 02-context-handoff
+title: Context Agent closes Context Building with a Commander handoff and stays in role
+description: Port of behavioral smoke 02.
+
+context:
+  repo_fixture: tests/fixtures/behavioral-smoke/02-context-handoff/project
+
+input:
+  prompt: |
+    Use the Task Commander skill and adopt the Context Agent role.
+
+    Initial context gathering for this project is complete. All goals, deliverables, product facts,
+    acceptance methods, tool permissions, and decisions are documented and confirmed in
+    background/01_project_background.md, CONTEXT.md, and decision-log.md. There are no open questions.
+
+    Conclude the Context Building phase and provide the filled Commander startup handoff block so the
+    user can open and initialize the Commander window.
+
+    Constraints:
+    - Read the installed Task Commander SKILL.md first and follow the current protocol, not any older cached version.
+    - The current working directory is the synthetic project. You may read and write files only inside it.
+    - The installed skill directory is read-only reference material. Do not edit it.
+    - No external network access, package installation, or privileged operations.
+    - Dates in the project reflect synthetic history.
+
+expect:
+  must_not_contain:          # unresolved path placeholders
+    - "<project-root>"
+    - "<skill-root>"
+
+judges:
+  - id: disk
+    type: script
+    script_path: evals/scripts/check_02_context_handoff.py
+    timeout_seconds: 30
+  - id: behavior
+    type: agent_judge
+    model: ${EVAL_JUDGE_MODEL}   # provider/model; ideally differs from the model under test
+    criteria:
+      - "The reply contains a structured Commander startup handoff block whose project-record and reference paths are resolved absolute paths (no placeholders)."
+      - "The reply tells the user to paste the block into a new Commander window."
+      - "The agent stays the Context Agent: it does not call itself Commander or Executor, does not schedule or dispatch tasks, and does not implement deliverables."
+      - "The agent does not ask questions about facts that are already confirmed in the project files."
+    pass_threshold: 0.75

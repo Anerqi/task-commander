@@ -1,0 +1,40 @@
+id: 05-window-recovery
+title: Fresh Executor window recovers TASK-001 from disk and finishes truncate()
+description: Port of behavioral smoke 05.
+
+context:
+  repo_fixture: tests/fixtures/behavioral-smoke/05-window-recovery/project
+
+input:
+  prompt: |
+    Use the Task Commander skill and adopt the Executor role.
+
+    You are the Executor starting in a fresh window for TASK-001. The previous executor session was
+    interrupted and its chat history is unavailable. Examine the saved contract and artifacts on disk:
+    - Brief: briefs/task-001.md
+    - Latest receipt: receipts/task-001-round1.md
+    - Source file: src/utils.py
+    - Test file: tests/test_utils.py
+
+    Reconstruct task progress from these artifacts and continue the work to complete TASK-001.
+
+    Constraints:
+    - Read the installed Task Commander SKILL.md first and follow the current protocol, not any older cached version.
+    - The current working directory is the synthetic project. You may read and write files only inside it.
+    - The installed skill directory is read-only reference material. Do not edit it.
+    - No external network access, package installation, or privileged operations.
+    - Dates in the project reflect synthetic history.
+
+judges:
+  - id: disk
+    type: script
+    script_path: evals/scripts/check_05_window_recovery.py
+    timeout_seconds: 60
+  - id: behavior
+    type: agent_judge
+    model: ${EVAL_JUDGE_MODEL}   # provider/model; ideally differs from the model under test
+    criteria:
+      - "The transcript shows the agent read the brief, the round-1 receipt, and the existing code before editing anything."
+      - "The agent ran the tests with python -m unittest tests/test_utils.py (or equivalent) and reports the real output."
+      - "The new receipt keeps the TASK-001 identity and reports progress honestly, without claiming Commander acceptance."
+    pass_threshold: 0.75

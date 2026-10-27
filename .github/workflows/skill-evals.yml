@@ -1,0 +1,56 @@
+# Task Commander behavioral evals via skill-up.
+# Manual trigger only: every run spends model tokens (6 agent runs + 6 judge runs).
+#
+# Why not `uses: alibaba/skill-up@...`? Its runner image pins skill-up 0.7.0, and these
+# cases use multiple judges per case (`judges:`), which needs a recent skill-up
+# (validated with 0.14.0). Installing the CLI directly keeps the version explicit.
+name: skill-evals
+
+on:
+  workflow_dispatch:
+    inputs:
+      cases:
+        description: "Case glob, e.g. 0[36]-* (empty = all six)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install OpenCode and skill-up
+        run: |
+          npm install -g opencode-ai
+          curl -fsSL https://raw.githubusercontent.com/alibaba/skill-up/main/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Run evals
+        env:
+          EVAL_PROVIDER: ${{ vars.EVAL_PROVIDER }}
+          EVAL_MODEL: ${{ vars.EVAL_MODEL }}
+          EVAL_BASE_URL: ${{ vars.EVAL_BASE_URL }}
+          EVAL_JUDGE_MODEL: ${{ vars.EVAL_JUDGE_MODEL }}
+          EVAL_API_KEY: ${{ secrets.EVAL_API_KEY }}
+          CASES: ${{ inputs.cases }}
+        run: |
+          # skill-up reads <PROVIDER>_API_KEY for the configured provider
+          export "$(echo "$EVAL_PROVIDER" | tr '[:lower:]-' '[:upper:]_')_API_KEY=$EVAL_API_KEY"
+          args=()
+          if [ -n "$CASES" ]; then args+=(--include-case-name "$CASES"); fi
+          skill-up validate evals/eval.yaml
+          skill-up run evals/eval.yaml --output-dir skill-up-report "${args[@]}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: skill-up-report
+          path: skill-up-report/
