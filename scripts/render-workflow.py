@@ -47,6 +47,7 @@ def load_state_data(source_path: Path) -> Dict[str, Any]:
         # Parse task list from project-status.md
         tasks: Dict[str, Any] = {}
         blocked: List[Dict[str, str]] = []
+        needs_you: List[Dict[str, str]] = []
         current_section = None
 
         with open(source_path, "r", encoding="utf-8") as f:
@@ -69,6 +70,15 @@ def load_state_data(source_path: Path) -> Dict[str, Any]:
                             "depends_on": deps,
                         }
 
+                elif current_section == "Needs you now" and line_str.startswith("|"):
+                    parts = split_markdown_row(line_str)
+                    if len(parts) >= 3 and parts[0] != "Task" and not is_separator_row(parts):
+                        needs_you.append({
+                            "task": parts[0],
+                            "question": parts[1],
+                            "resume_when": parts[2],
+                        })
+
                 elif current_section == "Blocked" and line_str.startswith("|"):
                     parts = split_markdown_row(line_str)
                     if len(parts) >= 5 and parts[0] != "Task" and not is_separator_row(parts):
@@ -86,6 +96,7 @@ def load_state_data(source_path: Path) -> Dict[str, Any]:
             "status": "TRACKED",
             "task_states": tasks,
             "blocked_items": blocked,
+            "needs_you": needs_you,
         }
     else:
         raise ValueError(f"Unsupported source format: {source_path.suffix}. Expected .json or .md")
@@ -104,6 +115,14 @@ def render_terminal(data: Dict[str, Any]) -> str:
         lines.append("  Command progress only; COMPLETED is not project acceptance.")
         if data.get("dry_run"):
             lines.append("  SIMULATION: no task commands executed.")
+
+    needs_you = data.get("needs_you") or []
+    if needs_you:
+        lines.append(f"  NEEDS YOU ({len(needs_you)}):")
+        for item in needs_you:
+            lines.append(f"  * Task {item.get('task', '?')} - {item.get('question', '')}"
+                         f" (resume when: {item.get('resume_when', '')})")
+        lines.append("-" * 70)
 
     task_states = data.get("task_states", {})
     if not task_states:

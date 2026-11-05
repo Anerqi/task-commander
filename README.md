@@ -37,6 +37,19 @@ Every task should record an explicit owner, scope, dependencies, quality gates, 
 
 The human remains the final decision-maker. Task Commander handles the structure, not the authority.
 
+## Authority and attention
+
+Two seams decide whether a long project stays honest: who may act, and what a person is actually expected to do next. Both are recorded in files rather than inferred from conversation, and neither adds a task state.
+
+- **Authority record:** a task brief carries the grant source, the scope it covers, the strength it carries and the condition that invalidates it. A resumed task, including one leaving Blocked, revalidates that record instead of inheriting it silently; a narrowed grant means narrower work or a fresh confirmation.
+- **Three strengths — observe, propose and act:** `observe` reads and produces a plan without writing, `propose` writes only to an isolated output and never the working tree, `act` executes normally. Strength sits beside Fast Lane, Lean and Standard rather than replacing them. An unfamiliar scope, a first delegation of a new kind or an irreversible action starts record-only at `propose`; strength never waives a review or QA gate.
+- **Needs you now:** `project-status.md` may carry a derived view with three columns — `Task | Question | Resume when` — capped at five rows and empty when the project is healthy. It reads the status file; it is not a second place to store state.
+- **Receipt attention block:** outcome, attention, question, resume when and dispatch key, with the next owner named explicitly (`person`, `executor`, `reviewer`, `qa`, `commander` or `none`). "Waiting for a person" is declared in that block; a receipt whose prose only sounds like waiting has not asked you for anything.
+- **Status revision:** `- Status revision: N` in the project section, bumped once per update, plus `--expected-revision` on the validator. A single writer still needs it: a resumed window or a parallel window can act on a stale read, and the check reports a concurrency error instead of overwriting newer state.
+- **Design constitution:** a new capability is an attribute of an existing concept or prompt text before it becomes a new role, state, file or section; one default beats a configuration knob; every output element justifies the attention it costs. Coordination messages and continuations therefore report only what needs a person or what finished — no periodic progress narration, and a healthy project occupies no space in status output.
+
+The field-level contract lives in `references/06-task-template.md` and `references/19-task-routing.md`; the status view and receipt fields live in `templates/project-status.md` and `templates/task-receipt.md`. Recording a grant is not granting it: existing files stay valid without any of these fields, and the validator checks structure, never whether a question is the right one.
+
 ## Features
 
 - **Right-sized entry:** independent, clear, low-risk and reversible requests can use Executor Fast Lane without project initialization. Registered tasks use Lean coordination or Standard workflow while preserving state, permissions and evidence-based acceptance. Risk matters more than file count.

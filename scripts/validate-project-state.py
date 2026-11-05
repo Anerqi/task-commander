@@ -10,7 +10,17 @@ behavior are described below.
   --from-state and --to-state require each other and a nonblank --task-id;
   --task-id alone is invalid; --spec-path (defaults to
   templates/task-state-spec.txt located relative to the script, without
-  hard-coding absolute paths).
+  hard-coding absolute paths); --expected-revision N compares the optional
+  "- Status revision: N" line in the Project section, which gives the sole
+  writer a compare-and-set check instead of an honour-system read.
+- Optional coordination metadata: a "## Needs you now" section, when present,
+  must hold at most needs_you_max_rows rows (default 5) of three columns
+  (task, one concrete question, resume condition). Each row must name an
+  existing task in a non-terminal state and carry a nonblank question; a
+  missing section or an empty one is valid, so older files stay valid.
+- Status revision: when --expected-revision is given, the file must carry a
+  non-negative integer revision line and match it; a missing line is an error
+  rather than a silent pass.
 - Spec parsing: read task-state-spec.txt line by line, skip blank lines
   and # comments; '=' separates key and value; phase / state / heading /
   transition.<from> and the remaining settings each go to their own
@@ -32,7 +42,7 @@ behavior are described below.
 - Case comparison: state and transition lookup is case-insensitive; the
   spelling from the specification is retained in validation messages.
 - Output: UTF-8 without BOM, LF line endings. JSON contains valid / path /
-  task_count / errors; when errors exist the JSON is still printed and the
+  task_count / status_revision / needs_you_count / errors; when errors exist the JSON is still printed and the
   exit code is 1; fatal errors such as a missing state file or a missing
   spec key go to stderr with exit code 1.
 """
@@ -122,6 +132,9 @@ def main():
                         help='target state (requires --from-state and --task-id; nonblank)')
     parser.add_argument('--task-id', default=None, metavar='ID',
                         help='existing task id required for every transition; invalid alone')
+    parser.add_argument('--expected-revision', default=None, type=int, metavar='N',
+                        help='compare the optional "- Status revision: N" line in the '
+                             'Project section; a mismatch or a missing line is an error')
     parser.add_argument('--spec-path', default=None, metavar='FILE',
                         help='path to the state specification file; defaults to '
                              'templates/task-state-spec.txt under the Task Commander '
@@ -264,6 +277,77 @@ def main():
         if normalize_state(state) == 'blocked' and task_key not in blocked_before_by_task:
             errors.append('Missing blocked record for task: ' + task_key)
 
+    # Optional compare-and-set metadata: the sole writer bumps the revision once
+    # per update, so a stale read is detectable instead of silently overwritten.
+    revision_value = None
+    revision_prefix = settings.get('revision_prefix', '- Status revision:')
+    revision_match = re.search(r'(?m)^' + re.escape(revision_prefix) + r'\s*(\S+)\s*$', content)
+    if revision_match:
+        raw_revision = revision_match.group(1)
+        if re.fullmatch(r'\d+', raw_revision):
+            revision_value = int(raw_revision)
+        else:
+            errors.append('Invalid status revision: ' + raw_revision)
+    if args.expected_revision is not None:
+        if args.expected_revision < 0:
+            errors.append('Expected revision must not be negative: ' + str(args.expected_revision))
+        elif not revision_match:
+            errors.append('Missing status revision line required by --expected-revision')
+        elif revision_value is not None and revision_value != args.expected_revision:
+            errors.append('Status revision mismatch: file has ' + str(revision_value)
+                          + ', expected ' + str(args.expected_revision))
+
+    # Optional attention view: only work that waits for a person belongs here,
+    # and the row count is capped so a healthy project takes no space.
+    needs_you_count = 0
+    needs_you_start = settings.get('needs_you_section_start')
+    needs_you_end = settings.get('needs_you_section_end')
+    if needs_you_start and needs_you_end and needs_you_start in content:
+        try:
+            needs_you_columns = int(settings.get('needs_you_column_count', '3'))
+            needs_you_max_rows = int(settings.get('needs_you_max_rows', '5'))
+            if needs_you_columns < 1 or needs_you_max_rows < 1:
+                raise ValueError
+        except ValueError:
+            sys.exit('Needs-you-now column count and row cap must be positive integers')
+        needs_you_header = settings.get('needs_you_task_header', 'Task')
+        needs_you_section = re.search(
+            '(?s)' + re.escape(needs_you_start) + r'\s*(.*?)\s*' + re.escape(needs_you_end),
+            content)
+        if not needs_you_section:
+            errors.append('Needs you now section is not closed by the following section heading')
+        else:
+            for line_number, line in enumerate(
+                    re.split(r'\r\n|\r|\n', needs_you_section.group(1)), start=1):
+                line = line.strip()
+                if not line.startswith('|'):
+                    continue
+                cells = split_markdown_row(line)
+                if len(cells) != needs_you_columns:
+                    errors.append('Malformed needs-you-now row ' + str(line_number)
+                                  + ': expected ' + str(needs_you_columns)
+                                  + ' columns, found ' + str(len(cells)))
+                    continue
+                if is_separator_row(cells) or contains_ci((needs_you_header, ''), cells[0]):
+                    continue
+                needs_you_count += 1
+                needs_you_task = cells[0].strip()
+                needs_you_key = needs_you_task.casefold()
+                if not needs_you_key:
+                    errors.append('Malformed needs-you-now row ' + str(line_number)
+                                  + ': task id must be nonblank')
+                    continue
+                if needs_you_key not in task_states_by_id:
+                    errors.append('Needs you now references unknown task: ' + needs_you_task)
+                elif normalize_state(task_states_by_id[needs_you_key]) in ('completed', 'cancelled'):
+                    errors.append('Needs you now lists a finished task: ' + needs_you_task)
+                if not cells[1].strip() or cells[1].strip() == '-':
+                    errors.append('Needs you now row for task ' + needs_you_task
+                                  + ' has no concrete question')
+            if needs_you_count > needs_you_max_rows:
+                errors.append('Needs you now lists ' + str(needs_you_count)
+                              + ' rows; the attention budget is ' + str(needs_you_max_rows))
+
     # Flag presence, not truthiness: empty values must never bypass validation.
     # State transition validation (including <blocked-before> blocked recovery)
     blocked_before_token = '<blocked-before>'
@@ -312,6 +396,8 @@ def main():
         'valid': len(errors) == 0,
         'path': real_path,
         'task_count': len(task_states_by_id),
+        'status_revision': revision_value,
+        'needs_you_count': needs_you_count,
         'errors': errors,
     }
     # Always print the JSON; exit code 1 when errors exist

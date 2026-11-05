@@ -5,6 +5,14 @@ description: Multi-model task orchestration. Use for context building, durable p
 
 # Task Commander
 
+## Design constitution
+
+These three rules govern how this skill is extended; they are not task steps.
+
+1. **Attribute before concept.** A new capability is an attribute of an existing concept or a change to existing prompt text first. Adding a role, state, file or section requires showing that no existing mechanism can carry it, and recording the rejected alternative.
+2. **Defaults before settings.** For a value that suits almost every project, one default beats a setting: do not add a configuration knob; keep an adjustable default instead and state its value.
+3. **Every output element pays its attention cost.** A message, a table row, a field or a section must justify the attention it costs, or it is removed.
+
 ## Route once, keep the role
 
 1. Determine the project root from the user's path or current workspace; ask only when ambiguous. For project coordination or unfamiliar role boundaries, read `references/00-overview.md`. On an unfamiliar host, before installation, or when a needed capability may be missing, read `references/host-adapters.md`.
@@ -24,6 +32,7 @@ description: Multi-model task orchestration. Use for context building, durable p
 
 - **Project rules**: read the target project's root `AGENTS.md` when present; cold-start stage 1 gets only its neutral packet.
 - **Collaboration**: `references/15-collaboration.md` owns batches, permissions, windows and synchronization. Public research and focused subagents are allowed within effective authorization.
+- **Attention budget**: coordination messages and continuations report only what needs a person or what finished. No periodic progress narration, and a healthy project occupies no space in status output.
 - **Quality**: `references/16-quality-gates.md` owns gates. Reviewer=Spec, QA=Standards/behavior; no budget or one axis becomes an automatic pass.
 - **Recovery**: `references/14-backup-manager.md` owns recovery. Knowledge records are durable assets; a required verified backup gates dependent mutation.
 - **State**: `references/11-task-state-machine.md` owns status. Commander is the sole status writer after Context initialization and integrates shared records; only user-confirmed decisions are final. The optional knowledge layer never replaces task state.
@@ -31,7 +40,7 @@ description: Multi-model task orchestration. Use for context building, durable p
 - **Boundaries**: `references/21-window-boundaries.md` owns phase/window choices; `references/22-project-retro.md` is the optional environment retro after completion, a major incident, or repeated review/QA friction. Do not reset or auto-edit project rules by habit.
 - **Prompts**: `references/06-task-template.md` owns vertical slices and outcome-first instructions. Save the contract, reference paths, bundle coherent work, and stop when the outcome is established.
 - **Discovery**: `references/12-skill-discovery.md` plus `scripts/scan-skills.py`; filter frontmatter, then read only candidate bodies.
-- **Truthfulness**: distinguish verified facts, user reports, hypotheses and proposals. Tool availability, emitted prompts and successful checks are different facts; never claim execution from intent.
+- **Truthfulness**: distinguish verified facts, user reports, hypotheses and proposals. Tool availability, emitted prompts and successful checks are different facts; never claim execution from intent. Availability is not outcome: an idle, silent or unresponsive window has not completed, succeeded or failed; only a receipt or evidence changes state.
 
 ## Artifact navigation
 

@@ -40,3 +40,10 @@ blocked_id_header=Task
 task_id_header=ID
 task_column_count=11
 blocked_column_count=6
+# Optional coordination metadata; a file that omits these keys stays valid
+revision_prefix=- Status revision:
+needs_you_section_start=## Needs you now
+needs_you_section_end=## Task list
+needs_you_task_header=Task
+needs_you_column_count=3
+needs_you_max_rows=5

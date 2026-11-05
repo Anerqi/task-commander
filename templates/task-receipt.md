@@ -2,6 +2,18 @@
 
 > Use as a concise section of the existing task result, or a separate receipt if useful. Omit irrelevant optional sections rather than filling pages with empty fields. Retain prior-round evidence. All roles submit evidence and suggested states; only Commander updates central status.
 
+## Attention
+
+State what this delivery needs from a person; never leave it to be inferred from the prose below.
+
+- Outcome: ready | blocked | failed | waiting
+- Attention: person | executor | reviewer | qa | commander | none
+- Question: one concrete question when Attention is person; otherwise "-"
+- Resume when: the condition that lets this task continue
+- Dispatch key: the assignment this receipt answers, for example 03-R1 at input revision C4
+
+A delivery that needs nobody uses "none" with "-" as the question; do not invent a question to look diligent. A delivery that waits for a person without saying so is unfinished work, not a pass.
+
 ## Identity and progress
 
 - Task ID / round / primary role / window label:

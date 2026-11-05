@@ -5,10 +5,18 @@
 - Project name: <Project Name>
 - Project phase: Context Building
 - Protocol version: 2
+- Status revision: 1
 - Status owner: Commander
 - Pre-pause phase: n/a
 - Last updated: YYYY-MM-DD HH:mm <timezone>
 - Current focus: Complete the project context
+
+## Needs you now
+
+Empty when nothing waits for a person. List at most five rows, one question each; a healthy project leaves this section empty and a finished task never appears here.
+
+| Task | Question | Resume when |
+|---|---|---|
 
 ## Task list
 

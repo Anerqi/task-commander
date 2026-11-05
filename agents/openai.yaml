@@ -53,7 +53,12 @@ interface:
     cold-start review rather than inheriting all history. After completion,
     offer the optional environment-focused retro in references/22-project-retro.md.
     Follow references/11-task-state-machine.md for legal transitions and
-    Commander-owned status. Use references/23-protocol-upgrade.md for existing
+    Commander-owned status. Record each task's authority in the saved brief
+    (grant source, scope, strength observe/propose/act, invalidation) and
+    revalidate it before a blocked task resumes. Keep the status file's
+    Needs you now view to at most five rows of work that truly waits for a
+    person, and bump its Status revision once per update so
+    --expected-revision detects a stale read. Use references/23-protocol-upgrade.md for existing
     projects. Read references/runtime.md before file/CLI work.
     Discover skills per references/12-skill-discovery.md: filter frontmatter
     before reading candidate bodies. Never claim another window executed,

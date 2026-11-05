@@ -88,13 +88,14 @@ Use the existing 11-column task table and 6-column blocked table. Both CLI tools
 Every Commander status update must complete in order:
 
 1. Read the latest `project-status.md` and confirm the current state was not changed by another update.
-2. Before writing, validate the proposed transition against the current file: `<python> scripts/validate-project-state.py --path <status path> --task-id <task id> --from-state "<current state>" --to-state "<target state>"`. Both states and a nonblank task ID are required; the source must match that task's recorded current state.
-3. Check that the required evidence files really exist, and read their key conclusions.
-4. Update the current status, time, and next actions in the task list.
-5. Append one row to the status history: old state, new state, basis, and operator.
-6. Sync the current blockage, current focus, and project phase. Add a blocked record on entry; remove it on recovery/cancellation, retaining its reason and pre-block state in history. Change the task and active blocked table together before validation.
-7. Run structural validation with `--path` only on the updated file, then re-read it as UTF-8 and confirm the tables, states, and evidence paths. Do not replay the old `--from-state` transition check after the state has already changed.
-8. On the first update after adopting a newer protocol, add or correct the `Protocol version` line in the Project section as metadata. This is not a task transition and must not rewrite task history; see `references/23-protocol-upgrade.md`.
+2. Treat the write as a compare-and-set on the optional `- Status revision: N` integer in the Project section. Pass the value just read as `--expected-revision <N>` to the transition check in the next step, and bump the integer exactly once in every status update. A file without the line remains valid, and the update that adopts it writes `- Status revision: 1`. A mismatch means another writer changed the file since the read, so re-read and redo the update instead of overwriting; the revision is metadata, not a transition, and a mismatch is a concurrency error, not a state error.
+3. Before writing, validate the proposed transition against the current file: `<python> scripts/validate-project-state.py --path <status path> --task-id <task id> --from-state "<current state>" --to-state "<target state>"`. Both states and a nonblank task ID are required; the source must match that task's recorded current state.
+4. Check that the required evidence files really exist, and read their key conclusions.
+5. Update the current status, time, and next actions in the task list.
+6. Append one row to the status history: old state, new state, basis, and operator.
+7. Sync the current blockage, current focus, and project phase. Add a blocked record on entry; remove it on recovery/cancellation, retaining its reason and pre-block state in history. Change the task and active blocked table together before validation.
+8. Run structural validation with `--path` only on the updated file, then re-read it as UTF-8 and confirm the tables, states, and evidence paths. Do not replay the old `--from-state` transition check after the state has already changed.
+9. On the first update after adopting a newer protocol, add or correct the `Protocol version` line in the Project section as metadata. This is not a task transition and must not rewrite task history; see `references/23-protocol-upgrade.md`.
 
 If any step fails, keep the original state and record it as an issue to handle; never write the target state first and add evidence later.
 
@@ -120,6 +121,8 @@ Entering `Blocked` must record:
 Each currently Blocked task must have exactly one active blocked record. The record must reference an existing Blocked task, and its pre-block state must be a declared non-Blocked state with a legal transition into Blocked. In the default graph, Completed, Cancelled, Blocked and unknown values cannot be pre-block states. Duplicate, orphan, stale or missing records fail structural validation; repair them from actual history/evidence rather than guessing or deleting inconvenient evidence.
 
 After the blockage is relieved, the task may return only to its recorded legal pre-block state and continue with normal transitions; recovery must never skip review or QA. Validate against the still-blocked file with `<python> scripts/validate-project-state.py --path <path/to/project-status.md> --task-id <task id> --from-state Blocked --to-state "<pre-block state>"`. Cancellation remains an explicit legal alternative, with the same task-ID and structural consistency requirements, not a recovery to the pre-block state.
+
+Before a Blocked task resumes, revalidate its authority against the current policy instead of inheriting the pre-block grant. If the grant was narrowed, the task resumes with the narrower scope or waits for user confirmation, and the receipt records which authority version applies.
 
 ## Parallel tasks
 

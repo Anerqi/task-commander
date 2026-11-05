@@ -17,6 +17,16 @@
 
 A complex low-risk task may need Standard coordination. Lean does not imply weak verification. Existing task permissions and gates remain effective until explicitly revised through their governing protocol.
 
+## Authority strength
+
+Authority strength answers a separate question from mode selection: what may this window do with its scope? It takes one of three values, `observe`, `propose` or `act`, and it is recorded in the brief per `references/06-task-template.md`. It is an attribute of the assignment, not a mode, role or task state.
+
+- **Observe**: read, inspect and produce a plan or findings; no writes to the working tree, the project outputs or external systems.
+- **Propose**: write to an isolated output such as a scratch directory, a copy, a draft or a diff, never the working tree; the result is a proposal that a later `act` round applies.
+- **Act**: normal execution within the recorded scope, permissions and gates.
+
+A first pass in an unfamiliar scope, any irreversible action, or a first delegation of a new kind starts at `propose`; a reversible change inside a scope the window has already handled may start at `act`. Strength is orthogonal to Fast Lane, Lean and Standard: it never waives a required Reviewer or QA gate and never grants a capability the effective policy does not. Raising strength needs user confirmation and is recorded in the brief and the task history. `observe` and `propose` still produce evidence; neither can satisfy an acceptance gate by itself.
+
 ## Fast Lane eligibility and contract
 
 All conditions must hold:

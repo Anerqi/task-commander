@@ -723,6 +723,58 @@ class DocumentContracts(unittest.TestCase):
         self.assertIn("knowledge closeout", scenarios.lower())
         self.assertIn("Spec-axis failure", scenarios)
 
+    def test_authority_and_attention_contracts(self):
+        # Text guards for the authority record, the strength axis, the attention
+        # view and the compare-and-set revision. They catch deletion, not live
+        # model compliance, and they say nothing about whether a grant is genuine.
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        for marker in (
+            "## Design constitution",
+            "attribute of an existing concept",
+            "one default beats a setting",
+            "justify the attention it costs",
+            "Attention budget",
+            "Availability is not outcome",
+        ):
+            with self.subTest(source="SKILL.md", marker=marker):
+                self.assertIn(marker, skill)
+
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        for marker in (
+            "## Authority and attention",
+            "Needs you now",
+            "--expected-revision",
+            "Status revision",
+            "observe",
+            "propose",
+            "act",
+        ):
+            with self.subTest(source="README.md", marker=marker):
+                self.assertIn(marker, readme)
+
+        contracts = {
+            "references/06-task-template.md": (
+                "**Authority and recovery**", "grant source", "observe | propose | act",
+                "context mode"),
+            "references/19-task-routing.md": (
+                "## Authority strength", "**Observe**", "**Propose**", "**Act**"),
+            "references/15-collaboration.md": (
+                "Availability is not outcome", "claim", "advisory warning"),
+            "references/11-task-state-machine.md": (
+                "Status revision", "--expected-revision", "revalidate"),
+            "templates/task-receipt.md": (
+                "## Attention", "Outcome:", "Attention:", "Dispatch key:"),
+            "templates/project-status.md": (
+                "## Needs you now", "Status revision: 1"),
+            "templates/task-state-spec.txt": (
+                "needs_you_section_start", "needs_you_max_rows", "revision_prefix"),
+        }
+        for source, markers in contracts.items():
+            text = (ROOT / source).read_text(encoding="utf-8")
+            for marker in markers:
+                with self.subTest(source=source, marker=marker):
+                    self.assertIn(marker, text)
+
 
 if __name__ == "__main__":
     unittest.main()
