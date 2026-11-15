@@ -252,7 +252,7 @@ def main():
     task_states_by_id = {}   # case-insensitive task id -> parsed current state
     if len(task_sections) == 1:
         for line_number, line in enumerate(
-                re.split(r'\\r\\n|\\r|\\n', task_sections[0]['body']), start=1):
+                re.split(r'\r\n|\r|\n', task_sections[0]['body']), start=1):
             line = line.strip()
             if not line.startswith('|'):
                 continue
@@ -283,7 +283,7 @@ def main():
     blocked_sections = extract_sections(content, blocked_title, (2, 3))
     for blocked_section in blocked_sections:
         for line_number, line in enumerate(
-                re.split(r'\\r\\n|\\r|\\n', blocked_section['body']), start=1):
+                re.split(r'\r\n|\r|\n', blocked_section['body']), start=1):
             line = line.strip()
             if not line.startswith('|'):
                 continue
@@ -358,7 +358,7 @@ def main():
             errors.append('Needs you now section is duplicated')
         for needs_you_section in needs_you_sections[:1]:
             for line_number, line in enumerate(
-                    re.split(r'\\r\\n|\\r|\\n', needs_you_section['body']), start=1):
+                    re.split(r'\r\n|\r|\n', needs_you_section['body']), start=1):
                 line = line.strip()
                 if not line.startswith('|'):
                     continue
