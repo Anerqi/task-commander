@@ -75,7 +75,7 @@ class DocumentContracts(unittest.TestCase):
         for marker in (
             "Generate this file last",
             "Extract hard rules from the interview",
-            "If `AGENTS.md` already exists, read it first, merge new information",
+            "If `AGENTS.md` already exists, read it first. Preserve confirmed rules",
             "flag any conflicts for the user to resolve before writing",
             "must be confirmed by the user before writing",
             "Do not paste Task Commander protocol rules into `AGENTS.md`",
