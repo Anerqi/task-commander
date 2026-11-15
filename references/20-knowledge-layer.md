@@ -38,8 +38,9 @@ knowledge/
 
 **Creation trigger:**
 
-- **New project:** Context may create `knowledge/LOG.md` at initialization when the project is expected to span multiple sessions or the user wants durable knowledge; it may also initialize a short `ROADMAP.md` when goals outlast the current session.
-- **Existing project:** do not create a layer during a routine context refresh. Start with `knowledge/LOG.md` on the first durable conclusion and after user confirmation; preserve all existing records and history. No task-schema migration is required.
+- **New or existing project:** a multi-session expectation alone does not justify an empty knowledge directory or LOG. Create the layer on the first durable conclusion, or when the user explicitly requests a persistent timeline. For an existing project, obtain confirmation before creating a new layer; preserve all existing records and history.
+- Create `knowledge/ROADMAP.md` only when goals extend beyond the current session and a roadmap will guide later work. Do not create an empty roadmap.
+- No task-schema migration is required.
 - In both cases, do not pre-create topic files, `Cited.md` or `Reference/`; create each on its first real trigger.
 - Before creating the directory, check for an existing `knowledge/` that already serves another purpose. If it is unrelated, ask the user and choose a different directory or explicitly confirm adoption; do not overwrite it.
 - `knowledge/Reference/` holds raw external inputs the project owns but did not author. It is not for copied knowledge-base bodies or generated summaries.
@@ -58,7 +59,7 @@ After initialization, the **Commander is the integration owner** for shared know
 
 ### LOG entries
 
-After a substantive milestone, decision, experiment result or incident, add one entry **at the top** of `knowledge/LOG.md` (newest first):
+After a substantive milestone, decision, experiment result or incident, add one concise entry **at the top** of `knowledge/LOG.md` (newest first). Do not log every task transition, routine status update, repeated checkpoint or unchanged evidence refresh:
 
 - What changed, was decided, or was learned.
 - Evidence, receipt or artifact pointer.
@@ -74,7 +75,7 @@ When a stable conclusion, lesson, procedure or reusable pattern appears, create 
 - Keep `summary` as a one-line conclusion for retrieval.
 - Use `contains` for the kinds of knowledge present: `decision`, `experience`, `lesson`, `procedure`, `reference` or `open_question`.
 - Keep only body sections with real content. Include `Background` and `Current conclusion` when they carry content; evidence, practice, boundaries and open questions are added only when useful. A topic must still contain a real conclusion somewhere; a title-only or heading-only shell is not valid.
-- Correct an old conclusion in place and add a LOG pointer to the revision. Do not silently overwrite history.
+- Do not silently replace a prior conclusion. Mark the old conclusion as superseded, preserve its evidence and rationale, and add a LOG pointer to the new conclusion. If the conclusion is materially different, prefer a new topic/version over rewriting the historical body.
 - A topic may point to a decision ID, artifact, receipt or source; it must not become a second decision ledger.
 
 ### External knowledge
@@ -141,7 +142,7 @@ Mark `graduation_status: candidate` only after that judgment. Commander proposes
 
 ## AGENTS.md navigation
 
-When the layer exists, the root `AGENTS.md` should state the reading order and boundaries, not duplicate the protocol:
+When the layer exists, the root `AGENTS.md` should state the reading order and boundaries, not duplicate the protocol. Keep it stable: do not add live task counts, completed-task totals, milestone counters or temporary progress notes, and do not rewrite it when its durable rules have not changed.
 
 ```text
 Read AGENTS.md -> knowledge/ROADMAP.md (if present) -> recent knowledge/LOG.md entries -> relevant knowledge/topics/ -> task brief.

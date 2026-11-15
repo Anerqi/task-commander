@@ -27,6 +27,20 @@ Work top to bottom. The first answer that fits wins.
 5. **Compact or summarize.**
    Use this when the context is still relevant, the host/directory/role stay the same, and the user must stay in the loop, but the window is approaching a real limit. Prefer the host's verified compaction feature; otherwise save a durable checkpoint and open a fresh window with a recovery prompt. If no reliable compaction exists, say so rather than pretending context was preserved.
 
+## Phase closeout
+
+At a genuine phase boundary, compact coordination overhead without erasing project history:
+
+1. Reconcile the phase outcome against the original goal, task briefs, receipts and accepted artifact versions. Keep task IDs and terminal states stable.
+2. Review completed-task accumulation. More than 10 Completed rows triggers a non-blocking validator warning; use it as a prompt to review the phase, not permission to delete records. Archive only after a verified copy exists and the project owner has approved the destination and retention.
+3. Keep the live status file focused on current tasks, the current user attention view, next steps and short status history. Move optional Coordination, Knowledge, Active windows, Pending user actions, Backups and Synchronization sections into the file only when they carry current information.
+4. Keep the root AGENTS.md limited to durable project rules and navigation. Do not put task counts, milestone counters, current progress or temporary notes in it. Do not rewrite it when no durable rule changed.
+5. Update knowledge/LOG.md only for a substantive milestone or durable conclusion. Preserve superseded conclusions and confirmed decisions; do not rewrite history to make the current view look shorter.
+6. Update knowledge/ROADMAP.md only when goals continue beyond this session. If no longer-term goal remains, omit it rather than retaining an empty roadmap.
+7. Validate the resulting status and knowledge layer, then prepare a compact next-phase handoff with authoritative paths, current versions, remaining outcomes and effective permissions.
+
+Do not create a new role or task state for closeout. Do not compact or archive mid-phase. A warning is not authorization to delete, merge or change accepted work.
+
 ## How this maps to Task Commander
 
 Task Commander uses manually relayed windows on most hosts. It does not assume automatic `clear`, `compact` or cross-window messaging.

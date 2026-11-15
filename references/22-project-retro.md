@@ -29,6 +29,18 @@ Do not run a full retro after every small task. A short LOG entry may be enough.
 
 Use `templates/project-retro.md` for the working record. The retro is not a new task state and does not replace project Acceptance; it happens after the triggered milestone or completion.
 
+## Phase closeout and compaction
+
+At a phase boundary, review the project for accumulated coordination clutter:
+
+- Check whether more than 10 task rows are Completed. The status validator reports this as a warning only; it does not invalidate the status file or authorize deletion.
+- Preserve task IDs, state history, accepted evidence and confirmed decisions. Archive only with an approved destination and a verified copy; keep a readable pointer in the live project records.
+- Keep AGENTS.md stable and limited to durable rules/navigation. Remove counters and temporary progress notes only with the project owner's approval; do not rewrite an otherwise unchanged file.
+- Keep the skills inventory in the Available skills subsection of background/01_project_background.md. Read legacy background/02_skill_list.md as migration input; do not create it for new projects or delete it automatically.
+- Do not create CONTEXT.md just because grill-with-docs was loaded for this session. Keep it only when the project already maintains that glossary or the user requests it.
+- Create/update knowledge/LOG.md only for substantive milestones or durable conclusions. Maintain ROADMAP.md only when future-session goals remain.
+- Create a successor phase/task for accepted new scope; do not reopen terminal tasks or erase their history.
+
 ## Boundaries
 
 - Improve the environment, not the person. Avoid blame and vague advice.

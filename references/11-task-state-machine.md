@@ -28,7 +28,7 @@ When a project resumes from `Paused`, the pre-pause phase must be recorded and r
 
 ## Protocol version
 
-`project-status.md` may include an optional `- Protocol version: 2` line in the Project section. It records which Task Commander protocol the project was last reconciled against and supports the upgrade checks in `references/23-protocol-upgrade.md`. It is metadata, not a task state: existing files without it remain valid, and adding it requires neither a transition nor a new task row. The task table, blocked table and state rules are unchanged by protocol version.
+`project-status.md` may include an optional `- Protocol version: 3` line in the Project section. It records which Task Commander protocol the project was last reconciled against and supports the upgrade checks in `references/23-protocol-upgrade.md`. It is metadata, not a task state: existing files without it remain valid, and adding it requires neither a transition nor a new task row. Version 3 nests Blocked and Pending user actions under `## Needs you now`; legacy top-level sections remain valid.
 
 ## Required task fields
 
@@ -81,7 +81,7 @@ A gate may be skipped only when the task brief explicitly states that Reviewer o
 
 ## Status table cells
 
-Use the existing 11-column task table and 6-column blocked table. Both CLI tools share the same cell parser: start rows with `|`, escape a literal pipe inside a cell as `\|`, and retain empty cells. Surrounding whitespace, an optional closing pipe, and alignment rows such as `| :--- | ---: |` are supported. Other backslashes are preserved; this is not a general Markdown parser. The validator still rejects wrong column counts and inconsistent blocked records; rendering alone is not validation.
+Use the existing 11-column task table and 6-column blocked table. New status files place the blocked table under `### Blocked` inside `## Needs you now`. Existing files with a top-level `## Blocked` remain valid. The blocked table may be omitted when no task is Blocked; every Blocked task still requires exactly one matching record. Both CLI tools share the same cell parser: start rows with `|`, escape a literal pipe inside a cell as `\|`, and retain empty cells. Surrounding whitespace, an optional closing pipe, and alignment rows such as `| :--- | ---: |` are supported. Other backslashes are preserved; this is not a general Markdown parser. The validator still rejects wrong column counts and inconsistent blocked records; rendering alone is not validation.
 
 ## Status update transaction
 
@@ -141,8 +141,8 @@ Parallelism only changes dispatch order; it never changes a single task's state 
 
 ## Optional coordination metadata
 
-The optional Coordination, Knowledge, Active windows, Pending user actions, Backups, and Synchronization sections in `templates/project-status.md` track context revisions, durable-knowledge pointers, task/window mappings, input versions, ownership and acknowledgment. They do not add states or alter the required task/history columns. Existing projects may add them incrementally.
+Create optional Coordination, Knowledge, Active windows, Pending user actions, Backups and Synchronization sections only when they carry current information. New Pending user actions belong under `### Pending user actions` inside `## Needs you now`; legacy top-level sections remain valid. These sections track context revisions, durable-knowledge pointers, task/window mappings, input versions, ownership and acknowledgment. They do not add states or alter the required task/history columns. Existing projects may adopt them at a phase boundary.
 
 Optional in-phase progress evidence belongs in task receipts/checkpoints per `templates/task-receipt.md`; continuations reference it. `references/02-commander.md` (In-phase progress checks) owns the diagnostic trigger. These checks add no required fields or states and never imply a transition or gate pass by themselves; use the existing evidence and transaction rules for any actual status change.
 
-Commander checks these optional fields manually; `scripts/validate-project-state.py` validates structure/state names, active blocked-record consistency and task-bound requested transitions, not evidence truth, project-phase readiness, backup restorability, read/write conflicts, acknowledgment, Reviewer/QA evidence or permission enforcement, or full history consistency. A successful CLI result does not replace those checks.
+Commander checks these optional fields manually; `scripts/validate-project-state.py` validates structure/state names, active blocked-record consistency and task-bound requested transitions. It also warns when more than 10 tasks are Completed. Warnings do not change validity or the exit code. The validator does not prove evidence truth, project-phase readiness, backup restorability, read/write conflicts, acknowledgment, Reviewer/QA evidence, permission enforcement or full history consistency. A successful CLI result does not replace those checks.
