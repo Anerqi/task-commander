@@ -106,9 +106,10 @@ if any(row[2] == "Blocked" for row in task_rows if len(row) >= 3):
 history_rows = table_rows(section(status, "## Status history"), "When")
 check(len(history_rows) >= 12, "Status history remains intact")
 
+status_headings = {line.strip() for line in status.splitlines() if line.lstrip().startswith('#')}
 for heading in ("## Coordination", "## Knowledge", "## Active windows",
                 "## Backups", "## Synchronization", "## Pending user actions"):
-    check(heading not in status, "Empty optional section omitted: " + heading)
+    check(heading not in status_headings, "Empty optional section omitted: " + heading)
 
 check("## Available skills" in background, "Skills have a consolidated section")
 check("csv-normalizer" in background and "sqlite-migrator" in background,
