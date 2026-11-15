@@ -107,7 +107,7 @@ def extract_sections(content, title, allowed_levels, stop_at_nested=False):
             if (stop_at_nested and next_level > level) or next_level <= level:
                 end = cursor
                 break
-        sections.append({'level': level, 'body': '\\n'.join(lines[index + 1:end])})
+        sections.append({'level': level, 'body': '\n'.join(lines[index + 1:end])})
     return sections
 
 
@@ -117,7 +117,6 @@ def heading_title(value):
 
 
 def load_spec(spec_path):
-
     """Parse the spec: return phases, states, headings, transitions, settings."""
     # UTF-8 with BOM stripped; invalid bytes are replaced
     with open(spec_path, 'r', encoding='utf-8-sig', errors='replace') as reader:
