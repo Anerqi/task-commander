@@ -43,28 +43,6 @@
 | ID | Affected tasks | Question / local action | Expected safe return | Owner | Resume condition / fallback |
 |---|---|---|---|---|---|
 
-## Coordination
-
-- Context revision: C7
-- Collaboration policy: background/01_project_background.md
-- Integration owner: Commander
-
-## Knowledge
-
-- Knowledge directory: knowledge/
-
-## Active windows
-
-- None.
-
-## Backups
-
-- None.
-
-## Synchronization
-
-- None pending.
-
 ## Next steps
 
 1. Close Phase 1 and prepare the Phase 2 cutover rehearsal.
