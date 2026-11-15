@@ -24,7 +24,7 @@ When the four modules are composed, the orchestration order and document sources
 
 ### Steps
 
-1. Understand the current state. Read the project structure and documents first: CONTEXT.md, decision-log.md, existing background documents, and code; when the project already uses ADRs, read them as well. Record facts confirmable from files directly; do not ask the user.
+1. Understand the current state. Read the project structure and documents first: decision-log.md, existing background documents, and code. Read CONTEXT.md only when it exists; when the project already uses ADRs, read them as well. Record facts confirmable from files directly; do not ask the user.
 2. Deep-dive by decision dependency. Ask the highest-impact question first; wait before dependent follow-ups. Related low-effort questions may be grouped per `references/15-collaboration.md`. Every question must:
    - Check the term table: point out conflicts between the user's wording and existing standard terms immediately.
    - Sharpen vague language: when the user is vague or polysemous, propose precise standard-term candidates and ask the user to confirm.
@@ -33,7 +33,7 @@ When the four modules are composed, the orchestration order and document sources
    - Offer recommended answers: every question comes with a recommended answer or recommended options; never leave the user to answer from scratch.
    - Resolve dependencies that would block later questions first; do not ask what documents can answer.
 3. Consolidate as you go. For every answer, judge its category (goal/scope/constraint/term/decision/open) and write it to the matching source of truth:
-   - Update the term table immediately once a term is confirmed (CONTEXT.md); record terms and domain relations only, never implementation details.
+   - If the project maintains CONTEXT.md, update its term table once a term is confirmed; record terms and domain relations only. Otherwise update only the core terminology summary in background/01_project_background.md. Do not create CONTEXT.md merely because this fallback is active.
    - Do not create ADRs by default; record one only when the project already uses ADRs and the decision is simultaneously hard to reverse, surprising without context, and a real trade-off, including background, decision, and reason. `decision-log.md` is the sole ledger of project decisions and keeps the decision id, final conclusion, and ADR path; on conflict it wins.
 
 ### Output form

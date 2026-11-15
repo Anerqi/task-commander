@@ -1,6 +1,6 @@
 # Host-Neutral Skill Discovery Protocol
 
-> Purpose: when generating `background/02_skill_list.md`, avoid reading every Skill body. First read only the YAML frontmatter with the script, dedupe and filter; read the full body only for candidate Skills. Host installation conventions and capability fallbacks live in `references/host-adapters.md`.
+> Purpose: maintain the `Available skills` subsection in `background/01_project_background.md` without reading every Skill body. First read only YAML frontmatter, dedupe and filter; read full bodies only for selected candidates. `background/02_skill_list.md` is a legacy input path, not a new output. Host installation conventions and capability fallbacks live in `references/host-adapters.md`.
 
 ## When to run
 
@@ -35,7 +35,7 @@ Root order is also duplicate priority. When the same skill name appears more tha
 
 ### Phase one: metadata filtering
 
-1. Extract 5-15 query terms from `01_project_background.md` and `CONTEXT.md`, covering domain, deliverables, technology stack, and task types.
+1. Extract 5-15 query terms from `01_project_background.md` and, only when present, `CONTEXT.md`, covering domain, deliverables, technology stack, and task types.
 2. Run the scan script; it reads only the YAML frontmatter at the top of each `SKILL.md`, never the body.
 3. Match query terms against names and descriptions and score them.
 4. Keep at most 30 candidates by default; when results are short, supplement with same-domain skills or skills the user explicitly specified.
@@ -53,7 +53,7 @@ Do not keep reading unselected Skills' bodies "just in case".
 
 ## Output requirements
 
-`background/02_skill_list.md` records, for every final inclusion:
+`background/01_project_background.md` records a concise `Available skills` subsection for every final inclusion:
 
 - Skill name
 - Choice reason
@@ -68,7 +68,11 @@ Do not keep reading unselected Skills' bodies "just in case".
 Absolute paths are resolved for the active workspace and current session. They
 are not portable artifacts that can be reused unchanged on another machine.
 
-The scan result is a candidate list, not the final checklist. The final judgment must combine the project background and the candidate bodies.
+The scan result is a candidate list, not the final checklist. The final judgment must combine the project background and selected candidate bodies.
+
+## Legacy compatibility
+
+When `background/02_skill_list.md` exists, read it as migration input and merge only still-relevant entries into the `Available skills` subsection in `background/01_project_background.md`. Do not create the legacy file in new projects. Do not delete or rewrite an existing legacy file automatically; retain it as a historical compatibility source until the project owner approves cleanup.
 
 ## Fallback rules
 
