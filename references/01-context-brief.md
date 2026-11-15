@@ -44,7 +44,7 @@ Create the prescribed records for a new project. For an existing project, reuse 
    - Core terminology summary. Point to `<Project Root>/CONTEXT.md` only when that glossary already exists or the project explicitly chooses to maintain one.
    - Available skills: a concise inventory of selected Skills/plugins, their triggers, applicable tasks, paths and capability requirements. This subsection replaces a new `background/02_skill_list.md` file.
    - Open items: owner, needed information, corresponding questionnaire path
-   - Collaboration policy: record effective tool permissions with their authorization sources, exceptions, parallel capacity, acceptance/revision budgets, user assistance preferences, and backup scope/destination/retention. Read `references/15-collaboration.md` only when defining or changing policy; otherwise reuse confirmed policy and inherit existing authorization without asking again.
+   - Collaboration policy: record effective tool permissions with their authorization sources, exceptions, parallel capacity, acceptance/revision budgets, user assistance preferences, and backup scope/destination/retention. Read `references/15-collaboration.md` (Policy activation) only when defining or changing policy; otherwise reuse confirmed policy and inherit existing authorization without asking again.
    - Knowledge retention: whether the optional knowledge layer is deferred or enabled, its directory, and any chosen external graduation target. Point to `references/20-knowledge-layer.md`; do not duplicate the layer's topics here.
 
 2. `<Project Root>/CONTEXT.md` — conditional domain glossary

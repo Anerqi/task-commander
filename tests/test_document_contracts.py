@@ -62,22 +62,27 @@ class DocumentContracts(unittest.TestCase):
 
     def test_context_has_handoff_and_stop_contract(self):
         text = (ROOT / "references/01-context-brief.md").read_text(encoding="utf-8")
+        template = (ROOT / "templates/commander-handoff.md").read_text(encoding="utf-8")
         for marker in (
-            "You are the Commander for this project.",
+            "templates/commander-handoff.md",
             "Paste this block into your Commander window.",
             "without planning or dispatching execution tasks yourself",
             "Creating documents alone is not completion.",
         ):
             self.assertIn(marker, text)
+        self.assertIn("You are the Commander for this project.", template)
 
     def test_context_agent_generates_and_safely_reconciles_project_agents(self):
         context = (ROOT / "references/01-context-brief.md").read_text(encoding="utf-8")
         orchestration = (ROOT / "references/10-context-orchestration.md").read_text(encoding="utf-8")
         for marker in (
-            "Generate this file last",
+            "generate this file after the core project records are complete",
             "Extract hard rules from the interview",
-            "If `AGENTS.md` already exists, read it first. Preserve confirmed rules",
-            "flag any conflicts for the user to resolve before writing",
+            "read it during the first project-record pass and compare it with confirmed rules",
+            "byte-for-byte identical",
+            "leave it untouched",
+            "show the exact diff and obtain user confirmation",
+            "Flag conflicts and resolve them with the user before writing",
             "must be confirmed by the user before writing",
             "Do not paste Task Commander protocol rules into `AGENTS.md`",
         ):
@@ -617,9 +622,11 @@ class DocumentContracts(unittest.TestCase):
         self.assertIn("Knowledge delta", command)
 
         context = (ROOT / "references/01-context-brief.md").read_text(encoding="utf-8")
-        for marker in ("knowledge/LOG.md", "knowledge/ROADMAP.md", "Reading order",
-                       "knowledge/LOG.md (if present"):
+        for marker in ("knowledge/LOG.md", "knowledge/ROADMAP.md", "Reading order"):
             self.assertIn(marker, context)
+        handoff = (ROOT / "templates/commander-handoff.md").read_text(encoding="utf-8")
+        self.assertIn("knowledge/LOG.md (if present", handoff)
+        self.assertIn("knowledge/ROADMAP.md (if present", handoff)
 
         orchestration = (ROOT / "references/10-context-orchestration.md").read_text(encoding="utf-8")
         for marker in ("Optional durable knowledge", "references/20-knowledge-layer.md",
