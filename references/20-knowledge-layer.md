@@ -29,7 +29,7 @@ Do not create a second competing summary. If a topic needs the full reasoning, i
 
 ```text
 knowledge/
-  LOG.md                  # created at initialization for a multi-session project
+  LOG.md                  # created on the first durable conclusion or user request
   ROADMAP.md              # optional; only when goals outlast one session
   topics/<topic>.md       # created on the first stable conclusion or lesson
   Cited.md                # created on first external adoption
