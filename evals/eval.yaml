@@ -37,6 +37,7 @@ cases:
     - evals/cases/04-continuation.yaml
     - evals/cases/05-window-recovery.yaml
     - evals/cases/06-missing-evidence.yaml
+    - evals/cases/07-commander-scope.yaml
   defaults:
     timeout_seconds: 600
     max_turns: 30
