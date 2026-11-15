@@ -1,5 +1,5 @@
 # Task Commander behavioral evals via skill-up.
-# Manual trigger only: every run spends model tokens (6 agent runs + 6 judge runs).
+# Manual trigger only: every run spends model tokens (one agent run and one judge run per case).
 #
 # Why not `uses: alibaba/skill-up@...`? Its runner image pins skill-up 0.7.0, and these
 # cases use multiple judges per case (`judges:`), which needs a recent skill-up
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       cases:
-        description: "Case glob, e.g. 0[36]-* (empty = all six)"
+        description: "Case glob, e.g. 0[36]-* (empty = all seven)"
         required: false
         default: ""
 
@@ -47,6 +47,7 @@ jobs:
           export "$(echo "$EVAL_PROVIDER" | tr '[:lower:]-' '[:upper:]_')_API_KEY=$EVAL_API_KEY"
           args=()
           if [ -n "$CASES" ]; then args+=(--include-case-name "$CASES"); fi
+          python evals/scripts/prepare_judge_model.py
           skill-up validate evals/eval.yaml
           skill-up run evals/eval.yaml --output-dir skill-up-report "${args[@]}"
       - uses: actions/upload-artifact@v4
