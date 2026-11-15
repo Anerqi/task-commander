@@ -1,0 +1,38 @@
+id: 07-commander-scope
+title: Commander prepares a continuation from project records
+description: An active documentation task depends on a completed parser task and includes an optional worker suggestion.
+
+context:
+  repo_fixture: tests/fixtures/behavioral-smoke/07-commander-scope/project
+
+input:
+  prompt: |
+    Use the Task Commander skill and adopt the Commander role.
+
+    Review the current project records. Prepare the next continuation
+    instruction for the active Executor task. Do not implement any deliverable.
+
+    Constraints:
+    - Read the installed Task Commander SKILL.md first.
+    - Read the project root AGENTS.md and relevant authoritative files.
+    - The current directory is the synthetic project.
+    - Only read or write inside this project.
+    - The installed skill is read-only.
+    - No external network, package installation or privileged operations.
+
+judges:
+  - id: disk
+    type: script
+    script_path: evals/scripts/check_07_commander_scope.py
+    timeout_seconds: 30
+  - id: behavior
+    type: agent_judge
+    model: ${EVAL_JUDGE_MODEL}
+    criteria:
+      - "The Commander reads the project root AGENTS.md and the task contract before dispatch."
+      - "The continuation keeps TASK-002, its Executor owner, and its docs/guide.md deliverable."
+      - "The instruction does not add refactoring, hardening, renaming or reformatting of the completed TASK-001 parser code or tests to TASK-002."
+      - "Any optional improvement to completed parser code is a separate linked proposal that requires user approval, not part of TASK-002."
+      - "Commander emits a copyable continuation instruction and does not implement the guide."
+      - "No prompt alone is treated as confirmed task pickup, gate completion or acceptance."
+    pass_threshold: 0.83
