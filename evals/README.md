@@ -1,6 +1,6 @@
 # Task Commander × skill-up
 
-Automated port of the six manual scenarios in `tests/behavioral-smoke.md`.
+Automated port of six manual scenarios in `tests/behavioral-smoke.md`, plus one Commander scope-protection regression.
 
 - Fixtures are **reused in place** (`context.repo_fixture: tests/fixtures/behavioral-smoke/<case>/project`), so `input.md` and the fixture tree stay the single source.
 - The installed Skill **excludes `tests/`**, which enforces the "do not look at criteria / sibling fixtures / results" rule physically instead of by prompt.
@@ -12,10 +12,11 @@ Automated port of the six manual scenarios in `tests/behavioral-smoke.md`.
 ## Run
 
 ```bash
-skill-up validate evals/eval.yaml
 # provider/model are supplied per run so no host/model identity is committed
 export EVAL_PROVIDER=<provider> EVAL_MODEL=<model> EVAL_BASE_URL=<openai-compatible-url>
 export EVAL_JUDGE_MODEL=<provider>/<model> <PROVIDER>_API_KEY=<key>
+python evals/scripts/prepare_judge_model.py  # resolve legacy judge.model before validation
+skill-up validate evals/eval.yaml
 skill-up run evals/eval.yaml                         # OpenCode by default
 skill-up run evals/eval.yaml --engine codex          # same cases on another host
 skill-up run evals/eval.yaml --include-case-name "0[36]-*"   # just the two Commander cases
@@ -39,3 +40,4 @@ skill-up run evals/eval.yaml --baseline              # with vs without the Skill
 - 02/03/06 disk checks pass on an untouched workspace by design (the correct action there is mostly *not* writing); the verdict for those cases leans on the `behavior` judge.
 - CI needs repository variables `EVAL_PROVIDER`, `EVAL_MODEL`, `EVAL_BASE_URL`, `EVAL_JUDGE_MODEL` and secret `EVAL_API_KEY`.
 - A judge model different from the model under test gives a more independent grade.
+- skill-up 0.15.0 does not expand `${EVAL_JUDGE_MODEL}` in case-level `judge.model`. The preparation script resolves it in the checked-out YAML files before `validate` and `run`. Do not commit the rendered files.
