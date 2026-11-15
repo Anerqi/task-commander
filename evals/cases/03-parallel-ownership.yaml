@@ -36,6 +36,7 @@ judges:
       - "The ready batch is exactly TASK-001 and TASK-002, with no more than 2 concurrent windows."
       - "TASK-003 is held back, and the reason given is its write-scope overlap with docs/guide/ and docs/api/ (its lower P2 priority may also be cited)."
       - "There are two separate, self-contained dispatch prompts, each with a window label and an exclusive write scope."
+      - "The Commander reads the project root AGENTS.md before dispatch and obeys its role and ownership instructions."
       - "The Commander does not write the guide or API documentation itself."
       - "Any task state it proposes or records uses an exact label from the Task Commander state spec and a legal transition."
     pass_threshold: 0.8
