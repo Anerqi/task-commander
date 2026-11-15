@@ -245,14 +245,14 @@ def main():
     except ValueError:
         sys.exit('State specification column counts must be positive integers')
 
-    # taskSection: non-greedy capture of the task list table content
-    section_pattern = ('(?s)' + re.escape(settings['task_section_start'])
-                       + r'\s*(.*?)\s*' + re.escape(settings['task_section_end']))
-    task_section = re.search(section_pattern, content)
+    # Parse Task list through the next top-level heading. This accepts both
+    # v3 files and legacy files whose next section was ## Blocked.
+    task_title = heading_title(settings['task_section_start'])
+    task_sections = extract_sections(content, task_title, (2,))
     task_states_by_id = {}   # case-insensitive task id -> parsed current state
-    if task_section:
+    if len(task_sections) == 1:
         for line_number, line in enumerate(
-                re.split(r'\r\n|\r|\n', task_section.group(1)), start=1):
+                re.split(r'\\r\\n|\\r|\\n', task_sections[0]['body']), start=1):
             line = line.strip()
             if not line.startswith('|'):
                 continue
@@ -274,16 +274,16 @@ def main():
             if not contains_ci(task_states, state):
                 errors.append('Task ' + parsed_task_id + ' has invalid state: ' + state)
     else:
-        errors.append('Task table section is missing')
+        errors.append('Task table section is missing or duplicated')
 
-    # Validate all blocked metadata, even for structural-only invocations.
+    # Parse nested v3 Blocked or legacy top-level Blocked sections. The
+    # section is optional when no task is currently Blocked.
     blocked_before_by_task = {}
-    blocked_pattern = ('(?s)' + re.escape(settings['blocked_section_start'])
-                       + r'\s*(.*?)\s*' + re.escape(settings['blocked_section_end']))
-    blocked_match = re.search(blocked_pattern, content)
-    if blocked_match:
+    blocked_title = heading_title(settings['blocked_section_start'])
+    blocked_sections = extract_sections(content, blocked_title, (2, 3))
+    for blocked_section in blocked_sections:
         for line_number, line in enumerate(
-                re.split(r'\r\n|\r|\n', blocked_match.group(1)), start=1):
+                re.split(r'\\r\\n|\\r|\\n', blocked_section['body']), start=1):
             line = line.strip()
             if not line.startswith('|'):
                 continue
@@ -313,8 +313,6 @@ def main():
                     or not contains_ci(transitions_ci.get(normalize_state(before), []),
                                        'Blocked')):
                 errors.append('Invalid pre-block state for task ' + cells[0] + ': ' + before)
-    else:
-        errors.append('Blocked section is missing')
 
     for task_key, state in task_states_by_id.items():
         if normalize_state(state) == 'blocked' and task_key not in blocked_before_by_task:
@@ -340,12 +338,12 @@ def main():
             errors.append('Status revision mismatch: file has ' + str(revision_value)
                           + ', expected ' + str(args.expected_revision))
 
-    # Optional attention view: only work that waits for a person belongs here,
-    # and the row count is capped so a healthy project takes no space.
+    # Parse only the table directly under Needs you now. Nested subsections
+    # have their own parsers and do not count against the question-row budget.
     needs_you_count = 0
     needs_you_start = settings.get('needs_you_section_start')
     needs_you_end = settings.get('needs_you_section_end')
-    if needs_you_start and needs_you_end and needs_you_start in content:
+    if needs_you_start and needs_you_end:
         try:
             needs_you_columns = int(settings.get('needs_you_column_count', '3'))
             needs_you_max_rows = int(settings.get('needs_you_max_rows', '5'))
@@ -354,14 +352,13 @@ def main():
         except ValueError:
             sys.exit('Needs-you-now column count and row cap must be positive integers')
         needs_you_header = settings.get('needs_you_task_header', 'Task')
-        needs_you_section = re.search(
-            '(?s)' + re.escape(needs_you_start) + r'\s*(.*?)\s*' + re.escape(needs_you_end),
-            content)
-        if not needs_you_section:
-            errors.append('Needs you now section is not closed by the following section heading')
-        else:
+        needs_you_sections = extract_sections(
+            content, heading_title(needs_you_start), (2,), stop_at_nested=True)
+        if len(needs_you_sections) > 1:
+            errors.append('Needs you now section is duplicated')
+        for needs_you_section in needs_you_sections[:1]:
             for line_number, line in enumerate(
-                    re.split(r'\r\n|\r|\n', needs_you_section.group(1)), start=1):
+                    re.split(r'\\r\\n|\\r|\\n', needs_you_section['body']), start=1):
                 line = line.strip()
                 if not line.startswith('|'):
                     continue
@@ -387,9 +384,9 @@ def main():
                 if not cells[1].strip() or cells[1].strip() == '-':
                     errors.append('Needs you now row for task ' + needs_you_task
                                   + ' has no concrete question')
-            if needs_you_count > needs_you_max_rows:
-                errors.append('Needs you now lists ' + str(needs_you_count)
-                              + ' rows; the attention budget is ' + str(needs_you_max_rows))
+        if needs_you_count > needs_you_max_rows:
+            errors.append('Needs you now lists ' + str(needs_you_count)
+                          + ' rows; the attention budget is ' + str(needs_you_max_rows))
 
     # Flag presence, not truthiness: empty values must never bypass validation.
     # State transition validation (including <blocked-before> blocked recovery)
