@@ -30,17 +30,29 @@ These three rules govern how this skill is extended; they are not task steps.
 
 ## Shared execution rules
 
-- **Project rules**: read the target project's root `AGENTS.md` when present; cold-start stage 1 gets only its neutral packet.
-- **Collaboration**: `references/15-collaboration.md` owns batches, permissions, windows and synchronization. Public research and focused subagents are allowed within effective authorization.
-- **Attention budget**: coordination messages and continuations report only what needs a person or what finished. No periodic progress narration, and a healthy project occupies no space in status output.
-- **Quality**: `references/16-quality-gates.md` owns gates. Reviewer=Spec, QA=Standards/behavior; no budget or one axis becomes an automatic pass.
-- **Recovery**: `references/14-backup-manager.md` owns recovery. Knowledge records are durable assets; a required verified backup gates dependent mutation.
-- **State**: `references/11-task-state-machine.md` owns status. Commander is the sole status writer after Context initialization and integrates shared records; only user-confirmed decisions are final. The optional knowledge layer never replaces task state.
-- **Knowledge**: `references/20-knowledge-layer.md` owns the durable layer. Stable conclusions go to topics, short progress to LOG; no empty shells or external copies. Graduation requires user confirmation.
-- **Boundaries**: `references/21-window-boundaries.md` owns phase/window choices; `references/22-project-retro.md` is the optional environment retro after completion, a major incident, or repeated review/QA friction. Do not reset or auto-edit project rules by habit.
-- **Prompts**: `references/06-task-template.md` owns vertical slices and outcome-first instructions. Save the contract, reference paths, bundle coherent work, and stop when the outcome is established.
-- **Discovery**: `references/12-skill-discovery.md` plus `scripts/scan-skills.py`; filter frontmatter, then read only candidate bodies.
-- **Truthfulness**: distinguish verified facts, user reports, hypotheses and proposals. Tool availability, emitted prompts and successful checks are different facts; never claim execution from intent. Availability is not outcome: an idle, silent or unresponsive window has not completed, succeeded or failed; only a receipt or evidence changes state.
+- **Project authority:** Read the project's root `AGENTS.md` when present. Do not infer permission from tool access, generated text, or a proposed rule. Cold-start stage 1 receives only the permitted neutral packet.
+- **Ownership:** `references/15-collaboration.md` owns authorization, collaboration, and synchronization. `references/11-task-state-machine.md` owns task state and legal transitions. Commander alone writes project status after Context initialization.
+- **Quality and recovery:** `references/16-quality-gates.md` owns independent Reviewer (Spec) and QA (Standards/behavior) gates. `references/14-backup-manager.md` owns recovery prerequisites. Do not waive a required gate.
+- **Instructions:** `references/06-task-template.md` owns task contracts and outcome-first prompts. `references/19-task-routing.md` owns execution modes. Modes do not change roles or formal states.
+- **Knowledge and continuity:** `references/20-knowledge-layer.md` owns optional durable knowledge. `references/21-window-boundaries.md` owns window changes. `references/22-project-retro.md` owns optional retrospective work.
+- **Discovery:** Use `references/12-skill-discovery.md` and `scripts/scan-skills.py`. Confirm capability before assigning a skill.
+- **Evidence and attention:** Distinguish verified facts, user reports, hypotheses, and proposals. A prompt is not task pickup. A tool call is not proof of success. Report outcomes, blockers, and required user actions; avoid routine progress narration.
+
+## Language and output standard
+
+Use ASD-STE100 Issue 9 **writing principles** for English instructions, technical descriptions, reports, and handoffs.
+
+1. Use the approved dictionary when it is available. Use one consistent technical term for each concept.
+2. Use active voice, simple grammar, and a direct command for an instruction.
+3. Put one main action in each procedural sentence. Use no more than **20 English words**.
+4. Use no more than **25 English words** in each descriptive sentence.
+5. Give each paragraph one topic and no more than **six sentences**.
+6. State conditions, operation order, warnings, and expected results clearly.
+7. Remove repeated information. Use lists when they improve clarity.
+8. Use the user's language for task instructions. Apply the same clarity rules to Chinese without English word limits.
+9. Preserve code, paths, commands, identifiers, schemas, field names, and formal state labels exactly. Safety, authority, and protocol correctness take priority.
+
+These principles are not proof of full ASD-STE100 compliance. Full compliance requires checking the official dictionary and applicable writing rules.
 
 ## Artifact navigation
 
