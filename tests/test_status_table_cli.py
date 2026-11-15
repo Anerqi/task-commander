@@ -152,6 +152,20 @@ class StatusTableCLITests(unittest.TestCase):
         self.assertEqual(rendered["pending_user_actions"][0]["id"], "U01")
         self.assertEqual(rendered["pending_user_actions"][0]["owner"], "User")
 
+    def test_legacy_top_level_pending_user_actions_are_rendered(self):
+        content = self.state_content(
+            "| 01 | Guide | In Progress | P1 | Executor | - | No | No | No | out | now |")
+        content = content.replace(
+            "## Task list",
+            "## Pending user actions\n\n"
+            "| ID | Affected tasks | Question / local action | Expected safe return | Owner | Resume condition / fallback |\n"
+            "|---|---|---|---|---|---|\n"
+            "| U01 | 01 | Confirm access window | Approval note | User | Access approved |\n\n"
+            "## Task list", 1)
+        validation, rendered = self.run_tools(content)
+        self.assert_valid(validation)
+        self.assertEqual(rendered["pending_user_actions"][0]["id"], "U01")
+
     def test_extra_blocked_columns_are_not_silently_accepted(self):
         validation, _ = self.run_tools(self.state_content(
             "| 01 | Guide | Blocked | P1 | Executor | - | No | No | No | out | now |",

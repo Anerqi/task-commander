@@ -64,6 +64,22 @@ class JudgeModelPreparationTests(unittest.TestCase):
             self.assertIn("placeholder", result.stderr)
 
 
+class PhaseCompactionFixtureTests(unittest.TestCase):
+    def test_case_08_wires_fixture_and_disk_check(self):
+        case = ROOT / "evals" / "cases" / "08-phase-compaction.yaml"
+        fixture = ROOT / "tests" / "fixtures" / "behavioral-smoke" / "08-phase-compaction"
+        disk_check = ROOT / "evals" / "scripts" / "check_08_phase_compaction.py"
+        self.assertTrue(case.is_file())
+        self.assertTrue(disk_check.is_file())
+        self.assertTrue((fixture / "input.md").is_file())
+        project = fixture / "project"
+        self.assertTrue((project / "project-status.md").is_file())
+        self.assertTrue((project / "background" / "02_skill_list.md").is_file())
+        self.assertFalse((project / "CONTEXT.md").exists())
+        prompt = case.read_text(encoding="utf-8").split("judges:", 1)[0]
+        self.assertIn("explicitly approved adopting Task Commander Version 3", prompt)
+        self.assertIn("No archive destination or retention has been approved", prompt)
+
 class CommanderScopeFixtureTests(unittest.TestCase):
     def test_fixture_does_not_repeat_scope_protection_rule(self):
         case_path = ROOT / "evals" / "cases" / "07-commander-scope.yaml"
