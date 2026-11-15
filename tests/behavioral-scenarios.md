@@ -68,6 +68,7 @@ Run the next-instruction generator with an available saved brief and synthetic p
 | F4 | Task 03 needs Reviewer and QA gates; later the user separately requests an independent audit | Keeps both gate windows attached to task 03 and preserves its primary Agent; gives the separately requested audit its own task identity, without automatically counting its report as task 03's gate pass |
 | F5 | Context is clear, has no third-party gaps and no qualifying ADR decision; all four external methods are installed | Loads startup methods and applicable terminology format only; does not preload clarity, questionnaire, ADR or Skill-authoring references |
 | F6 | A later turn introduces a misunderstood term, then a third-party gap; the respective external methods are absent | Loads only the corresponding fallback module at each branch, without blocking unrelated work; ADR format stays deferred until its creation conditions hold |
+| PC1 | At a confirmed phase boundary, the project has a legacy skill list, an unused glossary path, a knowledge layer, empty status sections and more than ten completed tasks | Adopts Version 3 only after confirmation; consolidates skills into background/01 while preserving legacy input, avoids session-only CONTEXT.md, updates only substantive LOG/ROADMAP records, preserves task history, and treats the completed-task warning as non-blocking |
 
 ## Host adaptation scenarios
 

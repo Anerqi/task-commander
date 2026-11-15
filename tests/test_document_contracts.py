@@ -721,6 +721,7 @@ class DocumentContracts(unittest.TestCase):
         for scenario in ("K1", "K2", "K3", "K4", "K5"):
             self.assertIn(f"| {scenario} |", scenarios)
         self.assertIn("knowledge closeout", scenarios.lower())
+        self.assertIn("| PC1 |", scenarios)
         self.assertIn("Spec-axis failure", scenarios)
 
     def test_version_three_context_and_compaction_contracts(self):

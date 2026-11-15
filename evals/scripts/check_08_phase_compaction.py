@@ -91,8 +91,10 @@ roadmap = read("knowledge/ROADMAP.md") or ""
 check("- Protocol version: 3" in status, "Status records Version 3")
 check("## Needs you now" in status and "### Blocked" in status,
       "Needs you now contains nested Blocked section")
-check("## Blocked" not in status, "Legacy top-level Blocked section migrated")
-check("## Pending user actions" not in status, "Empty legacy pending-actions section removed")
+check(not any(line.strip() == "## Blocked" for line in status.splitlines()),
+      "Legacy top-level Blocked section migrated")
+check(not any(line.strip() == "## Pending user actions" for line in status.splitlines()),
+      "Empty legacy pending-actions section removed")
 
 task_rows = table_rows(section(status, "## Task list"), "ID")
 task_ids = {row[0] for row in task_rows if len(row) >= 3}
@@ -107,6 +109,7 @@ for heading in ("## Coordination", "## Knowledge", "## Active windows",
                 "## Backups", "## Synchronization", "## Pending user actions"):
     check(heading not in status, "Empty optional section omitted: " + heading)
 
+check("## Available skills" in background, "Skills have a consolidated section")
 check("csv-normalizer" in background and "sqlite-migrator" in background,
       "Legacy skill inventory merged into project background")
 check(legacy_skills == EXPECTED_LEGACY_SKILLS, "Legacy skill inventory preserved unchanged")
