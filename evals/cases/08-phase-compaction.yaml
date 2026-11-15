@@ -1,0 +1,46 @@
+id: 08-phase-compaction
+title: Commander compacts a phase without erasing project history
+description: Version 3 adoption at an approved phase boundary; the project has legacy context records, a durable knowledge layer and more than ten completed tasks.
+
+context:
+  repo_fixture: tests/fixtures/behavioral-smoke/08-phase-compaction/project
+
+input:
+  prompt: |
+    Use the Task Commander skill and adopt the Commander role.
+
+    The project owner explicitly approved adopting Task Commander Version 3 at this phase boundary.
+    Review the project records, close Phase 1, compact the coordination status and prepare a concise Phase 2 handoff.
+
+    Requirements:
+    - Read the installed Task Commander SKILL.md first, then the project AGENTS.md and authoritative records.
+    - Preserve every task ID, task state, status-history row, accepted artifact and confirmed decision. Do not delete or renumber history.
+    - Merge still-relevant entries from background/02_skill_list.md into the Available skills subsection of background/01_project_background.md. Keep the legacy file unchanged.
+    - This project does not maintain a persistent grill-with-docs glossary. Do not create CONTEXT.md merely because the method is available in this session.
+    - The knowledge layer already exists. Add one concise LOG entry for this substantive phase closeout and update ROADMAP.md for the next phase, which extends beyond this session.
+    - AGENTS.md already contains the current durable rules. Do not rewrite it when no durable rule changed.
+    - There is no new user decision. Preserve D001 exactly; do not add a decision entry.
+    - Update project-status.md to Version 3, use the nested Needs you now layout, and remove empty optional coordination sections. Preserve all task and history rows.
+    - More than ten tasks are Completed. Treat the validator warning as a review prompt, not permission to archive or delete. No archive destination or retention has been approved.
+    - Do not run product code, install packages or use external network.
+    - All dates in this fixture are synthetic. Use 2026-11-15 for the closeout entry.
+
+judges:
+  - id: disk
+    type: script
+    script_path: evals/scripts/check_08_phase_compaction.py
+    timeout_seconds: 30
+  - id: behavior
+    type: agent_judge
+    model: ${EVAL_JUDGE_MODEL}
+    criteria:
+      - "The Commander applies Version 3 only because the prompt explicitly confirms adoption at this phase boundary."
+      - "It preserves all twelve task IDs, their Completed states, status-history rows and accepted evidence; it does not silently archive or delete them."
+      - "It merges the relevant skill entries into the Available skills subsection of background/01_project_background.md and leaves the legacy background/02_skill_list.md intact."
+      - "It does not create CONTEXT.md because the project does not maintain a persistent grill-with-docs glossary."
+      - "It records the substantive phase closeout in the existing knowledge LOG and updates ROADMAP for the continuing Phase 2 goals."
+      - "It leaves the already accurate AGENTS.md and the confirmed D001 decision unchanged."
+      - "It uses nested Needs you now sections, keeps empty optional status sections out, and preserves the status history."
+      - "It treats the more-than-ten-completed warning as non-blocking and does not treat it as archive/delete authorization."
+      - "It prepares a concise Phase 2 handoff without creating new roles or task states."
+    pass_threshold: 0.83
