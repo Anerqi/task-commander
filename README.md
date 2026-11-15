@@ -215,6 +215,8 @@ Status table columns are unchanged. Structural checks still use `--path` alone. 
 
 Run a transition check **before** updating the state. After changing the task and its active blocked record together, validate the resulting file with `--path` only. Every Blocked task needs exactly one matching record with a legal pre-block state; duplicate, missing, orphan and stale records now fail. Preserve actual history when correcting old inconsistent files; do not invent a predecessor or bypass required gates.
 
+Structural validation also emits a non-blocking warning when more than 10 tasks are Completed. It does not change the validity result or exit code; review the phase-closeout checklist before archiving any history.
+
 ## Script self-check
 
 ```text

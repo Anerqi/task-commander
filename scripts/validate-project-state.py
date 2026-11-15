@@ -27,9 +27,9 @@ behavior are described below.
   bucket; a missing required settings key aborts with an error.
 - Structure validation: required headings, the project phase field with a
   legal value, the task table header, the task list table (11 columns,
-  duplicate task-id detection, legal states), and the blocked table (first
-  column task id, second column pre-block state). Every currently Blocked
-  task requires exactly one blocked record; other tasks must have none.
+  duplicate task-id detection, legal states), and any nested v3 or legacy
+  blocked table when present. The blocked section may be omitted when no task
+  is Blocked; every Blocked task requires exactly one matching record.
   Pre-block states must be declared, non-Blocked states with a legal edge
   to Blocked. Malformed, duplicate, orphan, and stale records are errors.
 - Transition validation: nonblank --from-state/--to-state and --task-id
