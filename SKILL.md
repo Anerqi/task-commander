@@ -77,4 +77,4 @@ These principles are not proof of full ASD-STE100 compliance. Full compliance re
 - Continuation, boundary and lost-window recovery: `templates/task-continuation.md`
 - Optional project retro record: `templates/project-retro.md`
 - Before optional command execution, checkpoint resume or rendering: `references/18-dynamic-workflow.md`, `templates/workflow-plan.template.py`, `templates/workflow-checkpoint.json`. The runner is sequential command progress, not agent dispatch or project acceptance.
-- Structural/status validation: `scripts/validate-project-state.py`; knowledge-layer structure: `scripts/validate-knowledge.py` (neither proves evidence, permissions, or actual agent behavior)
+- Structural/status validation: `scripts/validate-project-state.py`; knowledge-layer structure: `scripts/validate-knowledge.py`; shared thresholds: `scripts/validation_limits.py` (validators do not prove evidence, permissions, or actual agent behavior)

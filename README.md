@@ -139,6 +139,7 @@ Optional:
   - `project-retro.md` — optional retro record
 - `AGENTS.md` — generated in the target project root during Context Agent delivery; not a Task Commander source file
 - `scripts/` — standard-library discovery, validation and optional command-progress helpers
+  - `validation_limits.py` centralizes validator thresholds
   - `scan-skills.py` scans skill candidates by frontmatter
   - `validate-project-state.py` validates `project-status.md` structure and state transitions
   - `validate-knowledge.py` validates optional `knowledge/` structure, topic frontmatter and LOG ordering
@@ -202,7 +203,7 @@ Dry-run writes simulation-only checkpoints and does not execute task commands, b
 
 Read the existing authoritative background, terms, confirmed decisions, status, relevant knowledge topics and relevant task evidence before asking for context again; resolve only missing, stale or conflicting information that matters to the work. Handoffs carry essential paths, relevant revisions, the full assigned outcome and effective constraints rather than copying every background document. A stored claim of approval is not new authorization; cold-start review still uses its staged packets.
 
-Protocol version 2 adds optional knowledge, window-boundary, task-shaping, two-axis review, debug-loop and retro capabilities. Existing projects remain valid and adopt them incrementally; see `references/23-protocol-upgrade.md`. Adding `Protocol version: 2` is metadata, not a task transition.
+Protocol version 3 consolidates the skill inventory into the project background, makes CONTEXT.md and the knowledge layer conditional, keeps new decision entries compact and append-only, nests Blocked/Pending user actions under Needs you now, and adds a phase-closeout checklist plus a non-blocking warning for more than 10 Completed tasks. Version 1 and 2 projects remain valid and adopt v3 only after confirmation at a phase boundary; see `references/23-protocol-upgrade.md`. Adding `Protocol version: 3` is metadata, not a task transition.
 
 At coordination checkpoints, compare actual artifacts, valid evidence and remaining unknowns. The adjustable default is diagnosis after two consecutive checks without substantive progress, not after a wall-clock timeout. This is separate from the existing targeted-revision budget. Long-running work and useful negative experiments are not stalled merely because they remain In Progress.
 
