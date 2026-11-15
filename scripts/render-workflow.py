@@ -43,60 +43,79 @@ def load_state_data(source_path: Path) -> Dict[str, Any]:
                 raise ValueError(f"Invalid display dependencies: {tid}")
         data["record_kind"] = "command-progress"
         return data
-    elif source_path.suffix == ".md":
-        # Parse task list from project-status.md
+    elif source_path.suffix == '.md':
+        # Parse v3 nested attention sections and legacy top-level sections.
         tasks: Dict[str, Any] = {}
         blocked: List[Dict[str, str]] = []
         needs_you: List[Dict[str, str]] = []
+        pending_user_actions: List[Dict[str, str]] = []
         current_section = None
+        current_subsection = None
 
-        with open(source_path, "r", encoding="utf-8") as f:
+        with open(source_path, 'r', encoding='utf-8') as f:
             for line in f:
                 line_str = line.strip()
-                if line_str.startswith("## "):
+                if line_str.startswith('## '):
                     current_section = line_str[3:].strip()
+                    current_subsection = None
+                    continue
+                if line_str.startswith('### '):
+                    current_subsection = line_str[4:].strip()
+                    continue
+                if not line_str.startswith('|'):
+                    continue
+                parts = split_markdown_row(line_str)
+                if is_separator_row(parts):
                     continue
 
-                if current_section == "Task list" and line_str.startswith("|"):
-                    parts = split_markdown_row(line_str)
-                    if len(parts) >= 6 and parts[0] not in ("ID", "") and not is_separator_row(parts):
+                if current_section == 'Task list':
+                    if len(parts) >= 6 and parts[0] not in ('ID', ''):
                         tid, name, status, priority, agent = parts[0], parts[1], parts[2], parts[3], parts[4]
-                        deps = [d.strip() for d in parts[5].split(",") if d.strip() and d.strip() != "-"]
+                        deps = [d.strip() for d in parts[5].split(',') if d.strip() and d.strip() != '-']
                         tasks[tid] = {
-                            "name": name,
-                            "status": status,
-                            "priority": priority,
-                            "agent": agent,
-                            "depends_on": deps,
+                            'name': name,
+                            'status': status,
+                            'priority': priority,
+                            'agent': agent,
+                            'depends_on': deps,
                         }
-
-                elif current_section == "Needs you now" and line_str.startswith("|"):
-                    parts = split_markdown_row(line_str)
-                    if len(parts) >= 3 and parts[0] != "Task" and not is_separator_row(parts):
+                elif current_section == 'Needs you now' and current_subsection is None:
+                    if len(parts) >= 3 and parts[0] != 'Task':
                         needs_you.append({
-                            "task": parts[0],
-                            "question": parts[1],
-                            "resume_when": parts[2],
+                            'task': parts[0],
+                            'question': parts[1],
+                            'resume_when': parts[2],
                         })
-
-                elif current_section == "Blocked" and line_str.startswith("|"):
-                    parts = split_markdown_row(line_str)
-                    if len(parts) >= 5 and parts[0] != "Task" and not is_separator_row(parts):
+                elif ((current_section == 'Needs you now' and current_subsection == 'Blocked')
+                      or current_section == 'Blocked'):
+                    if len(parts) >= 5 and parts[0] != 'Task':
                         blocked.append({
-                            "task": parts[0],
-                            "reason": parts[2],
-                            "owner": parts[3],
-                            "done_when": parts[4],
+                            'task': parts[0],
+                            'reason': parts[2],
+                            'owner': parts[3],
+                            'done_when': parts[4],
+                        })
+                elif ((current_section == 'Needs you now' and current_subsection == 'Pending user actions')
+                      or current_section == 'Pending user actions'):
+                    if len(parts) >= 6 and parts[0] != 'ID':
+                        pending_user_actions.append({
+                            'id': parts[0],
+                            'tasks': parts[1],
+                            'action': parts[2],
+                            'expected_return': parts[3],
+                            'owner': parts[4],
+                            'resume_when': parts[5],
                         })
 
         return {
-            "record_kind": "project-status",
-            "workflow_id": "project-status",
-            "workflow_name": "Project Tasks",
-            "status": "TRACKED",
-            "task_states": tasks,
-            "blocked_items": blocked,
-            "needs_you": needs_you,
+            'record_kind': 'project-status',
+            'workflow_id': 'project-status',
+            'workflow_name': 'Project Tasks',
+            'status': 'TRACKED',
+            'task_states': tasks,
+            'blocked_items': blocked,
+            'needs_you': needs_you,
+            'pending_user_actions': pending_user_actions,
         }
     else:
         raise ValueError(f"Unsupported source format: {source_path.suffix}. Expected .json or .md")
@@ -122,6 +141,13 @@ def render_terminal(data: Dict[str, Any]) -> str:
         for item in needs_you:
             lines.append(f"  * Task {item.get('task', '?')} - {item.get('question', '')}"
                          f" (resume when: {item.get('resume_when', '')})")
+        lines.append("-" * 70)
+
+    pending_actions = data.get("pending_user_actions") or []
+    if pending_actions:
+        lines.append(f"  PENDING USER ACTIONS ({len(pending_actions)}):")
+        for item in pending_actions:
+            lines.append(f"  * {item.get('id', '?')} - {item.get('action', '')} (owner: {item.get('owner', '')})")
         lines.append("-" * 70)
 
     task_states = data.get("task_states", {})
