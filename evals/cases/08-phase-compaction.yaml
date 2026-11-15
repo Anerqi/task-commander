@@ -40,7 +40,7 @@ judges:
       - "It does not create CONTEXT.md because the project does not maintain a persistent grill-with-docs glossary."
       - "It records the substantive phase closeout in the existing knowledge LOG and updates ROADMAP for the continuing Phase 2 goals."
       - "It leaves the already accurate AGENTS.md and the confirmed D001 decision unchanged."
-      - "It uses nested Needs you now sections, keeps empty optional status sections out, and preserves the status history."
+      - "It uses Needs you now as the parent for any Blocked or Pending user actions sections, keeps empty optional status sections out, and preserves the status history."
       - "It treats the more-than-ten-completed warning as non-blocking and does not treat it as archive/delete authorization."
       - "It prepares a concise Phase 2 handoff without creating new roles or task states."
     pass_threshold: 0.83
