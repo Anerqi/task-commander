@@ -626,8 +626,8 @@ class DocumentContracts(unittest.TestCase):
             self.assertIn(marker, orchestration)
 
         status = (ROOT / "templates/project-status.md").read_text(encoding="utf-8")
-        self.assertIn("Protocol version: 2", status)
-        self.assertIn("## Knowledge", status)
+        self.assertIn("Protocol version: 3", status)
+        self.assertNotIn("## Knowledge", status)
 
         receipt = (ROOT / "templates/task-receipt.md").read_text(encoding="utf-8")
         self.assertIn("## Knowledge delta (when relevant)", receipt)
@@ -709,9 +709,9 @@ class DocumentContracts(unittest.TestCase):
                        "mechanical", "judgment", "human-confirmed", "not a new task state"):
             self.assertIn(marker, retro)
         upgrade = (ROOT / "references/23-protocol-upgrade.md").read_text(encoding="utf-8")
-        for marker in ("Current protocol version: 2", "protocol_version",
-                       "Existing `project-status.md` files may omit",
-                       "backward-compatible", "This is metadata, not a task transition"):
+        for marker in ("Current protocol version: 3", "Version 1 and 2 status files remain valid",
+                       "Existing `background/02_skill_list.md` files",
+                       "nested `### Blocked`", "This is metadata, not a task transition"):
             self.assertIn(marker, upgrade)
         self.assertIn("references/22-project-retro.md",
                       (ROOT / "SKILL.md").read_text(encoding="utf-8"))
@@ -722,6 +722,42 @@ class DocumentContracts(unittest.TestCase):
             self.assertIn(f"| {scenario} |", scenarios)
         self.assertIn("knowledge closeout", scenarios.lower())
         self.assertIn("Spec-axis failure", scenarios)
+
+    def test_version_three_context_and_compaction_contracts(self):
+        context = (ROOT / "references/01-context-brief.md").read_text(encoding="utf-8")
+        for marker in ("Available skills", "legacy input only", "does not trigger creation",
+                       "Do not rewrite it when there is no meaningful durable change"):
+            self.assertIn(marker, context)
+
+        orchestration = (ROOT / "references/10-context-orchestration.md").read_text(encoding="utf-8")
+        for marker in ("grill-with-docs is loaded for this session",
+                       "multi-session", "background/01_project_background.md` → `Available skills`"):
+            self.assertIn(marker, orchestration)
+
+        discovery = (ROOT / "references/12-skill-discovery.md").read_text(encoding="utf-8")
+        self.assertIn("Legacy compatibility", discovery)
+        self.assertIn("Do not create the legacy file in new projects", discovery)
+
+        knowledge = (ROOT / "references/20-knowledge-layer.md").read_text(encoding="utf-8")
+        self.assertIn("multi-session expectation alone", knowledge)
+        self.assertIn("Do not log every task transition", knowledge)
+        self.assertIn("preserve its evidence and rationale", knowledge)
+
+        boundaries = (ROOT / "references/21-window-boundaries.md").read_text(encoding="utf-8")
+        self.assertIn("## Phase closeout", boundaries)
+        self.assertIn("More than 10 Completed rows", boundaries)
+        retro = (ROOT / "references/22-project-retro.md").read_text(encoding="utf-8")
+        self.assertIn("## Phase closeout and compaction", retro)
+
+        limits = (ROOT / "scripts/validation_limits.py").read_text(encoding="utf-8")
+        self.assertIn("COMPLETED_TASK_WARNING_THRESHOLD = 10", limits)
+        validator = (ROOT / "scripts/validate-project-state.py").read_text(encoding="utf-8")
+        self.assertIn("warnings", validator)
+        self.assertIn("extract_sections", validator)
+
+        status = (ROOT / "templates/project-status.md").read_text(encoding="utf-8")
+        self.assertNotIn("## Coordination", status)
+        self.assertNotIn("## Knowledge", status)
 
     def test_authority_and_attention_contracts(self):
         # Text guards for the authority record, the strength axis, the attention
@@ -765,9 +801,9 @@ class DocumentContracts(unittest.TestCase):
             "templates/task-receipt.md": (
                 "## Attention", "Outcome:", "Attention:", "Dispatch key:"),
             "templates/project-status.md": (
-                "## Needs you now", "Status revision: 1"),
+                "## Needs you now", "### Blocked", "Protocol version: 3", "Status revision: 1"),
             "templates/task-state-spec.txt": (
-                "needs_you_section_start", "needs_you_max_rows", "revision_prefix"),
+                "needs_you_section_start", "blocked_section_start", "needs_you_max_rows", "revision_prefix"),
         }
         for source, markers in contracts.items():
             text = (ROOT / source).read_text(encoding="utf-8")

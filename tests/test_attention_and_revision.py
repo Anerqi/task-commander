@@ -50,7 +50,7 @@ class AttentionAndRevisionTests(unittest.TestCase):
             content = content.replace("- Status revision: 1",
                                       f"- Status revision: {revision}", 1)
         if drop_needs_section:
-            start = content.find("## Needs you now\\n")
+            start = content.find("## Needs you now\n")
             end = content.find("## Task list", start)
             if start >= 0 and end >= 0:
                 content = content[:start] + content[end:]
