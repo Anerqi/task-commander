@@ -142,6 +142,7 @@ class ContextHandoffOptimizationTests(unittest.TestCase):
             "scripts/validate-project-state.py --path",
             "**Initialize or recover**",
             "Do not load full-initialization references on this path",
+            "without changing project files",
         ):
             with self.subTest(marker=marker):
                 self.assertIn(marker, skill)
