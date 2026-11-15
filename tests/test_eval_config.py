@@ -158,6 +158,7 @@ class ContextHandoffOptimizationTests(unittest.TestCase):
             "references/15-collaboration.md",
             "references/11-task-state-machine.md",
             "templates/task-continuation.md",
+            "Do not load its listed references in the current Context Agent window",
         ):
             with self.subTest(marker=marker):
                 self.assertIn(marker, template)

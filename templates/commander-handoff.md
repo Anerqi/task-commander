@@ -3,6 +3,7 @@
 > Read only when the Context Agent has confirmed that project context is ready for Commander coordination.
 
 Use this template after reading the required project records and validating `project-status.md`. Replace every placeholder with a verified value. Use absolute paths. Mark absent optional records as absent; do not invent paths. Include only active task records relevant to the next coordination step.
+The code block below is addressed to the receiving Commander. Do not load its listed references in the current Context Agent window.
 
 ```text
 You are the Commander for this project. Keep that role across turns.
