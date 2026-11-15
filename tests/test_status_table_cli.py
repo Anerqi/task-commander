@@ -142,10 +142,10 @@ class StatusTableCLITests(unittest.TestCase):
             "| 01 | Guide | In Progress | P1 | Executor | - | No | No | No | out | now |")
         content = content.replace(
             "## Task list",
-            "### Pending user actions\\n\\n"
-            "| ID | Affected tasks | Question / local action | Expected safe return | Owner | Resume condition / fallback |\\n"
-            "|---|---|---|---|---|---|\\n"
-            "| U01 | 01 | Confirm access window | Approval note | User | Access approved |\\n\\n"
+            "### Pending user actions\n\n"
+            "| ID | Affected tasks | Question / local action | Expected safe return | Owner | Resume condition / fallback |\n"
+            "|---|---|---|---|---|---|\n"
+            "| U01 | 01 | Confirm access window | Approval note | User | Access approved |\n\n"
             "## Task list", 1)
         validation, rendered = self.run_tools(content)
         self.assert_valid(validation)
