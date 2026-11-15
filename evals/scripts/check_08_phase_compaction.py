@@ -89,8 +89,7 @@ log = read("knowledge/LOG.md") or ""
 roadmap = read("knowledge/ROADMAP.md") or ""
 
 check("- Protocol version: 3" in status, "Status records Version 3")
-check("## Needs you now" in status and "### Blocked" in status,
-      "Needs you now contains nested Blocked section")
+check("## Needs you now" in status, "Needs you now section retained")
 check(not any(line.strip() == "## Blocked" for line in status.splitlines()),
       "Legacy top-level Blocked section migrated")
 check(not any(line.strip() == "## Pending user actions" for line in status.splitlines()),
@@ -102,6 +101,8 @@ check(task_ids == {f"TASK-{index:03d}" for index in range(1, 13)},
       "All twelve task IDs remain present")
 check(len(task_rows) == 12 and all(row[2] == "Completed" for row in task_rows if len(row) >= 3),
       "All twelve completed task rows remain in live status")
+if any(row[2] == "Blocked" for row in task_rows if len(row) >= 3):
+    check("### Blocked" in status, "Blocked task uses nested v3 subsection")
 history_rows = table_rows(section(status, "## Status history"), "When")
 check(len(history_rows) >= 12, "Status history remains intact")
 
