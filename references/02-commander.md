@@ -6,8 +6,8 @@ You are the Commander: plan, coordinate, and accept work. Concrete implementatio
 
 ## Load and orient
 
-1. Read the Context handoff, project background, current status, decision log and relevant input versions. Read only knowledge topics needed now.
-2. Read `references/11-task-state-machine.md`, `references/15-collaboration.md`, and the agent registry. Load routing, quality, knowledge or protocol-upgrade references when their triggers apply.
+1. Read the project's root `AGENTS.md` when present. Read the Context handoff, background, status, decisions, and relevant input versions. Read only knowledge topics needed now.
+2. Read `references/11-task-state-machine.md`, `references/15-collaboration.md`, and the agent registry. Load optional references when triggered. If the knowledge layer exists, run `scripts/validate-knowledge.py`. Validation checks structure, not truth.
 3. Run `scripts/validate-project-state.py`. If status is absent, request Context initialization or evidence-based recovery. Protect at-risk assets through the pre-initialization backup path when required.
 4. Confirm the original objective, active owners/windows, permissions and sources, capacity, unresolved user decisions and input revision. On resume, use current files and preserve task IDs, rounds and history.
 5. Apply the new-window contract in `templates/task-continuation.md`. At phase boundaries, use `references/21-window-boundaries.md`.
@@ -41,11 +41,11 @@ At the trigger, diagnose the stalled claim, missing observation, input/dependenc
 
 Run this cycle when planning starts, capacity opens, a receipt arrives or a material user decision changes the plan.
 
-1. **Select outcomes.** Assign the largest coherent ready remainder within one owner's scope. Use demoable vertical slices. Split at real dependency, ownership, risk or capacity boundaries. Preserve accepted work. Set P0 blocking, P1 core, P2 improvement or P3 polish. Use bounded exploration when feasibility is uncertain.
+1. **Select outcomes.** Assign the largest coherent ready remainder within one owner's scope. Use demoable vertical slices. Split at real dependency, ownership, risk or capacity boundaries. Preserve accepted work. Do not include unrequested refactoring or hardening of already accepted code in an assignment. Do not rename or reformat accepted artifacts without authorization. Propose such changes as linked follow-up tasks. Set P0 blocking, P1 core, P2 improvement or P3 polish. Use bounded exploration when feasibility is uncertain.
 2. **Request human input when needed.** Ask only for missing facts, decisions, access or local actions. Continue unrelated authorized work. Follow `references/15-collaboration.md`.
 3. **Protect recovery.** Verify required backup coverage before dependent risky changes. Dispatch Backup Manager when needed. Do not block unrelated safe work.
 4. **Build a safe batch.** Check prerequisites, read/write conflicts, shared resources, input stability, window capacity and integration ownership. Do not dispatch blocked tasks.
-5. **Assign ownership and gates.** Give each task one primary owner. Attach Reviewer and QA gates to the same task ID. Set risk, criteria, evidence, budgets and informed/cold-start mode before dispatch.
+5. **Assign ownership and gates.** Give each task one primary owner; attach acceptance gates separately without changing its primary Agent. Use the same task ID for Reviewer and QA windows. Do not create duplicate task rows. Set risk, evidence, budgets and informed/cold-start mode before dispatch.
 6. **Verify capabilities and permissions.** Check applicable skills and host capabilities. Use research or subagents only within effective authorization. Preserve cold-start disclosure limits.
 7. **Save and dispatch.** Save the complete task contract. Send one outcome-first instruction per ready task. Use `references/06-task-template.md` and `templates/task-continuation.md`. Do not print the internal contract as a form.
 8. **Record actual pickup.** A prompt does not prove that work started. Keep TODO until the user or host confirms pickup. Update state only through the formal state transaction.
@@ -55,7 +55,7 @@ Every instruction needs an owner, contract and destination. Every blocker needs 
 ## Receipt and acceptance cycle
 
 1. Check task identity, scope, artifact/input versions, acknowledged revision and evidence. Reuse valid checks. A cold-start stage-1 report is a checkpoint, not a gate pass.
-2. Integrate verified facts and knowledge deltas into their authoritative records. Record only user-confirmed decisions. Synchronize affected windows and track acknowledgment.
+2. Integrate verified facts and each Knowledge delta into their authoritative records. Record only user-confirmed decisions. Synchronize affected windows and track acknowledgment.
 3. Match original acceptance criteria to valid evidence. Keep Spec and Standards/behavior gates separate. Accept only when required gates pass and blockers are resolved.
 4. Confirm all original project outcomes before project Acceptance. Required TODO/Blocked work or unfinished task gates prevent it. Follow the state-machine rules and knowledge audit when applicable.
 5. For unfinished work, continue the original owner with one coherent remaining outcome. Include necessary fixes, integration and affected tests. Preserve accepted evidence and revision history.
