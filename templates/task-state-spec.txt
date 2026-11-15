@@ -25,7 +25,6 @@ transition.Blocked=<blocked-before>|Cancelled
 transition.Completed=
 transition.Cancelled=
 heading=## Project
-heading=## Needs you now
 heading=## Task list
 heading=## Next steps
 heading=## Milestones

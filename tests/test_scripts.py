@@ -536,6 +536,38 @@ class ProjectStateValidationTests(unittest.TestCase):
         self.assertEqual(process.returncode, 0)
         self.assertTrue(payload["valid"])
 
+    def test_completed_task_warning_is_non_blocking_and_uses_strict_threshold(self):
+        ten = self.state_content("Completed", other_tasks=[
+            (f"TC-{index:02d}", "Completed") for index in range(2, 11)
+        ])
+        process, payload = self.run_validator(ten)
+        self.assertEqual(process.returncode, 0, payload)
+        self.assertTrue(payload["valid"])
+        self.assertEqual(payload["warnings"], [])
+
+        eleven = self.state_content("Completed", other_tasks=[
+            (f"TC-{index:02d}", "Completed") for index in range(2, 12)
+        ])
+        process, payload = self.run_validator(eleven)
+        self.assertEqual(process.returncode, 0, payload)
+        self.assertTrue(payload["valid"])
+        self.assertEqual(payload["errors"], [])
+        self.assertTrue(any("More than 10 tasks are Completed (11)" in warning
+                            for warning in payload["warnings"]), payload)
+
+    def test_legacy_top_level_blocked_section_remains_valid(self):
+        content = self.state_content("Blocked", blocked=[("TC-01", "In Review")])
+        content = content.replace("### Blocked", "## Blocked", 1)
+        process, payload = self.run_validator(content)
+        self.assertEqual(process.returncode, 0, payload)
+        self.assertTrue(payload["valid"])
+
+    def test_blocked_section_may_be_absent_when_no_task_is_blocked(self):
+        content = TEMPLATE.read_text(encoding="utf-8").replace("### Blocked", "### No blocked tasks", 1)
+        process, payload = self.run_validator(content)
+        self.assertEqual(process.returncode, 0, payload)
+        self.assertTrue(payload["valid"])
+
     def test_malformed_task_row_fails(self):
         content = TEMPLATE.read_text(encoding="utf-8").replace(
             "|---|---|---|---|---|---|---|---|---|---|---|",

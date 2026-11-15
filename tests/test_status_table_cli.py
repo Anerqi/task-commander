@@ -128,6 +128,15 @@ class StatusTableCLITests(unittest.TestCase):
                 self.assertTrue(any("expected 11 columns, found 12" in error
                                     for error in payload["errors"]), payload)
 
+    def test_legacy_top_level_blocked_section_is_rendered(self):
+        content = self.state_content(
+            "| 01 | Guide | Blocked | P1 | Executor | - | No | No | No | out | now |",
+            "| 01 | In Review | Need evidence | QA | Verified | next |",
+        ).replace("### Blocked", "## Blocked", 1)
+        validation, rendered = self.run_tools(content)
+        self.assert_valid(validation)
+        self.assertEqual(rendered["blocked_items"][0]["task"], "01")
+
     def test_extra_blocked_columns_are_not_silently_accepted(self):
         validation, _ = self.run_tools(self.state_content(
             "| 01 | Guide | Blocked | P1 | Executor | - | No | No | No | out | now |",

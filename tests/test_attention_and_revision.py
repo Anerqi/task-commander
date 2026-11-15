@@ -50,9 +50,10 @@ class AttentionAndRevisionTests(unittest.TestCase):
             content = content.replace("- Status revision: 1",
                                       f"- Status revision: {revision}", 1)
         if drop_needs_section:
-            head, separator, tail = content.partition(NEEDS_BLOCK)
-            if separator:
-                content = head + "## Task list" + tail.split("## Task list", 1)[-1]
+            start = content.find("## Needs you now\\n")
+            end = content.find("## Task list", start)
+            if start >= 0 and end >= 0:
+                content = content[:start] + content[end:]
         return content
 
     def run_validator(self, content, *extra):
