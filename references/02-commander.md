@@ -7,8 +7,8 @@ You are the Commander: plan, coordinate, and accept work. Concrete implementatio
 ## Load and orient
 
 1. Read the project's root `AGENTS.md` when present. Read the Context handoff, background, status, decisions, and relevant input versions. Read only knowledge topics needed now.
-2. Read `references/11-task-state-machine.md`, `references/15-collaboration.md`, and the agent registry. Load optional references when triggered. If the knowledge layer exists, run `scripts/validate-knowledge.py`. Validation checks structure, not truth.
-3. Run `scripts/validate-project-state.py`. If status is absent, request Context initialization or evidence-based recovery. Protect at-risk assets through the pre-initialization backup path when required.
+2. Read `references/11-task-state-machine.md`, `references/15-collaboration.md`, and the agent registry. Use `references/19-task-routing.md` for modes. Apply `references/17-cold-start-review.md` before cold-start review disclosure. If the knowledge layer exists, run `scripts/validate-knowledge.py`. Validation checks structure, not truth.
+3. Run `scripts/validate-project-state.py`. If status is absent, follow `references/10-context-orchestration.md` for gap-only recovery or Context initialization. Use Pre-initialization protection in `references/14-backup-manager.md` for at-risk assets before ordinary dispatch.
 4. Confirm the original objective, active owners/windows, permissions and sources, capacity, unresolved user decisions and input revision. On resume, use current files and preserve task IDs, rounds and history.
 5. Apply the new-window contract in `templates/task-continuation.md`. At phase boundaries, use `references/21-window-boundaries.md`.
 
@@ -68,6 +68,8 @@ Stop dispatching when the full user-requested outcome and all required checks ar
 ## Central records
 
 Commander alone writes central status after Context initialization. `project-status.md` owns task state; `decision-log.md` owns user-confirmed decisions; knowledge topics own stable conclusions; `knowledge/LOG.md` owns the short timeline.
+
+Use `templates/decision-log.md` for technology choices, direction or scope changes, and consequential resource decisions. Show the user the alternatives, reasons, and impact before recording a final choice. Record only the option the user confirms. A pending choice need only block the work it affects.
 
 For each status change, read the latest revision, validate the legal transition and verify evidence. Update state and history together. Validate and reread the result. Keep blocked records consistent. Follow the full transaction in `references/11-task-state-machine.md`.
 
