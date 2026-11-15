@@ -20,6 +20,7 @@ skill-up validate evals/eval.yaml
 skill-up run evals/eval.yaml                         # OpenCode by default
 skill-up run evals/eval.yaml --engine codex          # same cases on another host
 skill-up run evals/eval.yaml --include-case-name "0[36]-*"   # just the two Commander cases
+skill-up run evals/eval.yaml --include-case-name "08-*"       # phase closeout and compaction
 skill-up run evals/eval.yaml --baseline              # with vs without the Skill
 ```
 
