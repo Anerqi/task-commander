@@ -432,6 +432,17 @@ def main():
     elif task_id is not None:
         errors.append('--task-id requires --from-state and --to-state')
 
+    completed_task_count = sum(
+        1 for state in task_states_by_id.values()
+        if normalize_state(state) == 'completed')
+    warnings = []
+    if completed_task_count > COMPLETED_TASK_WARNING_THRESHOLD:
+        warnings.append(
+            'More than ' + str(COMPLETED_TASK_WARNING_THRESHOLD)
+            + ' tasks are Completed (' + str(completed_task_count)
+            + '); review phase closeout and archive needs. This warning does not invalidate status.'
+        )
+
     result = {
         'valid': len(errors) == 0,
         'path': real_path,
@@ -439,6 +450,7 @@ def main():
         'status_revision': revision_value,
         'needs_you_count': needs_you_count,
         'errors': errors,
+        'warnings': warnings,
     }
     # Always print the JSON; exit code 1 when errors exist
     sys.stdout.write(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
