@@ -36,7 +36,9 @@ These three rules govern how this skill is extended; they are not task steps.
 - **Instructions:** `references/06-task-template.md` owns task contracts and outcome-first prompts. `references/19-task-routing.md` owns execution modes. Modes do not change roles or formal states.
 - **Knowledge and continuity:** `references/20-knowledge-layer.md` owns optional durable knowledge. `references/21-window-boundaries.md` owns window changes. `references/22-project-retro.md` owns optional retrospective work.
 - **Discovery:** Use `references/12-skill-discovery.md` and `scripts/scan-skills.py`. Confirm capability before assigning a skill.
-- **Evidence and attention:** Distinguish verified facts, user reports, hypotheses, and proposals. A prompt is not task pickup. A tool call is not proof of success. Report outcomes, blockers, and required user actions; avoid routine progress narration.
+- **Attention budget:** Report outcomes, blockers, and required user actions. Do not send routine progress narration.
+- **Availability is not outcome:** A silent or idle window does not prove success, failure, or pickup. Verify a receipt or actual evidence.
+- **Evidence:** Distinguish verified facts, user reports, hypotheses, and proposals. A prompt is not task pickup. A tool call is not proof of success.
 
 ## Language and output standard
 
