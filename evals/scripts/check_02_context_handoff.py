@@ -33,5 +33,15 @@ def finish():
 for d in ("briefs", "receipts", "src", "docs"):
     check(not files_under(d), f"no {d}/ artifacts created (no dispatch or implementation)")
 status = read("project-status.md") or ""
+
+agents = read("AGENTS.md")
+expected_agents = (
+    "# Project Agents & Roles\n"
+    "\n"
+    "- Context Agent: Context initialization and handoff.\n"
+    "- Commander: Central planning and coordination.\n"
+    "- Executor: Primary deliverable implementation.\n"
+)
+check(agents == expected_agents, "pre-existing AGENTS.md remains unchanged")
 check("Project phase: In Progress" not in status, "project phase not advanced to In Progress by the Context Agent")
 finish()

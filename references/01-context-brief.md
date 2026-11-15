@@ -26,7 +26,7 @@ For a new project, use grill-with-docs' question-by-question deep-dive as the ma
   2. Project scope: explicitly what to do and what not to do.
   3. User profile and constraints: who uses it, what hard limits exist.
   4. Deliverable forms: documents, websites, reports, calculation tables, etc.
-  5. Collaboration: read `references/15-collaboration.md`; propose parallel capacity, public research/subagent permissions, risk-based acceptance, and follow-up cadence. Ask about the user's useful expertise, available time, and browser/account actions they can perform locally.
+  5. Collaboration: during new-project initialization, or when an existing policy is missing or changing, read `references/15-collaboration.md`. Otherwise reuse the confirmed policy. Propose parallel capacity, public research/subagent permissions, risk-based acceptance, and follow-up cadence. Ask about the user's useful expertise, available time, and browser/account actions they can perform locally.
   6. Recovery: identify irreplaceable data, dirty/untracked work, backup destinations and privacy constraints. If protection is needed before context-file updates and no status file exists, deliver the standalone Backup Manager prompt per `references/14-backup-manager.md` (Pre-initialization protection). Check its receipt before the protected writes, then resume this role's initialization; include the verified backup reference in the later Commander handoff. Capture unknown recovery requirements instead of assuming Git covers everything.
   7. Knowledge retention: decide whether durable conclusions, a timeline or long-term milestones need to be retained. A multi-session project alone does not require a knowledge directory or empty LOG. Create the layer at the first durable conclusion, or when the user explicitly asks for a durable timeline. Create ROADMAP only when goals extend beyond the current session. Do not pre-create empty topic files. Record the choice in the background and point to `references/20-knowledge-layer.md`.
 - If a question can be answered by reading existing files, read the files instead of asking the user.
@@ -44,7 +44,7 @@ Create the prescribed records for a new project. For an existing project, reuse 
    - Core terminology summary. Point to `<Project Root>/CONTEXT.md` only when that glossary already exists or the project explicitly chooses to maintain one.
    - Available skills: a concise inventory of selected Skills/plugins, their triggers, applicable tasks, paths and capability requirements. This subsection replaces a new `background/02_skill_list.md` file.
    - Open items: owner, needed information, corresponding questionnaire path
-   - Collaboration policy: effective tool permissions with their authorization sources, exceptions, parallel capacity, acceptance/revision budgets, user assistance preferences, backup scope/destination/retention. Separate effective policy from pending proposals per `references/15-collaboration.md` (Policy activation); inherit existing authorization without asking again.
+   - Collaboration policy: record effective tool permissions with their authorization sources, exceptions, parallel capacity, acceptance/revision budgets, user assistance preferences, and backup scope/destination/retention. Read `references/15-collaboration.md` only when defining or changing policy; otherwise reuse confirmed policy and inherit existing authorization without asking again.
    - Knowledge retention: whether the optional knowledge layer is deferred or enabled, its directory, and any chosen external graduation target. Point to `references/20-knowledge-layer.md`; do not duplicate the layer's topics here.
 
 2. `<Project Root>/CONTEXT.md` — conditional domain glossary
@@ -62,7 +62,7 @@ Create the prescribed records for a new project. For an existing project, reuse 
    - If a skill benefits from subagents or network, record the available capability and effective policy per `references/15-collaboration.md`; do not classify a useful capability as prohibited by default.
 
 4. `<Project Root>/project-status.md`
-   - First read `references/11-task-state-machine.md` and follow its initialization/recovery distinction. Validate existing status; give Commander evidence-based recovery deltas when records are missing.
+   - Read `references/11-task-state-machine.md` only when creating status or reconstructing/recovering missing or invalid status. For an existing valid status, preserve its phase, task IDs, revisions and history. Validate it with `scripts/validate-project-state.py` before delivery.
    - For a new project, initialize the phase to `Context Building`; once background meets the delivery bar, set it to `Planning`. For an existing project, give Commander a proposed context/phase update rather than resetting it.
    - The task list may be empty while no task is being executed; when third-party questionnaires are unanswered, record the current blockage or next actions.
    - After creation, the sole writer of the status file becomes the Commander.
@@ -92,37 +92,8 @@ Create the prescribed records for a new project. For an existing project, reuse 
 
 ## Step four: delivery notes
 
-1. Report created/updated or reused files, proposed deltas, confirmed facts, remaining gaps and owners, and any questionnaire. Include `AGENTS.md` and any knowledge-layer files in the file list: note whether they were newly created or merged with an existing version. Confirm readiness for the next coordination step (or state its blocking gap); an existing project need not return to Planning.
-2. When ready, output the following complete Commander startup prompt as one separately copyable block. Fill every placeholder, resolve available paths absolutely, mark unavailable records explicitly, and include effective permissions or explicitly pending policy decisions. A recovery-only handoff must identify status reconstruction/validation as blocking business dispatch. Creating documents alone is not completion.
-
-```text
-You are the Commander for this project. Keep that role across turns.
-Project root: <absolute project root>
-Skill root: <absolute Task Commander root>
-Read first:
-- <absolute Skill root>/references/02-commander.md
-- <absolute Skill root>/references/15-collaboration.md
-- <absolute Skill root>/references/16-quality-gates.md
-- <absolute Skill root>/references/11-task-state-machine.md
-- <absolute Skill root>/templates/task-continuation.md (New-window read contract)
-- <absolute project root>/background/01_project_background.md
-- <absolute project root>/CONTEXT.md (if present; otherwise omit)
-- <absolute project root>/background/02_skill_list.md (legacy input only, if present)
-- <absolute project root>/decision-log.md
-- <absolute project root>/project-status.md
-- <absolute project root>/AGENTS.md
-- <absolute project root>/knowledge/ROADMAP.md (if present)
-- <absolute project root>/knowledge/LOG.md (if present; read recent entries)
-Before file/CLI work, read <absolute Skill root>/references/runtime.md.
-Current phase, protocol version and context revision: <actual values>
-Relevant task briefs, receipts/checkpoints and input versions: <absolute paths and versions needed for the next coordination step; preserve IDs/rounds/history>
-Confirmed goal and scope: <short summary pointing to background>
-Knowledge layer status: <enabled / deferred / absent; paths to ROADMAP and recent LOG>
-Open items and user actions: <owner, question, affected work, resume condition>
-Effective collaboration policy: <permissions with authorization sources and scope, capacity, acceptance budget; pending decisions separately>
-Recovery posture: <covered assets, verified backup pointer or unresolved requirement>
-First action: reconcile current status or integrate recovery evidence, validate status, resolve only dispatch-blocking gaps, assess backup needs, then propose/dispatch a ready batch with a separate prompt per independent task. Use the user for missing facts or browser actions. Do not implement tasks yourself.
-```
+1. Report created, updated or reused files, proposed deltas, confirmed facts, remaining gaps and owners, and any questionnaire. Include `AGENTS.md` and knowledge-layer files in the file list. State whether each file was created, changed or reused unchanged. Confirm readiness for the next coordination step or state its blocking gap.
+2. When ready, read `templates/commander-handoff.md` and fill its complete Commander startup prompt as one separately copyable block. Resolve all placeholders to verified absolute paths, mark unavailable optional records explicitly, and include effective permissions with their authorization sources. A recovery-only handoff must identify status reconstruction and validation as blocking business dispatch. Creating documents alone is not completion.
 
 3. Tell the user: "Paste this block into your Commander window." End the turn without planning or dispatching execution tasks yourself. Stay Context Agent in later turns; before handoff, update background as needed; after handoff, submit deltas to Commander or regenerate a versioned handoff. Switch roles only on the user's explicit request.
 

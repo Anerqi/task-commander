@@ -131,3 +131,52 @@ class CommanderScopeFixtureTests(unittest.TestCase):
         self.assertIn("| TASK-002 | User Guide | In Progress |", status)
         brief = (fixture / "briefs" / "task-002.md").read_text(encoding="utf-8")
         self.assertIn("Deliverable: docs/guide.md", brief)
+
+
+class ContextHandoffOptimizationTests(unittest.TestCase):
+    def test_handoff_only_route_uses_records_template_and_validation(self):
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        for marker in (
+            "**Handoff only**",
+            "templates/commander-handoff.md",
+            "scripts/validate-project-state.py --path",
+            "**Initialize or recover**",
+            "Do not load full-initialization references on this path",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, skill)
+
+    def test_commander_handoff_is_separate_from_context_brief(self):
+        context = (ROOT / "references" / "01-context-brief.md").read_text(encoding="utf-8")
+        template = (ROOT / "templates" / "commander-handoff.md").read_text(encoding="utf-8")
+        self.assertIn("templates/commander-handoff.md", context)
+        self.assertNotIn("You are the Commander for this project.", context)
+        for marker in (
+            "You are the Commander for this project.",
+            "references/02-commander.md",
+            "references/15-collaboration.md",
+            "references/11-task-state-machine.md",
+            "templates/task-continuation.md",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, template)
+
+    def test_existing_agents_noop_write_is_avoided(self):
+        context = (ROOT / "references" / "01-context-brief.md").read_text(encoding="utf-8")
+        self.assertIn("byte-for-byte identical", context)
+        self.assertIn("leave it untouched", context)
+        self.assertIn("as early as practical", context)
+
+    def test_context_reference_loading_is_conditional(self):
+        context = (ROOT / "references" / "01-context-brief.md").read_text(encoding="utf-8")
+        for marker in (
+            "only when defining or changing policy",
+            "only when creating status or reconstructing/recovering",
+            "only when creating or maintaining the layer",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, context)
+
+    def test_case_02_disk_check_guards_existing_agents_file(self):
+        script = (ROOT / "evals" / "scripts" / "check_02_context_handoff.py").read_text(encoding="utf-8")
+        self.assertIn("pre-existing AGENTS.md remains unchanged", script)
