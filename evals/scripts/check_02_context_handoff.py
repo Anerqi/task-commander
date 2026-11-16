@@ -34,7 +34,8 @@ for d in ("briefs", "receipts", "src", "docs"):
     check(not files_under(d), f"no {d}/ artifacts created (no dispatch or implementation)")
 status = read("project-status.md") or ""
 
-agents = read("AGENTS.md")
+agents_path = Path("AGENTS.md")
+agents = agents_path.read_bytes() if agents_path.exists() else None
 expected_agents = (
     "# Project Agents & Roles\n"
     "\n"
@@ -42,6 +43,6 @@ expected_agents = (
     "- Commander: Central planning and coordination.\n"
     "- Executor: Primary deliverable implementation.\n"
 )
-check(agents == expected_agents, "pre-existing AGENTS.md remains unchanged")
+check(agents == expected_agents.encode("utf-8"), "pre-existing AGENTS.md remains unchanged")
 check("Project phase: In Progress" not in status, "project phase not advanced to In Progress by the Context Agent")
 finish()

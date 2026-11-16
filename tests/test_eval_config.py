@@ -228,6 +228,15 @@ class ContextHandoffOptimizationTests(unittest.TestCase):
             self.assertEqual(changed.returncode, 1, changed.stdout + changed.stderr)
             self.assertIn("FAIL pre-existing AGENTS.md remains unchanged", changed.stdout)
 
+            original_bytes = (fixture / "AGENTS.md").read_bytes()
+            self.assertNotIn(b"\r\n", original_bytes)
+            agents.write_bytes(original_bytes.replace(b"\n", b"\r\n"))
+            changed_newlines = subprocess.run([sys.executable, str(checker)], cwd=project,
+                                             capture_output=True, text=True, encoding="utf-8", check=False)
+            self.assertEqual(changed_newlines.returncode, 1,
+                             changed_newlines.stdout + changed_newlines.stderr)
+            self.assertIn("FAIL pre-existing AGENTS.md remains unchanged", changed_newlines.stdout)
+
     def test_case_02_disk_check_accepts_v3_without_optional_legacy_records(self):
         fixture = ROOT / "tests" / "fixtures" / "behavioral-smoke" / "02-context-handoff" / "project"
         with tempfile.TemporaryDirectory(prefix="_tmp_handoff_v3_", dir=ROOT) as directory:
