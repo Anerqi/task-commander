@@ -259,6 +259,26 @@ class AttentionAndRevisionTests(unittest.TestCase):
         self.assertEqual(process.returncode, 1)
         self.assert_error(payload, "Status revision mismatch")
 
+    def test_revision_uses_project_metadata_and_ignores_fenced_examples(self):
+        examples = "```md\n- Status revision: 99\n- Project phase: Invalid\n```\n"
+        for content in (examples + self.build(),
+                        self.build().replace("## Project\n", "## Project\n" + examples, 1)):
+            with self.subTest(content=content[:70]):
+                process, payload = self.run_validator(content, "--expected-revision", "1")
+                self.assertEqual(process.returncode, 0, payload)
+                self.assertEqual(payload["status_revision"], 1)
+                _, payload = self.run_validator(content, "--expected-revision", "99")
+                self.assert_error(payload, "Status revision mismatch")
+        _, payload = self.run_validator(examples + self.build(revision=None),
+                                        "--expected-revision", "99")
+        self.assert_error(payload, "Missing status revision")
+
+    def test_duplicate_project_revisions_are_ambiguous(self):
+        content = self.build().replace("- Status revision: 1\n",
+                                       "- Status revision: 1\n- Status revision: 2\n", 1)
+        _, payload = self.run_validator(content)
+        self.assert_error(payload, "Duplicate status revision")
+
     def test_expected_revision_requires_the_line(self):
         _, payload = self.run_validator(
             self.build(revision=None), "--expected-revision", "1")

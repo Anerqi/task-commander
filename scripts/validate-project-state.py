@@ -188,9 +188,13 @@ def main():
         if heading not in content:
             errors.append('Missing heading: ' + heading)
 
-    # phasePattern: the first line whose start is exactly phase_prefix
+    # Metadata belongs to the real Project body, excluding fenced examples.
+    project_sections = extract_sections(content, 'Project', (2,))
+    if len(project_sections) != 1:
+        errors.append('Project section is missing or duplicated')
+    project_content = project_sections[0]['body'] if len(project_sections) == 1 else ''
     phase_match = re.search(
-        r'(?m)^' + re.escape(settings['phase_prefix']) + r'(.+)$', content)
+        r'(?m)^' + re.escape(settings['phase_prefix']) + r'([^\r\n]+)$', project_content)
     if not phase_match:
         errors.append('Missing project phase field')
     else:
@@ -305,9 +309,12 @@ def main():
     # per update, so a stale read is detectable instead of silently overwritten.
     revision_value = None
     revision_prefix = settings.get('revision_prefix', '- Status revision:')
-    revision_match = re.search(r'(?m)^' + re.escape(revision_prefix) + r'\s*(\S+)\s*$', content)
-    if revision_match:
-        raw_revision = revision_match.group(1)
+    revision_values = re.findall(
+        r'(?m)^' + re.escape(revision_prefix) + r'[ \t]*([^\r\n]*)$', project_content)
+    if len(revision_values) > 1:
+        errors.append('Duplicate status revision lines in Project section')
+    if revision_values:
+        raw_revision = revision_values[0].strip()
         if re.fullmatch(r'\d+', raw_revision):
             revision_value = int(raw_revision)
         else:
@@ -315,7 +322,7 @@ def main():
     if args.expected_revision is not None:
         if args.expected_revision < 0:
             errors.append('Expected revision must not be negative: ' + str(args.expected_revision))
-        elif not revision_match:
+        elif not revision_values:
             errors.append('Missing status revision line required by --expected-revision')
         elif revision_value is not None and revision_value != args.expected_revision:
             errors.append('Status revision mismatch: file has ' + str(revision_value)
