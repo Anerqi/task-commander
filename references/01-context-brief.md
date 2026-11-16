@@ -28,7 +28,7 @@ For a new project, use grill-with-docs' question-by-question deep-dive as the ma
   4. Deliverable forms: documents, websites, reports, calculation tables, etc.
   5. Collaboration: read `references/15-collaboration.md`; propose parallel capacity, public research/subagent permissions, risk-based acceptance, and follow-up cadence. Ask about the user's useful expertise, available time, and browser/account actions they can perform locally.
   6. Recovery: identify irreplaceable data, dirty/untracked work, backup destinations and privacy constraints. If protection is needed before context-file updates and no status file exists, deliver the standalone Backup Manager prompt per `references/14-backup-manager.md` (Pre-initialization protection). Check its receipt before the protected writes, then resume this role's initialization; include the verified backup reference in the later Commander handoff. Capture unknown recovery requirements instead of assuming Git covers everything.
-  7. Knowledge retention: decide whether this project needs the optional durable knowledge layer for multi-session work, stable conclusions and reusable lessons. Default to initializing `knowledge/LOG.md` for a multi-session project; allow the user to defer it. Do not pre-create empty topic files. Record the choice in the background and point to `references/20-knowledge-layer.md`.
+  7. Knowledge retention: decide whether durable conclusions, a timeline or long-term milestones need to be retained. A multi-session project alone does not require a knowledge directory or empty LOG. Create the layer at the first durable conclusion, or when the user explicitly asks for a durable timeline. Create ROADMAP only when goals extend beyond the current session. Do not pre-create empty topic files. Record the choice in the background and point to `references/20-knowledge-layer.md`.
 - If a question can be answered by reading existing files, read the files instead of asking the user.
 
 ## Step three: produce documents
@@ -41,22 +41,24 @@ Create the prescribed records for a new project. For an existing project, reuse 
    - User profile and hard constraints
    - Project scope (including "not doing")
    - Deliverables and acceptance methods
-   - Core terminology summary with the path to `<Project Root>/CONTEXT.md`; do not copy the full term table
+   - Core terminology summary. Point to `<Project Root>/CONTEXT.md` only when that glossary already exists or the project explicitly chooses to maintain one.
+   - Available skills: a concise inventory of selected Skills/plugins, their triggers, applicable tasks, paths and capability requirements. This subsection replaces a new `background/02_skill_list.md` file.
    - Open items: owner, needed information, corresponding questionnaire path
    - Collaboration policy: effective tool permissions with their authorization sources, exceptions, parallel capacity, acceptance/revision budgets, user assistance preferences, backup scope/destination/retention. Separate effective policy from pending proposals per `references/15-collaboration.md` (Policy activation); inherit existing authorization without asking again.
    - Knowledge retention: whether the optional knowledge layer is deferred or enabled, its directory, and any chosen external graduation target. Point to `references/20-knowledge-layer.md`; do not duplicate the layer's topics here.
 
-2. `<Project Root>/CONTEXT.md`
-   - Sole source of truth for standard terms, avoided terms, and domain relations
-   - Use the CONTEXT-FORMAT conventions of grill-with-docs; when that skill is absent, follow the corresponding module of `references/methodology-fallback.md`
-   - Write only domain language, not requirements, plans, or implementation details
+2. `<Project Root>/CONTEXT.md` — conditional domain glossary
+   - Create or update this file only when the project already uses grill-with-docs as its persistent glossary workflow, or the user explicitly asks for one.
+   - Loading or composing grill-with-docs for this Context session alone does not trigger creation.
+   - If the file already exists, preserve it as the source of truth for standard terms, avoided terms and domain relations.
+   - Otherwise keep only core terminology in `background/01_project_background.md`; do not create an empty glossary.
 
-3. `<Project Root>/background/02_skill_list.md`
+3. Available skills in `<Project Root>/background/01_project_background.md`
    - First read `references/12-skill-discovery.md` in the Task Commander Skill root.
-   - Reuse an existing curated list when it covers the current work; discover or refresh only missing or stale relevant entries. When discovery is needed, extract query terms from the background and `CONTEXT.md`, run `scripts/scan-skills.py`, reading only Skill frontmatter and deduping by name.
-   - Keep at most 30 candidates by default; read the full body of candidate Skills only; never read every Skill body.
-   - For each usable skill record: skill name, trigger, applicable scenarios, whether network is needed, whether a plugin is needed, whether a subagent is needed.
-   - Record the final choice reason, the absolute path, and duplicate install paths.
+   - Reuse the current `Available skills` subsection when it covers the work; discover or refresh only missing or stale relevant entries.
+   - When discovery is needed, extract query terms from the background and `CONTEXT.md` only if it exists, then run `scripts/scan-skills.py`. Read only Skill frontmatter during discovery and full bodies only for selected candidates.
+   - Keep at most 30 candidates by default. Record each final selection's name, reason, trigger, applicable tasks, absolute path, network/plugin/subagent requirements and duplicate paths.
+   - If legacy `background/02_skill_list.md` exists, read it and merge only relevant current entries into the subsection. Keep the legacy file as a compatibility/history source; do not create it for new projects or delete it automatically.
    - If a skill benefits from subagents or network, record the available capability and effective policy per `references/15-collaboration.md`; do not classify a useful capability as prohibited by default.
 
 4. `<Project Root>/project-status.md`
@@ -76,15 +78,15 @@ Create the prescribed records for a new project. For an existing project, reuse 
    - Until the reply arrives, never write the questionnaire's questions or assumptions as confirmed facts
 
 7. `<Project Root>/knowledge/LOG.md` — optional durable knowledge timeline
-   - **New project:** create from `templates/knowledge-log.md` at Context building when the project is multi-session or the user wants durable knowledge. Record the initialization as the first short entry. Initialize `knowledge/ROADMAP.md` only when goals outlast one session.
-   - **Existing project:** do not create a knowledge layer during a routine context refresh. Reuse existing records; add the layer on the first durable conclusion and after user confirmation, per `references/20-knowledge-layer.md`.
-   - In both cases, do not pre-create topics, `Cited.md` or `Reference/`; create them on first trigger. Do not force a migration.
+   - **New or existing project:** do not create a LOG merely because the work may span multiple sessions. Create the layer on the first durable conclusion, or when the user explicitly requests a persistent timeline. For an existing project, obtain confirmation before creating a new layer.
+   - Add LOG entries only for substantive milestones, decisions, experiments or incidents; do not log every task transition or routine status update.
+   - Create `knowledge/ROADMAP.md` only when goals extend beyond the current session and a roadmap will guide later work. Do not pre-create topics, `Cited.md` or `Reference/`; create them on their first real trigger. Do not force a migration.
 
 8. `<Project Root>/AGENTS.md` — project-level behavioral rules and navigation for all AI agents
-   - Generate this file last, after all other documents are complete, so it draws on the fullest available project context.
+   - Generate this file last, after all other documents are complete, so it draws on the fullest available project context. If the existing file remains accurate and no durable rule or navigation change is needed, leave it untouched.
    - Extract hard rules from the interview and confirmed project background: technology stack constraints, coding conventions, forbidden patterns, testing requirements, file-structure invariants, naming standards, and any other non-negotiable expectations the user stated or confirmed.
-   - Structure the file with clear headings: Project identity (one-paragraph background), Reading order and source-of-truth pointers (including `knowledge/ROADMAP.md` and recent `knowledge/LOG.md` entries when that layer exists), Hard rules (MUST-level), and optionally Preferred conventions (SHOULD-level). Keep it concise — aim for actionable density, not exhaustive repetition of background.
-   - If `AGENTS.md` already exists, read it first, merge new information, preserve rules the user previously confirmed, and flag any conflicts for the user to resolve before writing. Never silently overwrite or drop existing rules.
+   - Structure the file with clear headings: Project identity, Reading order and source-of-truth pointers, and Hard rules; add Preferred conventions only when useful. Keep it concise and stable. Do not copy task status, milestone counts, progress metrics, temporary instructions or protocol internals into it.
+   - If `AGENTS.md` already exists, read it first. Preserve confirmed rules and flag any conflicts for the user to resolve before writing. Do not rewrite it when there is no meaningful durable change; never silently overwrite or drop existing rules.
    - This file is owned by the project, not by Task Commander. Any role (Commander, Executor, Reviewer, Context Agent) may propose additions when it discovers new constraints during work; the proposal must be confirmed by the user before writing.
    - Do not paste Task Commander protocol rules into `AGENTS.md`. It captures project-specific behavioral expectations and navigation, not orchestration internals.
 
@@ -104,8 +106,8 @@ Read first:
 - <absolute Skill root>/references/11-task-state-machine.md
 - <absolute Skill root>/templates/task-continuation.md (New-window read contract)
 - <absolute project root>/background/01_project_background.md
-- <absolute project root>/CONTEXT.md
-- <absolute project root>/background/02_skill_list.md
+- <absolute project root>/CONTEXT.md (if present; otherwise omit)
+- <absolute project root>/background/02_skill_list.md (legacy input only, if present)
 - <absolute project root>/decision-log.md
 - <absolute project root>/project-status.md
 - <absolute project root>/AGENTS.md

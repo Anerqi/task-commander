@@ -13,8 +13,7 @@ behavior are described below.
   hard-coding absolute paths); --expected-revision N compares the optional
   "- Status revision: N" line in the Project section, which gives the sole
   writer a compare-and-set check instead of an honour-system read.
-- Optional coordination metadata: a "Needs you now" section (nested under
-  Coordination in new templates, or a legacy top-level section), when present,
+- Optional coordination metadata: a "## Needs you now" section, when present,
   must hold at most needs_you_max_rows rows (default 5) of three columns
   (task, one concrete question, resume condition). Each row must name an
   existing task in a non-terminal state and carry a nonblank question; a
@@ -28,9 +27,9 @@ behavior are described below.
   bucket; a missing required settings key aborts with an error.
 - Structure validation: required headings, the project phase field with a
   legal value, the task table header, the task list table (11 columns,
-  duplicate task-id detection, legal states), and the blocked table (first
-  column task id, second column pre-block state). Every currently Blocked
-  task requires exactly one blocked record; other tasks must have none.
+  duplicate task-id detection, legal states), and any nested v3 or legacy
+  blocked table when present. The blocked section may be omitted when no task
+  is Blocked; every Blocked task requires exactly one matching record.
   Pre-block states must be declared, non-Blocked states with a legal edge
   to Blocked. Malformed, duplicate, orphan, and stale records are errors.
 - Transition validation: nonblank --from-state/--to-state and --task-id
@@ -43,9 +42,9 @@ behavior are described below.
 - Case comparison: state and transition lookup is case-insensitive; the
   spelling from the specification is retained in validation messages.
 - Output: UTF-8 without BOM, LF line endings. JSON contains valid / path /
-  task_count / completed_count / warnings / status_revision / needs_you_count /
-  errors; more than 10 Completed tasks produces a nonfatal warning. When errors exist the JSON is still printed and the
-  exit code is 1; fatal errors such as a missing state file or a missing
+  task_count / status_revision / needs_you_count / errors / warnings. Warnings
+  are non-blocking and do not change validity or the exit code; when errors exist
+  the JSON is still printed and the exit code is 1; fatal errors such as a missing state file or a missing
   spec key go to stderr with exit code 1.
 """
 
@@ -56,12 +55,11 @@ import re
 import sys
 
 try:
-    from markdown_table import find_markdown_sections, is_separator_row, split_markdown_row
-    from validation_limits import COMPLETED_TASK_WARNING_LIMIT, NEEDS_YOU_MAX_ROWS
+    from markdown_table import extract_sections, is_separator_row, split_markdown_row
+    from validation_limits import COMPLETED_TASK_WARNING_THRESHOLD, NEEDS_YOU_MAX_ROWS
 except ImportError as exc:
     raise SystemExit(
-        'Required helpers (markdown_table.py and validation_limits.py) must be '
-        'alongside this script; copy the whole '
+        'markdown_table.py and validation_limits.py must be alongside this script; copy the whole '
         'scripts/ directory. (' + str(exc) + ')'
     ) from None
 
@@ -75,6 +73,11 @@ def contains_ci(sequence, value):
 def normalize_state(value):
     """Return the comparison form used for state names and transitions."""
     return value.strip().casefold()
+
+
+def heading_title(value):
+    """Extract a title from a spec heading such as '### Blocked'."""
+    return value.strip().lstrip('#').strip()
 
 
 def load_spec(spec_path):
@@ -206,17 +209,13 @@ def main():
     except ValueError:
         sys.exit('State specification column counts must be positive integers')
 
-    # taskSection: non-greedy capture of the task list table content
-    section_pattern = ('(?s)' + re.escape(settings['task_section_start'])
-                       + r'\s*(.*?)\s*' + re.escape(settings['task_section_end']))
-    task_section = re.search(section_pattern, content)
-    task_heading = settings['task_section_start']
-    task_level = len(task_heading) - len(task_heading.lstrip('#'))
-    task_sections = find_markdown_sections(content, task_heading.lstrip('#').strip(), task_level)
+    # Only the direct body of the authoritative Task list holds live tasks.
+    task_title = heading_title(settings['task_section_start'])
+    task_sections = extract_sections(content, task_title, (2,))
     task_states_by_id = {}   # case-insensitive task id -> parsed current state
-    if task_section and task_sections:
+    if len(task_sections) == 1:
         for line_number, line in enumerate(
-                '\n'.join(task_sections).splitlines(), start=1):
+                re.split(r'\r\n|\r|\n', task_sections[0]['body']), start=1):
             line = line.strip()
             if not line.startswith('|'):
                 continue
@@ -242,19 +241,22 @@ def main():
             if not contains_ci(task_states, state):
                 errors.append('Task ' + parsed_task_id + ' has invalid state: ' + state)
     else:
-        errors.append('Task table section is missing')
+        errors.append('Task table section is missing or duplicated')
 
-    # Validate all blocked metadata, even for structural-only invocations.
+    # Parse nested v3 Blocked or legacy top-level Blocked sections. The
+    # section is optional when no task is currently Blocked.
     blocked_before_by_task = {}
-    blocked_pattern = ('(?s)' + re.escape(settings['blocked_section_start'])
-                       + r'\s*(.*?)\s*' + re.escape(settings['blocked_section_end']))
-    blocked_match = re.search(blocked_pattern, content)
-    blocked_heading = settings['blocked_section_start']
-    blocked_level = len(blocked_heading) - len(blocked_heading.lstrip('#'))
-    blocked_sections = find_markdown_sections(content, blocked_heading.lstrip('#').strip(), blocked_level)
-    if blocked_match and blocked_sections:
+    blocked_title = heading_title(settings['blocked_section_start'])
+    needs_you_parent_title = heading_title(
+        settings.get('needs_you_section_start', '## Needs you now'))
+    blocked_sections = extract_sections(content, blocked_title, (2, 3))
+    for blocked_section in blocked_sections:
+        if (blocked_section['level'] == 3
+                and blocked_section['parent'] != needs_you_parent_title):
+            errors.append('Nested Blocked section must be under ' + needs_you_parent_title)
+            continue
         for line_number, line in enumerate(
-                '\n'.join(blocked_sections).splitlines(), start=1):
+                re.split(r'\r\n|\r|\n', blocked_section['body']), start=1):
             line = line.strip()
             if not line.startswith('|'):
                 continue
@@ -284,12 +286,20 @@ def main():
                     or not contains_ci(transitions_ci.get(normalize_state(before), []),
                                        'Blocked')):
                 errors.append('Invalid pre-block state for task ' + cells[0] + ': ' + before)
-    else:
-        errors.append('Blocked section is missing')
 
     for task_key, state in task_states_by_id.items():
         if normalize_state(state) == 'blocked' and task_key not in blocked_before_by_task:
             errors.append('Missing blocked record for task: ' + task_key)
+
+    pending_actions_start = settings.get('pending_user_actions_section_start', '### Pending user actions')
+    if pending_actions_start:
+        pending_actions_title = heading_title(pending_actions_start)
+        pending_actions_sections = extract_sections(content, pending_actions_title, (2, 3))
+        for pending_section in pending_actions_sections:
+            if (pending_section['level'] == 3
+                    and pending_section['parent'] != needs_you_parent_title):
+                errors.append('Nested Pending user actions section must be under '
+                              + needs_you_parent_title)
 
     # Optional compare-and-set metadata: the sole writer bumps the revision once
     # per update, so a stale read is detectable instead of silently overwritten.
@@ -311,13 +321,11 @@ def main():
             errors.append('Status revision mismatch: file has ' + str(revision_value)
                           + ', expected ' + str(args.expected_revision))
 
-    # Optional attention view: only work that waits for a person belongs here,
-    # and the row count is capped so a healthy project takes no space.
+    # Parse only the table directly under Needs you now. Nested subsections
+    # have their own parsers and do not count against the question-row budget.
     needs_you_count = 0
-    needs_you_sections = find_markdown_sections(content, 'Needs you now')
-    if len(needs_you_sections) > 1:
-        errors.append('Duplicate Needs you now sections: expected at most one')
-    if needs_you_sections:
+    needs_you_start = settings.get('needs_you_section_start', '## Needs you now')
+    if needs_you_start:
         try:
             needs_you_columns = int(settings.get('needs_you_column_count', '3'))
             needs_you_max_rows = int(settings.get('needs_you_max_rows', NEEDS_YOU_MAX_ROWS))
@@ -326,9 +334,16 @@ def main():
         except ValueError:
             sys.exit('Needs-you-now column count must be at least 3 and row cap must be positive')
         needs_you_header = settings.get('needs_you_task_header', 'Task')
-        for needs_you_section in needs_you_sections:
+        needs_you_sections = extract_sections(
+            content, heading_title(needs_you_start), (2, 3))
+        if len(needs_you_sections) > 1:
+            errors.append('Duplicate Needs you now sections: expected at most one')
+        for needs_you_section in needs_you_sections[:1]:
+            if needs_you_section['level'] == 3 and needs_you_section['parent'] != 'Coordination':
+                errors.append('Legacy nested Needs you now section must be under Coordination')
+                continue
             for line_number, line in enumerate(
-                    re.split(r'\r\n|\r|\n', needs_you_section), start=1):
+                    re.split(r'\r\n|\r|\n', needs_you_section['body']), start=1):
                 line = line.strip()
                 if not line.startswith('|'):
                     continue
@@ -402,23 +417,26 @@ def main():
     elif task_id is not None:
         errors.append('--task-id requires --from-state and --to-state')
 
-    completed_count = sum(normalize_state(state) == 'completed'
-                          for state in task_states_by_id.values())
+    completed_task_count = sum(
+        1 for state in task_states_by_id.values()
+        if normalize_state(state) == 'completed')
     warnings = []
-    if completed_count > COMPLETED_TASK_WARNING_LIMIT:
-        warnings.append('Task list contains ' + str(completed_count)
-                        + ' Completed tasks; consider archiving completed tasks '
-                        + '(warning limit is ' + str(COMPLETED_TASK_WARNING_LIMIT) + ')')
+    if completed_task_count > COMPLETED_TASK_WARNING_THRESHOLD:
+        warnings.append(
+            'More than ' + str(COMPLETED_TASK_WARNING_THRESHOLD)
+            + ' tasks are Completed (' + str(completed_task_count)
+            + '); review phase closeout and archive needs. This warning does not invalidate status.'
+        )
 
     result = {
         'valid': len(errors) == 0,
         'path': real_path,
         'task_count': len(task_states_by_id),
-        'completed_count': completed_count,
-        'warnings': warnings,
+        'completed_count': completed_task_count,
         'status_revision': revision_value,
         'needs_you_count': needs_you_count,
         'errors': errors,
+        'warnings': warnings,
     }
     # Always print the JSON; exit code 1 when errors exist
     sys.stdout.write(json.dumps(result, ensure_ascii=False, indent=2) + '\n')

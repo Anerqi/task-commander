@@ -7,15 +7,18 @@ import re
 from collections.abc import Iterator
 
 
-def iter_markdown_sections(content: str, level: int | None = None) -> Iterator[tuple[str, str]]:
-    """Yield ATX heading titles and their direct bodies, excluding fenced code.
+def parse_markdown_sections(content: str) -> list[dict]:
+    """Read heading metadata and direct bodies, excluding fenced examples.
 
     Any subsequent heading ends the direct body, including a nested heading.
-    The optional level filter selects authoritative tables without changing
-    body boundaries. Nested historical tables remain separate sections.
+    Parent names refer to the containing level-two section. This distinguishes
+    attention subsections from nested historical tables with the same name.
     """
     title = None
     heading_level = None
+    parent = None
+    current_parent = None
+    sections = []
     body = []
     fence_character = None
     fence_length = 0
@@ -33,15 +36,36 @@ def iter_markdown_sections(content: str, level: int | None = None) -> Iterator[t
             continue
         heading = re.match(r"^ {0,3}(#{1,6})(?:[ \t]+(.*?)|[ \t]*)$", stripped)
         if heading:
-            if title is not None and (level is None or level == heading_level):
-                yield title, "".join(body)
+            if title is not None:
+                sections.append({'level': heading_level, 'title': title,
+                                 'parent': parent, 'body': ''.join(body)})
             heading_level = len(heading.group(1))
             title = re.sub(r"[ \t]+#+[ \t]*$", "", heading.group(2) or "").strip()
+            parent = current_parent if heading_level > 2 else None
+            if heading_level < 2:
+                current_parent = None
+            elif heading_level == 2:
+                current_parent = title
             body = []
         elif title is not None:
             body.append(line)
-    if title is not None and (level is None or level == heading_level):
-        yield title, "".join(body)
+    if title is not None:
+        sections.append({'level': heading_level, 'title': title,
+                         'parent': parent, 'body': ''.join(body)})
+    return sections
+
+
+def iter_markdown_sections(content: str, level: int | None = None) -> Iterator[tuple[str, str]]:
+    """Yield matching heading titles and their direct bodies."""
+    for section in parse_markdown_sections(content):
+        if level is None or level == section['level']:
+            yield section['title'], section['body']
+
+
+def extract_sections(content: str, title: str, allowed_levels: tuple[int, ...]) -> list[dict]:
+    """Select section records without losing nesting or direct-body boundaries."""
+    return [section for section in parse_markdown_sections(content)
+            if section['title'] == title and section['level'] in allowed_levels]
 
 
 def find_markdown_sections(content: str, title: str, level: int | None = None) -> list[str]:

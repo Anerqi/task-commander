@@ -58,3 +58,17 @@ class MarkdownSectionTests(unittest.TestCase):
                          ["current\n"])
         self.assertEqual(MARKDOWN.find_markdown_sections(content, "Task list", level=3),
                          ["past\n"])
+
+    def test_attention_and_history_keep_distinct_parents(self):
+        content = ("## Needs you now\nquestion\n### Blocked\ncurrent\n"
+                   "## Status history\n### Blocked\npast\n")
+        records = MARKDOWN.extract_sections(content, "Blocked", (2, 3))
+        self.assertEqual([section['parent'] for section in records],
+                         ["Needs you now", "Status history"])
+        self.assertEqual([section['body'] for section in records], ["current\n", "past\n"])
+
+    def test_fenced_parent_does_not_reparent_real_sections(self):
+        content = ("## Needs you now\n```md\n## Status history\n```\n"
+                   "### Blocked\ncurrent\n")
+        record, = MARKDOWN.extract_sections(content, "Blocked", (3,))
+        self.assertEqual(record['parent'], "Needs you now")

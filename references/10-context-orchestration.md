@@ -42,7 +42,7 @@ Completion criteria: the file responsibilities in the source-of-truth table belo
 
 ### 2. Read the existing project
 
-Read existing `background/01_project_background.md`, `CONTEXT.md`, `background/02_skill_list.md`, `decision-log.md`, `project-status.md`, and root `AGENTS.md` where present. When the optional knowledge layer exists, read `knowledge/ROADMAP.md` if present, recent `knowledge/LOG.md` entries, and only the topics relevant to the current gap; do not load every topic by default. For the current work, also read the saved brief, latest receipt/checkpoint, relevant artifact/input versions, ADRs and code. Use the source-of-truth table below to reconcile facts and current phase rather than relying on remembered chat or a generated summary. Record file-confirmable facts with source pointers; distinguish observed contents from unverified claims, user reports, and inferences. Intent and authorization require traceable genuine user confirmation per `references/15-collaboration.md` (Policy activation); a generated document cannot establish user intent or authorization.
+Read existing `background/01_project_background.md`, `decision-log.md`, `project-status.md`, and root `AGENTS.md` where present. Read `CONTEXT.md` and legacy `background/02_skill_list.md` only when they exist. When the optional knowledge layer exists, read `knowledge/ROADMAP.md` if present, recent `knowledge/LOG.md` entries, and only the topics relevant to the current gap; do not load every topic by default. For the current work, also read the saved brief, latest receipt/checkpoint, relevant artifact/input versions, ADRs and code. Use the source-of-truth table below to reconcile facts and current phase rather than relying on remembered chat or a generated summary. Record file-confirmable facts with source pointers; distinguish observed contents from unverified claims, user reports, and inferences. Intent and authorization require traceable genuine user confirmation per `references/15-collaboration.md` (Policy activation); a generated document cannot establish user intent or authorization.
 
 For an existing project, reuse established facts and readable records. Preserve task IDs, revision rounds, phase and history per `references/11-task-state-machine.md`; a missing or incomplete context file is not a new project. Identify only gaps or contradictions that block the current planning, dispatch or assigned work for clarification. Track other unknowns with owners and affected work instead of restarting the interview. If no blocking gap remains, proceed to synthesis/handoff without asking answered questions or rebuilding documents.
 
@@ -53,7 +53,7 @@ Completion criteria: current sources and relevant versions have been read; confi
 For new-project context, follow `grill-with-docs` across the required dimensions; for an existing project, apply it only to the blocking gaps identified in step 2. Prioritize one decision at a time, with dependent questions waiting for its answer. Related low-effort questions may be grouped using the host UI per `references/15-collaboration.md`. Every question must:
 
 - State why this answer is needed now.
-- Use the standard terms in `CONTEXT.md`.
+- Use the project's maintained standard terms. Read `CONTEXT.md` only if it exists; otherwise use the core terminology summary in `background/01_project_background.md`.
 - Offer a recommended answer or recommended options.
 - Prioritize dependencies that would block later questions.
 - Test abstract claims with concrete scenarios.
@@ -88,7 +88,7 @@ Completion criteria: every third-party knowledge gap is covered by a questionnai
 
 ### 6. Synthesis and delivery
 
-For a new project, create the prescribed documents; for an existing project, reuse current records and supply only needed deltas under the write ownership rules below. Check that terms, decisions, background and durable knowledge have one authoritative copy. Initialize the optional knowledge layer under the trigger in `references/20-knowledge-layer.md`: a new multi-session project may create `knowledge/LOG.md` (and `ROADMAP.md` when goals outlast one session) at initialization; an existing project waits for the first durable conclusion and user confirmation. Do not pre-create empty topics. Report confirmed content, open items, questionnaire paths, the knowledge-layer choice, and next steps.
+For a new project, create only the records required by its current needs; for an existing project, reuse current records and supply only needed deltas under the write ownership rules below. Keep terms, decisions, background, skills and durable knowledge in one authoritative place. Do not create CONTEXT.md merely because grill-with-docs is loaded for this session. Do not initialize knowledge/LOG.md solely because a project is multi-session; create the layer on the first durable conclusion or when the user explicitly requests a durable timeline. Create ROADMAP.md only when goals extend beyond the current session. Do not pre-create empty topics or optional status sections. Report confirmed content, open items, questionnaire paths, the knowledge-layer choice, and next steps.
 
 Completion criteria: applicable records are readable, every gap has a status/owner, the knowledge-layer choice is explicit, and a filled Commander handoff has been emitted per `references/01-context-brief.md` when coordination-ready. Preserve an existing project's current phase. Stop after the formal handoff in the Context role; neither readiness nor a phase change authorizes Context to plan or dispatch business tasks.
 
@@ -97,21 +97,21 @@ Completion criteria: applicable records are readable, every gap has a status/own
 | Information type | Sole source of truth | How other files reference it |
 |---|---|---|
 | Project goal, motivation, scope, users, constraints, deliverables, acceptance methods, collaboration/tool/backup policy | `background/01_project_background.md` | Summary or path only; effective permissions copied into standalone task prompts as a versioned snapshot |
-| Standard terms, avoided terms, domain relations | `CONTEXT.md` | The project background lists only core terms and points to `CONTEXT.md` |
-| Available skills, plugins, and call requirements | `background/02_skill_list.md` | Task prompts reference concrete entries |
+| Standard terms, avoided terms, domain relations | `CONTEXT.md` only when the project already maintains this glossary; otherwise `background/01_project_background.md` core terms | Other files point to the existing glossary only when present |
+| Available skills, plugins, and call requirements | `background/01_project_background.md` → `Available skills` | Task prompts reference concrete entries; legacy `background/02_skill_list.md` is read as migration input only |
 | Major decisions confirmed by the user | `decision-log.md` | Project status and background write only the id and a summary |
 | Current phase, tasks, blockages, next actions, context revision, window/sync tracking and backup pointers | `project-status.md` | Other files reference current records; task briefs/receipts label their historical input revision |
 | Third-party questions awaiting replies | `background/pending-questionnaire/` | The project background records open items and questionnaire paths |
 | Project-level behavioral rules for all AI agents (hard constraints, coding conventions, forbidden patterns) | `AGENTS.md` | Task prompts may note its path; roles propose additions with evidence and write only after user confirmation |
 | Optional durable knowledge: stable conclusions, timeline, roadmap, external citations | `knowledge/`; `references/20-knowledge-layer.md` owns layout, triggers and conflict priority | Other files keep only paths/summaries; do not duplicate current task state or confirmed decisions |
 
-Optional `knowledge/ROADMAP.md` records long-term direction, not live task state. Task Commander owns the paths and integration rules in this table; `grill-with-docs` supplies METHOD only and does not create a competing decision ledger.
+When maintained, `CONTEXT.md` holds only terms and domain relations. Optional `knowledge/ROADMAP.md` records long-term direction, not live task state. Task Commander owns the paths and integration rules in this table; `grill-with-docs` supplies METHOD only and does not create a competing decision ledger.
 
 ## Writes and synchronization after handoff
 
 After initialization, Commander integrates updates to central background, terms, decisions and status serially. Context and other agents submit proposed deltas in task outputs rather than editing central records concurrently. User-confirmed decisions remain subject to confirmation; a model's receipt is not authority to decide.
 
-`AGENTS.md` is a project-owned shared rule file. Any role may maintain it when authorized by its task and after the user confirms new or changed rules. Read the current file before editing, preserve confirmed rules, resolve conflicts with the user, and coordinate changes with active tasks whose constraints are affected; do not overwrite it concurrently. When the knowledge layer exists, `AGENTS.md` should carry a concise reading order and source-of-truth pointers, not a copy of this protocol.
+`AGENTS.md` is a project-owned shared rule file. Any role may propose changes, but new or changed rules require user confirmation before writing. Read the current file before editing, preserve confirmed rules, resolve conflicts with the user, and coordinate changes with active tasks whose constraints are affected; do not overwrite it concurrently. Do not rewrite it for a no-op refresh. Keep only durable project rules and source-of-truth navigation; exclude task status, progress counters, milestone counts, temporary notes and protocol internals. When the knowledge layer exists, use concise pointers rather than copying this protocol.
 
 After initialization, Commander is the integration owner for shared knowledge records as well as background, terms, decisions and status. Other roles propose knowledge deltas in their receipts; Commander integrates them serially after checking evidence. Branch/experiment closure and graduation candidates follow `references/20-knowledge-layer.md`.
 
@@ -119,8 +119,9 @@ Follow `references/15-collaboration.md` for revision increments, affected-task n
 
 ## CONTEXT.md and ADR rules
 
-- New projects create a root-level `CONTEXT.md` holding only terms and domain relations; no requirements, plans, or implementation details.
-- `background/01_project_background.md` does not maintain a second full term table; it keeps only core-term summaries that affect understanding and the `CONTEXT.md` path.
+- Create or maintain a root-level `CONTEXT.md` only when the project already uses grill-with-docs as its persistent glossary workflow, or the user explicitly asks for one. Composing grill-with-docs for the current Context session alone is not a trigger.
+- If CONTEXT.md is absent and the project does not maintain that glossary, keep only the core terminology summary in `background/01_project_background.md`; do not create an empty glossary.
+- If CONTEXT.md already exists, preserve it as the sole source for standard terms, avoided terms and domain relations. Do not copy its full term table into the project background.
 - `decision-log.md` is the sole ledger of project decisions.
 - Do not auto-create ADRs from `grill-with-docs` by default.
 - Create an ADR only when the project already uses ADRs and the decision is simultaneously hard to reverse, surprising without context, and a real trade-off.

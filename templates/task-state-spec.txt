@@ -20,32 +20,31 @@ transition.In Review=Needs Revision|QA Pending|Awaiting Acceptance|Blocked|Cance
 transition.Needs Revision=In Progress|Blocked|Cancelled
 transition.QA Pending=Needs Revision|Awaiting Acceptance|Blocked|Cancelled
 transition.Awaiting Acceptance=Completed|Needs Revision|Blocked|Cancelled
-# <blocked-before> is the pre-block state recorded for the task in the current blocked section; the script verifies it with --task-id on recovery
+# <blocked-before> is recorded in nested ### Blocked or legacy ## Blocked
 transition.Blocked=<blocked-before>|Cancelled
 transition.Completed=
 transition.Cancelled=
 heading=## Project
 heading=## Task list
-heading=## Blocked
 heading=## Next steps
 heading=## Milestones
 heading=## Status history
 phase_prefix=- Project phase:
 task_header=| ID | Name | Status | Priority | Agent | Depends | Parallel | Reviewer | QA | Output dir | Updated |
 task_section_start=## Task list
-task_section_end=## Blocked
-blocked_section_start=## Blocked
-blocked_section_end=## Next steps
+task_section_end=## Next steps
+blocked_section_start=### Blocked
+blocked_section_end=next-heading
 blocked_id_header=Task
 task_id_header=ID
 task_column_count=11
 blocked_column_count=6
-# Optional coordination metadata; a file that omits these keys stays valid
+# Optional coordination metadata; legacy files may omit these keys
 revision_prefix=- Status revision:
-# New templates nest attention under Coordination; legacy top-level or absent attention remains valid
-needs_you_section_start=### Needs you now
-# Direct section body ends at the next ATX heading of any level
-needs_you_section_end=## Knowledge
+needs_you_section_start=## Needs you now
+needs_you_section_end=## Task list
 needs_you_task_header=Task
 needs_you_column_count=3
 needs_you_max_rows=5
+pending_user_actions_section_start=### Pending user actions
+pending_user_actions_section_end=next-heading

@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 try:
-    from markdown_table import find_markdown_sections, is_separator_row, split_markdown_row
+    from markdown_table import parse_markdown_sections, is_separator_row, split_markdown_row
 except ImportError as exc:
     raise SystemExit(
         'markdown_table.py must be alongside this script; copy the whole '
@@ -48,13 +48,22 @@ def load_state_data(source_path: Path) -> Dict[str, Any]:
         tasks: Dict[str, Any] = {}
         blocked: List[Dict[str, str]] = []
         needs_you: List[Dict[str, str]] = []
+        pending_user_actions: List[Dict[str, str]] = []
         with open(source_path, "r", encoding="utf-8-sig") as f:
             content = f.read()
-        sections = ((title, body)
-                    for title, level in (("Task list", 2), ("Blocked", 2), ("Needs you now", None))
-                    for body in find_markdown_sections(content, title, level))
-        for current_section, body in sections:
-            for line in body.splitlines():
+        for section in parse_markdown_sections(content):
+            current_section = section['title']
+            level = section['level']
+            parent = section['parent']
+            if current_section == 'Task list' and level != 2:
+                continue
+            if current_section in ('Blocked', 'Pending user actions'):
+                if level != 2 and not (level == 3 and parent == 'Needs you now'):
+                    continue
+            if current_section == 'Needs you now':
+                if level != 2 and not (level == 3 and parent == 'Coordination'):
+                    continue
+            for line in section['body'].splitlines():
                 line_str = line.strip()
 
                 if current_section == "Task list" and line_str.startswith("|"):
@@ -89,6 +98,14 @@ def load_state_data(source_path: Path) -> Dict[str, Any]:
                             "done_when": parts[4],
                         })
 
+                elif current_section == 'Pending user actions' and line_str.startswith('|'):
+                    parts = split_markdown_row(line_str)
+                    if len(parts) >= 6 and parts[0] not in ('ID', '') and not is_separator_row(parts):
+                        pending_user_actions.append({
+                            'id': parts[0], 'tasks': parts[1], 'action': parts[2],
+                            'expected_return': parts[3], 'owner': parts[4], 'resume_when': parts[5],
+                        })
+
         return {
             "record_kind": "project-status",
             "workflow_id": "project-status",
@@ -97,6 +114,7 @@ def load_state_data(source_path: Path) -> Dict[str, Any]:
             "task_states": tasks,
             "blocked_items": blocked,
             "needs_you": needs_you,
+            "pending_user_actions": pending_user_actions,
         }
     else:
         raise ValueError(f"Unsupported source format: {source_path.suffix}. Expected .json or .md")
@@ -123,6 +141,14 @@ def render_terminal(data: Dict[str, Any]) -> str:
             lines.append(f"  * Task {item.get('task', '?')} - {item.get('question', '')}"
                          f" (resume when: {item.get('resume_when', '')})")
         lines.append("-" * 70)
+
+    pending_actions = data.get('pending_user_actions') or []
+    if pending_actions:
+        lines.append(f'  PENDING USER ACTIONS ({len(pending_actions)}):')
+        for item in pending_actions:
+            lines.append(f"  * {item.get('id', '?')} - {item.get('action', '')}"
+                         f" (owner: {item.get('owner', '')})")
+        lines.append('-' * 70)
 
     task_states = data.get("task_states", {})
     if not task_states:

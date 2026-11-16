@@ -43,7 +43,7 @@ Two seams decide whether a long project stays honest: who may act, and what a pe
 
 - **Authority record:** a task brief carries the grant source, the scope it covers, the strength it carries and the condition that invalidates it. A resumed task, including one leaving Blocked, revalidates that record instead of inheriting it silently; a narrowed grant means narrower work or a fresh confirmation.
 - **Three strengths — observe, propose and act:** `observe` reads and produces a plan without writing, `propose` writes only to an isolated output and never the working tree, `act` executes normally. Strength sits beside Fast Lane, Lean and Standard rather than replacing them. An unfamiliar scope, a first delegation of a new kind or an irreversible action starts record-only at `propose`; strength never waives a review or QA gate.
-- **Needs you now:** new templates place this derived view at `## Coordination` → `### Needs you now`, with three columns — `Task | Question | Resume when` — capped at five rows and empty when the project is healthy. Legacy top-level `## Needs you now` and files without the section remain valid. It reads the status file; it is not a second place to store state.
+- **Needs you now:** new templates use root `## Needs you now`, with `### Blocked` and on-demand `### Pending user actions`. Prior interim main v3 `## Coordination` with `### Needs you now` and legacy top-level Blocked/Pending remain compatible inputs. `project-status.md` may carry a derived view with three columns — `Task | Question | Resume when` — capped at five rows and empty when the project is healthy. It reads the status file; it is not a second place to store state.
 - **Receipt attention block:** outcome, attention, question, resume when and dispatch key, with the next owner named explicitly (`person`, `executor`, `reviewer`, `qa`, `commander` or `none`). "Waiting for a person" is declared in that block; a receipt whose prose only sounds like waiting has not asked you for anything.
 - **Status revision:** `- Status revision: N` in the project section, bumped once per update, plus `--expected-revision` on the validator. A single writer still needs it: a resumed window or a parallel window can act on a stale read, and the check reports a concurrency error instead of overwriting newer state.
 - **Design constitution:** a new capability is an attribute of an existing concept or prompt text before it becomes a new role, state, file or section; one default beats a configuration knob; every output element justifies the attention it costs. Coordination messages and continuations therefore report only what needs a person or what finished — no periodic progress narration, and a healthy project occupies no space in status output.
@@ -139,13 +139,13 @@ Optional:
   - `project-retro.md` — optional retro record
 - `AGENTS.md` — generated in the target project root during Context Agent delivery; not a Task Commander source file
 - `scripts/` — standard-library discovery, validation and optional command-progress helpers
+  - `validation_limits.py` centralizes validator thresholds
   - `scan-skills.py` scans skill candidates by frontmatter
   - `validate-project-state.py` validates `project-status.md` structure and state transitions
   - `validate-knowledge.py` validates optional `knowledge/` structure, topic frontmatter and LOG ordering
   - `run-workflow.py` sequentially runs trusted commands; its exit-0 completion is not project acceptance
   - `render-workflow.py` renders command checkpoints or recorded project status
   - `markdown_table.py` shares status-table cell parsing between validation and rendering (not a CLI)
-  - `validation_limits.py` owns shared attention, Completed-warning, file-size and knowledge-text limits (not a CLI)
 - `agents/openai.yaml` — agent configuration
 - `assets/workflow-section-en.png` — workflow overview diagram
 - `.github/workflows/ci.yml` — three-platform CI matrix
@@ -203,9 +203,7 @@ Dry-run writes simulation-only checkpoints and does not execute task commands, b
 
 Read the existing authoritative background, terms, confirmed decisions, status, relevant knowledge topics and relevant task evidence before asking for context again; resolve only missing, stale or conflicting information that matters to the work. Handoffs carry essential paths, relevant revisions, the full assigned outcome and effective constraints rather than copying every background document. A stored claim of approval is not new authorization; cold-start review still uses its staged packets.
 
-Protocol version 3 uses nested attention in new templates and shared parsing/validation limits while preserving version 2's optional knowledge, window-boundary, task-shaping, two-axis review, debug-loop and retro capabilities. Existing projects remain valid and adopt changes incrementally; see `references/23-protocol-upgrade.md`. Adding `Protocol version: 3` is metadata, not a task transition.
-
-More than 10 task rows with status `Completed` (case-insensitive) produces an advisory archive/readability warning, not a validation failure; `Cancelled` does not count. Preserve history and evidence pointers when archiving. `scripts/validation_limits.py` owns the shared limits. `CONTEXT.md` holds only terms/domain relations, `decision-log.md` is the sole decision ledger, and optional `knowledge/ROADMAP.md` holds long-term direction; live task state stays in `project-status.md`.
+Protocol version 3 consolidates the skill inventory into the project background, makes CONTEXT.md and the knowledge layer conditional, keeps new decision entries compact and append-only, nests Blocked/Pending user actions under Needs you now, and adds a phase-closeout checklist plus a non-blocking warning for more than 10 Completed tasks. Version 1 and 2 projects remain valid and adopt v3 only after confirmation at a phase boundary; see `references/23-protocol-upgrade.md`. Adding `Protocol version: 3` is metadata, not a task transition.
 
 At coordination checkpoints, compare actual artifacts, valid evidence and remaining unknowns. The adjustable default is diagnosis after two consecutive checks without substantive progress, not after a wall-clock timeout. This is separate from the existing targeted-revision budget. Long-running work and useful negative experiments are not stalled merely because they remain In Progress.
 
@@ -216,6 +214,8 @@ Keep existing task IDs, phases and history. Add the optional coordination sectio
 Status table columns are unchanged. Structural checks still use `--path` alone. Transition checks now require all of `--task-id`, `--from-state`, and `--to-state`; a missing/unknown task or a source state different from the recorded state fails. A lone `--task-id` is an error, not an ignored option.
 
 Run a transition check **before** updating the state. After changing the task and its active blocked record together, validate the resulting file with `--path` only. Every Blocked task needs exactly one matching record with a legal pre-block state; duplicate, missing, orphan and stale records now fail. Preserve actual history when correcting old inconsistent files; do not invent a predecessor or bypass required gates.
+
+Structural validation also emits a non-blocking warning when more than 10 tasks are Completed. It does not change the validity result or exit code; review the phase-closeout checklist before archiving any history.
 
 ## Script self-check
 

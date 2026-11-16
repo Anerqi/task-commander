@@ -1,73 +1,36 @@
 # Project Decision Log Template
 
+> Append-only ledger of user-confirmed consequential decisions. Keep each new entry compact; preserve existing historical entries.
+
 ## Purpose
 
-After the user confirms a major decision, the Commander appends the decision to `<Project Root>/decision-log.md` using this template. That file is the single source of truth; do not create a directory with the same name.
-Only record decisions the user has explicitly confirmed; do not write Decision Manager recommendations directly as final decisions.
+After the user confirms a major decision, the Commander appends one concise record to `<Project Root>/decision-log.md`. This file is the single source of truth for confirmed decisions.
 
-Decision-log entries are for consequential choices, not every reversible implementation detail. If the project uses ADRs, offer one only when the choice is hard to reverse, surprising without context, and the result of a real trade-off; otherwise the decision-log entry is enough. A stable conclusion that is not a decision belongs in `knowledge/topics/`, not here.
+Only record decisions the user has explicitly confirmed. Never copy a Decision Manager recommendation into the ledger as a final decision.
 
-## Numbering rules
+Use a separate analysis artifact for detailed option comparisons. The ledger records the outcome, not the full debate. Keep each new decision to about 3–5 substantive lines.
 
-Read the existing `decision-log.md` and increment the last number, in the format D001, D002...; start at D001 when the file does not exist.
+## Numbering and history
 
-## Input information (required / reference)
+Read the existing file and increment the last number in the format D001, D002, and so on. Start at D001 when the file does not exist.
 
-- Decision topic and background
-- Options considered and their pros and cons (usually from discussion records or comparison tables)
-- The chosen option and the reason
-- The tasks and files the decision affects
-- Whether a re-evaluation is needed later (optional)
+Append new records. Do not rewrite or delete prior confirmed decisions. When a new decision replaces an earlier one, include a `Supersedes` pointer in the new record; retain the earlier entry and its evidence.
+
+The `# Project Decision Log` H1 appears only once when the file is initialized; later records append only the `## DXXX` sections. A file at `decision-log.md` owns the ledger; do not create a directory with the same name.
 
 ## Record template
-
-The `# Project Decision Log` H1 appears only once when the file is initialized; later records append only the `## DXXX` sections.
 
 ```markdown
 # Project Decision Log
 
-## DXXX
-Date: YYYY-MM-DD
-Decision: (summarize the decision in one sentence)
-Chosen option: (name of the chosen option)
-
----
-
-## Background
-Why this decision was needed:
-
----
-
-## Options considered
-### Option A
-Pros:
-Cons:
-
-### Option B
-Pros:
-Cons:
-
-(Add more options as needed)
-
----
-
-## Final choice
-Choice: (Option A / Option B / ...)
-Reason:
-
----
-
-## Impact
-Affected tasks:
-- (task id)
-Affected files:
-- (file path)
-Knowledge topic / ADR pointer (if any):
-- (path)
-
----
-
-## Follow-up review
-Re-evaluation needed: yes / no
-(If yes, state the trigger condition or date for the re-evaluation)
+## DXXX — <short topic>
+- Date: YYYY-MM-DD
+- Decision: <confirmed choice in one sentence>
+- Rationale: <short reason; point to the full analysis if needed>
+- Impact: <affected task IDs and paths>
+- Supersedes: <decision ID or ->
 ```
+
+## Boundary
+
+Reversible implementation details do not need a decision record. Stable technical conclusions belong in `knowledge/topics/`. Offer an ADR only when the project already uses ADRs and the choice is hard to reverse, surprising without context, and a real trade-off.

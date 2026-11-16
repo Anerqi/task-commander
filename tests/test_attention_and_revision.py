@@ -9,7 +9,6 @@ the rejection cases.
 import json
 import os
 import pathlib
-import re
 import subprocess
 import sys
 import tempfile
@@ -18,9 +17,12 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 VALIDATOR = ROOT / "scripts" / "validate-project-state.py"
 TEMPLATE = ROOT / "templates" / "project-status.md"
+sys.path.insert(0, str(ROOT / "scripts"))
+from markdown_table import find_markdown_sections
+
 TASK_SEPARATOR = "|---|---|---|---|---|---|---|---|---|---|---|"
 BLOCKED_SEPARATOR = "|---|---|---|---|---|---|"
-NEEDS_BLOCK = "### Needs you now\n\n"
+NEEDS_BLOCK = "## Needs you now\n\n"
 NEEDS_HEADER = "| Task | Question | Resume when |\n|---|---|---|"
 
 
@@ -34,22 +36,27 @@ def needs_row(task_id, question="May I publish this draft?"):
 
 
 def without_attention(content):
-    return re.sub(r"(?ms)^#{2,3} Needs you now\n.*?(?=^#{1,6} |\Z)", "", content)
+    body, = find_markdown_sections(content, "Needs you now", level=2)
+    return content.replace("## Needs you now\n" + body, "", 1).replace(
+        "### Blocked\n", "## Blocked\n", 1)
+
+
+def insert_rows(content, title, separator, rows):
+    body, = find_markdown_sections(content, title)
+    assert separator in body, title
+    return content.replace(body, body.replace(
+        separator, separator + "\n" + "\n".join(rows), 1), 1)
 
 
 class AttentionAndRevisionTests(unittest.TestCase):
     def build(self, tasks=(), blocked=(), needs=(), revision=1, drop_needs_section=False):
         content = TEMPLATE.read_text(encoding="utf-8")
         if tasks:
-            content = content.replace(
-                TASK_SEPARATOR, TASK_SEPARATOR + "\n" + "\n".join(tasks), 1)
+            content = insert_rows(content, "Task list", TASK_SEPARATOR, tasks)
         if blocked:
-            content = content.replace(
-                "\n" + BLOCKED_SEPARATOR + "\n",
-                "\n" + BLOCKED_SEPARATOR + "\n" + "\n".join(blocked) + "\n", 1)
+            content = insert_rows(content, "Blocked", BLOCKED_SEPARATOR, blocked)
         if needs:
-            content = content.replace(
-                NEEDS_HEADER, NEEDS_HEADER + "\n" + "\n".join(needs), 1)
+            content = insert_rows(content, "Needs you now", NEEDS_HEADER, needs)
         if revision is None:
             content = content.replace("- Status revision: 1\n", "", 1)
         elif revision != 1:
@@ -81,8 +88,11 @@ class AttentionAndRevisionTests(unittest.TestCase):
 
     def test_template_ships_an_empty_attention_view_and_revision(self):
         template = TEMPLATE.read_text(encoding="utf-8")
-        self.assertIn(NEEDS_BLOCK, template.split("## Coordination\n", 1)[1])
-        self.assertNotIn("\n## Needs you now\n", template)
+        self.assertIn(NEEDS_BLOCK, template)
+        self.assertNotIn("\n## Coordination\n", template)
+        self.assertIn("\n### Blocked\n", template)
+        self.assertLess(template.index("### Blocked\n"), template.index("## Task list\n"))
+        self.assertNotIn("\n## Blocked\n", template)
         process, payload = self.run_validator(self.build())
         self.assertEqual(process.returncode, 0, payload)
         self.assertTrue(payload["valid"])
@@ -103,16 +113,27 @@ class AttentionAndRevisionTests(unittest.TestCase):
         self.assertEqual(process.returncode, 0, payload)
         self.assertEqual(payload["needs_you_count"], 1)
 
+    def test_old_main_coordination_attention_with_root_blocked_is_supported(self):
+        content = self.build(
+            tasks=[task_row("01", "Blocked")], needs=[needs_row("01")],
+            blocked=["| 01 | In Review | Need evidence | QA | Verified | next |"])
+        content = content.replace(NEEDS_BLOCK, "## Coordination\n\n### Needs you now\n\n", 1)
+        content = content.replace("### Blocked\n", "## Blocked\n", 1)
+        process, payload = self.run_validator(content)
+        self.assertEqual(process.returncode, 0, payload)
+        self.assertEqual(payload["needs_you_count"], 1)
+
     def test_attention_stops_at_eof_or_any_following_heading(self):
         base = self.build(tasks=[task_row("01")], drop_needs_section=True)
-        attention = "\n## Coordination\n\n" + NEEDS_BLOCK + NEEDS_HEADER + "\n" + needs_row("01")
-        for suffix in ("", "\n### Active windows\n| A | B | C | D |",
-                       "\n#### Detail\n| 99 | unrelated | table |",
-                       "\n## Other\n| 99 | unrelated | table |"):
-            with self.subTest(suffix=suffix):
-                process, payload = self.run_validator(base + attention + suffix)
-                self.assertEqual(process.returncode, 0, payload)
-                self.assertEqual(payload["needs_you_count"], 1)
+        for heading in (NEEDS_BLOCK, "## Coordination\n\n### Needs you now\n\n"):
+            attention = "\n" + heading + NEEDS_HEADER + "\n" + needs_row("01")
+            for suffix in ("", "\n### Active windows\n| A | B | C | D |",
+                           "\n#### Detail\n| 99 | unrelated | table |",
+                           "\n## Other\n| 99 | unrelated | table |"):
+                with self.subTest(heading=heading, suffix=suffix):
+                    process, payload = self.run_validator(base + attention + suffix)
+                    self.assertEqual(process.returncode, 0, payload)
+                    self.assertEqual(payload["needs_you_count"], 1)
 
     def test_duplicate_attention_sections_are_rejected(self):
         for heading in ("##", "###"):
@@ -203,6 +224,32 @@ class AttentionAndRevisionTests(unittest.TestCase):
             tasks=[task_row("01", "Awaiting Acceptance")],
             needs=["| 01 | Question | Later | extra |"]))
         self.assert_error(payload, "Malformed needs-you-now row")
+
+    def test_nested_blocked_section_must_be_under_needs_you_now(self):
+        content = self.build(
+            tasks=[task_row("01", "Blocked")],
+            blocked=["| 01 | In Review | Need evidence | QA | Evidence checked | next |"])
+        start = content.index("### Blocked\n")
+        end = content.index("## Task list", start)
+        blocked_section = content[start:end].strip("\n")
+        content = content[:start] + content[end:]
+        content = content.replace(
+            "## Next steps\n",
+            "## Next steps\n\n" + blocked_section + "\n\n", 1)
+        _, payload = self.run_validator(content)
+        self.assert_error(payload, "Nested Blocked section must be under Needs you now")
+
+    def test_nested_pending_actions_must_be_under_needs_you_now(self):
+        content = self.build()
+        misplaced = (
+            "### Pending user actions\n\n"
+            "| ID | Affected tasks | Question / local action | Expected safe return | Owner | Resume condition / fallback |\n"
+            "|---|---|---|---|---|---|\n"
+            "| U01 | 01 | Confirm access | Approval note | User | Access approved |\n\n"
+        )
+        content = content.replace("## Next steps\n", "## Next steps\n\n" + misplaced, 1)
+        _, payload = self.run_validator(content)
+        self.assert_error(payload, "Nested Pending user actions section must be under Needs you now")
 
     def test_expected_revision_matches_and_mismatches(self):
         process, payload = self.run_validator(self.build(), "--expected-revision", "1")

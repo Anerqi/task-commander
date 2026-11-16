@@ -15,16 +15,16 @@ The knowledge layer is **optional**. A one-shot or purely local task may need no
 | Current task state, phase, blockers, coordination | `project-status.md` | Knowledge notes may point to it; do not duplicate current status |
 | User-confirmed major decisions | `decision-log.md` | Topics summarize and point to the decision ID |
 | Stable technical conclusions, lessons, procedures | `knowledge/topics/<topic>.md` | LOG and task receipts point to the topic |
-| Chronological progress summary | `knowledge/LOG.md` | Short entries with pointers; no long conclusions |
 | Optional long-term direction | `knowledge/ROADMAP.md` | Goals and direction only; live task state remains in `project-status.md` |
+| Chronological progress summary | `knowledge/LOG.md` | Short entries with pointers; no long conclusions |
 | Delivery evidence | Task result files and receipts | Topics cite artifact versions and receipt paths |
 | Project context, scope, constraints, collaboration policy | `background/01_project_background.md` | Other files point to it |
 | Project-wide behavioral rules | root `AGENTS.md` | Knowledge notes do not replace project rules |
 | External knowledge actually used | `knowledge/Cited.md` | Pointers only; never copy the external body |
 
-Do not create a second competing summary. If a topic needs the full reasoning, it points to the artifact, decision or receipt that owns it.
+When maintained, `CONTEXT.md` holds only terms and domain relations. `decision-log.md` is the sole decision ledger. Task Commander owns paths and integration; `grill-with-docs` supplies METHOD only.
 
-`CONTEXT.md` holds only terms and domain relations; `decision-log.md` is the sole decision ledger. Composed `grill-with-docs` supplies METHOD only; Task Commander owns paths and integration rules.
+Do not create a second competing summary. If a topic needs the full reasoning, it points to the artifact, decision or receipt that owns it.
 
 **Engineering assets stay in the code tree.** A schema, configuration, source file or executable specification is not knowledge about the project; it is a project asset. Only the reasoning, pitfalls, decisions and reusable lessons about such assets belong in `knowledge/`.
 
@@ -32,7 +32,7 @@ Do not create a second competing summary. If a topic needs the full reasoning, i
 
 ```text
 knowledge/
-  LOG.md                  # created at initialization for a multi-session project
+  LOG.md                  # created on the first durable conclusion or user request
   ROADMAP.md              # optional; only when goals outlast one session
   topics/<topic>.md       # created on the first stable conclusion or lesson
   Cited.md                # created on first external adoption
@@ -41,8 +41,9 @@ knowledge/
 
 **Creation trigger:**
 
-- **New project:** Context may create `knowledge/LOG.md` at initialization when the project is expected to span multiple sessions or the user wants durable knowledge; it may also initialize a short `ROADMAP.md` when goals outlast the current session.
-- **Existing project:** do not create a layer during a routine context refresh. Start with `knowledge/LOG.md` on the first durable conclusion and after user confirmation; preserve all existing records and history. No task-schema migration is required.
+- **New or existing project:** a multi-session expectation alone does not justify an empty knowledge directory or LOG. Create the layer on the first durable conclusion, or when the user explicitly requests a persistent timeline. For an existing project, obtain confirmation before creating a new layer; preserve all existing records and history.
+- Create `knowledge/ROADMAP.md` only when goals extend beyond the current session and a roadmap will guide later work. Do not create an empty roadmap.
+- No task-schema migration is required.
 - In both cases, do not pre-create topic files, `Cited.md` or `Reference/`; create each on its first real trigger.
 - Before creating the directory, check for an existing `knowledge/` that already serves another purpose. If it is unrelated, ask the user and choose a different directory or explicitly confirm adoption; do not overwrite it.
 - `knowledge/Reference/` holds raw external inputs the project owns but did not author. It is not for copied knowledge-base bodies or generated summaries.
@@ -61,7 +62,7 @@ After initialization, the **Commander is the integration owner** for shared know
 
 ### LOG entries
 
-After a substantive milestone, decision, experiment result or incident, add one entry **at the top** of `knowledge/LOG.md` (newest first):
+After a substantive milestone, decision, experiment result or incident, add one concise entry **at the top** of `knowledge/LOG.md` (newest first). Do not log every task transition, routine status update, repeated checkpoint or unchanged evidence refresh:
 
 - What changed, was decided, or was learned.
 - Evidence, receipt or artifact pointer.
@@ -77,7 +78,7 @@ When a stable conclusion, lesson, procedure or reusable pattern appears, create 
 - Keep `summary` as a one-line conclusion for retrieval.
 - Use `contains` for the kinds of knowledge present: `decision`, `experience`, `lesson`, `procedure`, `reference` or `open_question`.
 - Keep only body sections with real content. Include `Background` and `Current conclusion` when they carry content; evidence, practice, boundaries and open questions are added only when useful. A topic must still contain a real conclusion somewhere; a title-only or heading-only shell is not valid.
-- Correct an old conclusion in place and add a LOG pointer to the revision. Do not silently overwrite history.
+- Do not silently replace a prior conclusion. Mark the old conclusion as superseded, preserve its evidence and rationale, and add a LOG pointer to the new conclusion. If the conclusion is materially different, prefer a new topic/version over rewriting the historical body.
 - A topic may point to a decision ID, artifact, receipt or source; it must not become a second decision ledger.
 
 ### External knowledge
@@ -105,8 +106,6 @@ Run a knowledge audit at a milestone and before project Acceptance when the laye
 ```
 
 The validator checks layout, frontmatter fields, enum values, LOG ordering and basic shell/empty-file warnings. It does not judge truth, contradicting conclusions or whether a topic is worth keeping.
-
-Keep `scripts/validation_limits.py` with the validator: it owns shared bounds including `MAX_FILE_BYTES=2*1024*1024`, `ENTRY_LINE_LIMIT=20` and `SUMMARY_LENGTH_LIMIT=200`. These structural/readability limits do not replace the audit below.
 
 Human/Commander audit checklist:
 
@@ -146,7 +145,7 @@ Mark `graduation_status: candidate` only after that judgment. Commander proposes
 
 ## AGENTS.md navigation
 
-When the layer exists, the root `AGENTS.md` should state the reading order and boundaries, not duplicate the protocol:
+When the layer exists, the root `AGENTS.md` should state the reading order and boundaries, not duplicate the protocol. Keep it stable: do not add live task counts, completed-task totals, milestone counters or temporary progress notes, and do not rewrite it when its durable rules have not changed.
 
 ```text
 Read AGENTS.md -> knowledge/ROADMAP.md (if present) -> recent knowledge/LOG.md entries -> relevant knowledge/topics/ -> task brief.

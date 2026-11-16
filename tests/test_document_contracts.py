@@ -76,7 +76,7 @@ class DocumentContracts(unittest.TestCase):
         for marker in (
             "Generate this file last",
             "Extract hard rules from the interview",
-            "If `AGENTS.md` already exists, read it first, merge new information",
+            "If `AGENTS.md` already exists, read it first. Preserve confirmed rules",
             "flag any conflicts for the user to resolve before writing",
             "must be confirmed by the user before writing",
             "Do not paste Task Commander protocol rules into `AGENTS.md`",
@@ -628,7 +628,7 @@ class DocumentContracts(unittest.TestCase):
 
         status = (ROOT / "templates/project-status.md").read_text(encoding="utf-8")
         self.assertIn("Protocol version: 3", status)
-        self.assertIn("## Knowledge", status)
+        self.assertNotIn("## Knowledge", status)
 
         receipt = (ROOT / "templates/task-receipt.md").read_text(encoding="utf-8")
         self.assertIn("## Knowledge delta (when relevant)", receipt)
@@ -710,9 +710,9 @@ class DocumentContracts(unittest.TestCase):
                        "mechanical", "judgment", "human-confirmed", "not a new task state"):
             self.assertIn(marker, retro)
         upgrade = (ROOT / "references/23-protocol-upgrade.md").read_text(encoding="utf-8")
-        for marker in ("Current protocol version: 3 (2026-11-16)", "protocol_version",
-                       "Existing `project-status.md` files may omit",
-                       "backward-compatible", "This is metadata, not a task transition"):
+        for marker in ("Current protocol version: 3", "Version 1 and 2 status files remain valid",
+                       "Existing `background/02_skill_list.md` files",
+                       "nested `### Blocked`", "This is metadata, not a task transition"):
             self.assertIn(marker, upgrade)
         self.assertIn("references/22-project-retro.md",
                       (ROOT / "SKILL.md").read_text(encoding="utf-8"))
@@ -722,7 +722,45 @@ class DocumentContracts(unittest.TestCase):
         for scenario in ("K1", "K2", "K3", "K4", "K5"):
             self.assertIn(f"| {scenario} |", scenarios)
         self.assertIn("knowledge closeout", scenarios.lower())
+        self.assertIn("| PC1 |", scenarios)
         self.assertIn("Spec-axis failure", scenarios)
+
+    def test_version_three_context_and_compaction_contracts(self):
+        context = (ROOT / "references/01-context-brief.md").read_text(encoding="utf-8")
+        for marker in ("Available skills", "legacy input only", "does not trigger creation",
+                       "Do not rewrite it when there is no meaningful durable change"):
+            self.assertIn(marker, context)
+
+        orchestration = (ROOT / "references/10-context-orchestration.md").read_text(encoding="utf-8")
+        for marker in ("grill-with-docs is loaded for this session",
+                       "multi-session", "background/01_project_background.md` → `Available skills`"):
+            self.assertIn(marker, orchestration)
+
+        discovery = (ROOT / "references/12-skill-discovery.md").read_text(encoding="utf-8")
+        self.assertIn("Legacy compatibility", discovery)
+        self.assertIn("Do not create the legacy file in new projects", discovery)
+
+        knowledge = (ROOT / "references/20-knowledge-layer.md").read_text(encoding="utf-8")
+        self.assertIn("multi-session expectation alone", knowledge)
+        self.assertIn("Do not log every task transition", knowledge)
+        self.assertIn("preserve its evidence and rationale", knowledge)
+
+        boundaries = (ROOT / "references/21-window-boundaries.md").read_text(encoding="utf-8")
+        self.assertIn("## Phase closeout", boundaries)
+        self.assertIn("More than 10 Completed rows", boundaries)
+        retro = (ROOT / "references/22-project-retro.md").read_text(encoding="utf-8")
+        self.assertIn("## Phase closeout and compaction", retro)
+
+        limits = (ROOT / "scripts/validation_limits.py").read_text(encoding="utf-8")
+        self.assertEqual(run_path(str(ROOT / "scripts/validation_limits.py"))["COMPLETED_TASK_WARNING_THRESHOLD"], 10)
+        validator = (ROOT / "scripts/validate-project-state.py").read_text(encoding="utf-8")
+        self.assertIn("warnings", validator)
+        parser = run_path(str(ROOT / "scripts/markdown_table.py"))
+        self.assertTrue(callable(parser["parse_markdown_sections"]))
+
+        status = (ROOT / "templates/project-status.md").read_text(encoding="utf-8")
+        self.assertNotIn("## Coordination", status)
+        self.assertNotIn("## Knowledge", status)
 
     def test_authority_and_attention_contracts(self):
         # Text guards for the authority record, the strength axis, the attention
@@ -766,9 +804,9 @@ class DocumentContracts(unittest.TestCase):
             "templates/task-receipt.md": (
                 "## Attention", "Outcome:", "Attention:", "Dispatch key:"),
             "templates/project-status.md": (
-                "### Needs you now", "Status revision: 1"),
+                "## Needs you now", "### Blocked", "Protocol version: 3", "Status revision: 1"),
             "templates/task-state-spec.txt": (
-                "needs_you_section_start", "needs_you_max_rows", "revision_prefix"),
+                "needs_you_section_start", "blocked_section_start", "needs_you_max_rows", "revision_prefix"),
         }
         for source, markers in contracts.items():
             text = (ROOT / source).read_text(encoding="utf-8")
@@ -776,16 +814,16 @@ class DocumentContracts(unittest.TestCase):
                 with self.subTest(source=source, marker=marker):
                     self.assertIn(marker, text)
 
-    def test_v3_template_attention_is_nested_and_matches_spec(self):
+    def test_v3_template_attention_is_compact_and_matches_spec(self):
         status = (ROOT / "templates/project-status.md").read_text(encoding="utf-8")
         parser = run_path(str(ROOT / "scripts/markdown_table.py"))
         sections = list(parser["iter_markdown_sections"](status))
         titles = [title for title, _ in sections]
         self.assertEqual(titles.count("Needs you now"), 1)
         headings = [line for line in status.splitlines() if line.startswith("#")]
-        attention_index = headings.index("### Needs you now")
-        self.assertEqual(headings[attention_index - 1], "## Coordination")
-        self.assertNotIn("## Needs you now", headings)
+        attention_index = headings.index("## Needs you now")
+        self.assertEqual(headings[attention_index + 1], "### Blocked")
+        self.assertNotIn("## Coordination", headings)
         body, = parser["find_markdown_sections"](status, "Needs you now")
         table = [line for line in body.splitlines() if line.startswith("|")]
         self.assertEqual(table, ["| Task | Question | Resume when |", "|---|---|---|"])
@@ -794,7 +832,7 @@ class DocumentContracts(unittest.TestCase):
         spec = dict(line.split("=", 1) for line in
                     (ROOT / "templates/task-state-spec.txt").read_text(encoding="utf-8").splitlines()
                     if "=" in line and not line.startswith("#"))
-        self.assertEqual(spec["needs_you_section_start"], "### Needs you now")
+        self.assertEqual(spec["needs_you_section_start"], "## Needs you now")
         self.assertNotIn("heading=### Needs you now",
                          (ROOT / "templates/task-state-spec.txt").read_text(encoding="utf-8"))
         limits = run_path(str(ROOT / "scripts/validation_limits.py"))
@@ -816,9 +854,9 @@ class DocumentContracts(unittest.TestCase):
         })
         limits = run_path(str(ROOT / "scripts/validation_limits.py"))
         for name, value in (("NEEDS_YOU_MAX_ROWS", 5),
-                            ("COMPLETED_TASK_WARNING_LIMIT", 10),
-                            ("MAX_FILE_BYTES", 2 * 1024 * 1024),
-                            ("ENTRY_LINE_LIMIT", 20), ("SUMMARY_LENGTH_LIMIT", 200)):
+                            ("COMPLETED_TASK_WARNING_THRESHOLD", 10),
+                            ("KNOWLEDGE_FILE_MAX_BYTES", 2 * 1024 * 1024),
+                            ("KNOWLEDGE_LOG_ENTRY_LINE_LIMIT", 20), ("KNOWLEDGE_TOPIC_SUMMARY_LENGTH_LIMIT", 200)):
             with self.subTest(limit=name):
                 self.assertEqual(limits[name], value)
                 self.assertIn(name, upgrade)
@@ -843,6 +881,37 @@ class DocumentContracts(unittest.TestCase):
                     "roadmap direction": r"roadmap\.md[^.]{0,40}(?:holds|records) long-term direction|optional long-term direction \| knowledge/roadmap\.md \| goals and direction only; live task state remains in project-status\.md",
                     "live state ownership": r"project-status\.md",
                 })
+
+    def test_shared_section_parser_excludes_examples_and_preserves_hierarchy(self):
+        parser = run_path(str(ROOT / "scripts/markdown_table.py"))
+        content = (
+            "# Status\n## Needs you now\n| Task | Question | Resume when |\n"
+            "```markdown\n## Tasks\n| fake | Completed |\n```\n"
+            "### Blocked\nactive blocker\n#### Example\nexample only\n"
+            "## Status history\nhistory only\n### Blocked\nhistorical blocker\n"
+            "~~~\n## Needs you now\n| fake attention |\n~~~\n"
+            "## Tasks\nauthoritative tasks\n"
+        )
+        sections = parser["parse_markdown_sections"](content)
+        self.assertEqual([s["title"] for s in sections], [
+            "Status", "Needs you now", "Blocked", "Example", "Status history",
+            "Blocked", "Tasks",
+        ])
+        active, historical = parser["extract_sections"](content, "Blocked", (3,))
+        self.assertEqual(active, {
+            "level": 3, "title": "Blocked", "parent": "Needs you now",
+            "body": "active blocker\n",
+        })
+        self.assertEqual(historical["parent"], "Status history")
+        self.assertEqual(historical["body"], "historical blocker\n")
+        self.assertEqual(sections[3]["parent"], "Needs you now")
+        self.assertEqual(parser["find_markdown_sections"](content, "Tasks", 2),
+                         ["authoritative tasks\n"])
+        self.assertEqual(list(parser["iter_markdown_sections"](content, 2)), [
+            ("Needs you now", "| Task | Question | Resume when |\n"),
+            ("Status history", "history only\n"),
+            ("Tasks", "authoritative tasks\n"),
+        ])
 
 
 if __name__ == "__main__":

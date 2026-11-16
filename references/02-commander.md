@@ -69,13 +69,13 @@ Stop dispatching when the full user-requested outcome and all required checks ar
 
 Commander alone writes central status after Context initialization. `project-status.md` owns task state; `decision-log.md` owns user-confirmed decisions; knowledge topics own stable conclusions; `knowledge/LOG.md` owns the short timeline.
 
-`CONTEXT.md` holds only terms and domain relations; optional `knowledge/ROADMAP.md` holds long-term direction, not live task state. Composed skills such as `grill-with-docs` supply METHOD only; Task Commander retains path and integration ownership, and decisions remain in the sole ledger `decision-log.md`.
+When maintained, `CONTEXT.md` holds only terms and domain relations; optional `knowledge/ROADMAP.md` holds long-term direction, not live task state. Composed skills such as `grill-with-docs` supply METHOD only; Task Commander retains path and integration ownership, and decisions remain in the sole ledger `decision-log.md`.
 
 Use `templates/decision-log.md` for technology choices, direction or scope changes, and consequential resource decisions. Show the user the alternatives, reasons, and impact before recording a final choice. Record only the option the user confirms. A pending choice need only block the work it affects.
 
 For each status change, read the latest revision, validate the legal transition and verify evidence. Update state and history together. Validate and reread the result. Keep blocked records consistent. Follow the full transaction in `references/11-task-state-machine.md`.
 
-Use `## Coordination` → `### Needs you now` in new status templates; legacy top-level or absent attention remains valid. Derive at most five questions from current records. More than 10 `Completed` rows (case-insensitive, excluding `Cancelled`) is an advisory archive/readability warning, not a validation failure. Consult `scripts/validation_limits.py` for shared bounds and preserve history/evidence pointers when archiving.
+Use root `## Needs you now` with `### Blocked` and on-demand `### Pending user actions` in new status templates. Prior interim main v3 `### Needs you now` under `## Coordination`, legacy top-level Blocked/Pending, and absent attention remain compatible inputs. Add optional coordination records only when they carry current information. Derive at most five questions from current records. More than 10 `Completed` rows (case-insensitive, excluding `Cancelled`) is an advisory archive/readability warning, not a validation failure. Consult `scripts/validation_limits.py` for shared bounds and preserve history/evidence pointers when archiving.
 
 For protocol upgrades, propose `AGENTS.md` changes for user confirmation. Apply new defaults to new tasks. Keep active contracts unchanged unless the user confirms a versioned change.
 

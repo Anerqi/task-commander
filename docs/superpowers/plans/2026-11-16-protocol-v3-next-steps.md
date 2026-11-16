@@ -1,5 +1,7 @@
 # Protocol v3 Next Steps Implementation Plan
 
+> Historical execution record. The structural convention in this plan is superseded by `2026-11-16-unify-v3-compact-context.md`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 在最新远端基线上明确协议合并约定，完成 v3、状态章节兼容和统一校验限制。

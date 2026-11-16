@@ -69,12 +69,17 @@ import re
 import sys
 
 try:
-    from validation_limits import ENTRY_LINE_LIMIT, MAX_FILE_BYTES, SUMMARY_LENGTH_LIMIT
+    from validation_limits import (
+        KNOWLEDGE_FILE_MAX_BYTES as MAX_FILE_BYTES,
+        KNOWLEDGE_LOG_ENTRY_LINE_LIMIT as ENTRY_LINE_LIMIT,
+        KNOWLEDGE_TOPIC_SUMMARY_LENGTH_LIMIT as SUMMARY_LENGTH_LIMIT,
+    )
 except ImportError as exc:
     raise SystemExit(
         'validation_limits.py must be alongside this script; copy the whole '
         'scripts/ directory. (' + str(exc) + ')'
     ) from None
+
 
 ISO_DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
 LOG_HEADING_RE = re.compile(
@@ -89,7 +94,6 @@ KNOWN_FRONTMATTER_KEYS = frozenset({
     'type', 'status', 'summary', 'tags', 'contains', 'created', 'updated',
     'related', 'authoring_mode', 'graduation_status', 'contributors',
 })
-
 TOPIC_TYPES = ('project_topic',)
 TOPIC_STATUSES = ('active', 'superseded', 'archived', 'needs_review')
 CONTAINS_KINDS = ('decision', 'experience', 'lesson', 'procedure',
@@ -100,7 +104,6 @@ REQUIRED_TOPIC_FIELDS = (
     'type', 'status', 'summary', 'tags', 'contains', 'created', 'updated',
     'authoring_mode',
 )
-
 
 def inspect_encoding(path, label, errors, warnings):
     """Flag invalid UTF-8/BOM/CRLF/oversize; return False when the file is unusable."""

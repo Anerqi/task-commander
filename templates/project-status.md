@@ -11,66 +11,28 @@
 - Last updated: YYYY-MM-DD HH:mm <timezone>
 - Current focus: Complete the project context
 
+## Needs you now
+
+Empty when nothing waits for a person. Keep the attention view concise; list at most five concrete questions.
+
+| Task | Question | Resume when |
+|---|---|---|
+
+### Blocked
+
+| Task | Pre-block state | Reason | Owner | Done-when | Next check |
+|---|---|---|---|---|---|
+
 ## Task list
 
 | ID | Name | Status | Priority | Agent | Depends | Parallel | Reviewer | QA | Output dir | Updated |
 |---|---|---|---|---|---|---|---|---|---|---|
 
-## Blocked
-
-| Task | Pre-block state | Reason | Owner | Done-when | Next check |
-|---|---|---|---|---|---|
-
 ## Next steps
 
-1. Finish the context documents and `CONTEXT.md`.
+1. Finish the context documents that are actually required.
 2. Deliver the filled Commander handoff; open the Commander window.
 3. Commander assesses human input and backup needs, then dispatches ready independent tasks.
-
-## Coordination
-
-- Context revision: C1
-- Collaboration policy: background/01_project_background.md (Collaboration policy)
-- Integration owner: Commander
-- Capacity: confirm project policy; batch size adapts to user's window capacity
-
-These coordination sections are optional for existing projects and manually checked; the CLI does not validate their semantics. Use pointers and versions, not duplicate background content.
-
-### Needs you now
-
-Empty when nothing waits for a person. List at most five rows, one question each; a healthy project leaves this section empty and a finished task never appears here. Existing files may retain a top-level section or omit it.
-
-| Task | Question | Resume when |
-|---|---|---|
-
-## Knowledge
-
-Optional; omit this section when the project has no durable knowledge layer. See `references/20-knowledge-layer.md`.
-
-- Knowledge policy / layer status: see `background/01_project_background.md` (Knowledge retention)
-- Timeline / roadmap pointers: `knowledge/LOG.md`, `knowledge/ROADMAP.md` (if present)
-- Latest audit / graduation candidates:
-- Durable topics that affect current coordination:
-
-## Active windows
-
-| Task | Window label / optional host session | Input revision / versions | Read scope | Exclusive write scope / isolation | Integration owner | Last receipt |
-|---|---|---|---|---|---|---|
-
-## Pending user actions
-
-| ID | Affected tasks | Question / local action | Expected safe return | Owner | Resume condition / fallback |
-|---|---|---|---|---|---|
-
-## Backups
-
-| Backup task / ID | Source version / coverage | Manifest / recovery artifact pointer | Integrity / restore-test evidence | Dependent action | Remaining gaps |
-|---|---|---|---|---|---|
-
-## Synchronization
-
-| Context revision | Changed authoritative pointers | Affected task / window | Continuation sent | Acknowledged revision / receipt | Required action |
-|---|---|---|---|---|---|
 
 ## Milestones
 

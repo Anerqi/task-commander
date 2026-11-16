@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures" / "behavioral-smoke"
 CASES = (
     "01-fast-lane", "02-context-handoff", "03-parallel-ownership",
-    "04-continuation", "05-window-recovery", "06-missing-evidence",
+    "04-continuation", "05-window-recovery", "06-missing-evidence", "08-phase-compaction",
 )
 
 

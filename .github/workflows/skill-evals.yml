@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       cases:
-        description: "Case glob, e.g. 0[36]-* (empty = all seven)"
+        description: "Case glob, e.g. 0[3678]-* (empty = all eight)"
         required: false
         default: ""
 

@@ -12,6 +12,9 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 TEMPLATE = ROOT / "templates" / "project-status.md"
+sys.path.insert(0, str(SCRIPTS))
+from markdown_table import find_markdown_sections
+
 TASK_SEPARATOR = "|---|---|---|---|---|---|---|---|---|---|---|"
 BLOCKED_SEPARATOR = "|---|---|---|---|---|---|"
 
@@ -26,13 +29,16 @@ class StatusTableCLITests(unittest.TestCase):
                                 PYTHONDONTWRITEBYTECODE="1")
 
     def state_content(self, task_row, blocked_row=None):
-        content = TEMPLATE.read_text(encoding="utf-8").replace(
-            TASK_SEPARATOR, TASK_SEPARATOR + "\n" + task_row, 1)
+        content = TEMPLATE.read_text(encoding="utf-8")
+        content = self.insert_row(content, "Task list", TASK_SEPARATOR, task_row)
         if blocked_row is not None:
-            content = content.replace(
-                "\n" + BLOCKED_SEPARATOR + "\n",
-                "\n" + BLOCKED_SEPARATOR + "\n" + blocked_row + "\n", 1)
+            content = self.insert_row(content, "Blocked", BLOCKED_SEPARATOR, blocked_row)
         return content
+
+    def insert_row(self, content, title, separator, row):
+        body, = find_markdown_sections(content, title)
+        self.assertIn(separator, body)
+        return content.replace(body, body.replace(separator, separator + "\n" + row, 1), 1)
 
     def run_cli(self, script, *arguments):
         return subprocess.run(
@@ -128,25 +134,46 @@ class StatusTableCLITests(unittest.TestCase):
     def test_nested_tables_end_the_task_and_blocked_direct_bodies(self):
         content = self.state_content(
             "| 01 | Guide | TODO | P1 | Executor | - | No | No | No | out | now |")
-        content = content.replace("\n## Blocked\n", "\n### Task examples\n"
+        content = content.replace("\n## Next steps\n", "\n### Task examples\n"
                                  "| fake | Example | Completed | P1 | Executor | - | No | No | No | out | now |\n"
-                                 "\n## Blocked\n", 1)
-        content = content.replace("\n## Next steps\n", "\n### Blocked examples\n"
-                                 "| fake | TODO | Example | QA | Done | next |\n"
                                  "\n## Next steps\n", 1)
+        content = content.replace("\n## Task list\n", "\n#### Blocked examples\n"
+                                 "| fake | TODO | Example | QA | Done | next |\n"
+                                 "\n## Task list\n", 1)
         validation, rendered = self.run_tools(content)
         self.assert_valid(validation)
         self.assertEqual(list(rendered["task_states"]), ["01"])
         self.assertEqual(rendered["blocked_items"], [])
 
-    def test_missing_task_boundary_is_still_rejected(self):
+    def test_missing_task_heading_is_still_rejected(self):
         content = self.state_content(
             "| 01 | Guide | TODO | P1 | Executor | - | No | No | No | out | now |")
-        self.path.write_text(content.replace("\n## Blocked\n", "\n## Missing\n"),
+        self.path.write_text(content.replace("\n## Task list\n", "\n## Missing\n"),
                              encoding="utf-8", newline="\n")
         validation = self.run_cli("validate-project-state.py", "--path", self.path)
         self.assertEqual(validation.returncode, 1)
-        self.assertIn("Task table section is missing", json.loads(validation.stdout)["errors"])
+        self.assertIn("Task table section is missing or duplicated",
+                      json.loads(validation.stdout)["errors"])
+
+    def test_nested_historical_task_list_is_ignored_in_a_valid_file(self):
+        content = self.state_content(
+            "| 01 | Current task | TODO | P1 | Executor | - | No | No | No | out | now |")
+        content += ("\n### Task list\n"
+                    "| 01 | Historical task | Completed | P1 | Executor | - | No | No | No | out | past |\n")
+        validation, rendered = self.run_tools(content)
+        self.assert_valid(validation)
+        self.assertEqual(json.loads(validation.stdout)["completed_count"], 0)
+        self.assertEqual(rendered["task_states"]["01"]["name"], "Current task")
+        self.assertEqual(rendered["task_states"]["01"]["status"], "TODO")
+
+    def test_blocked_section_can_be_omitted_when_no_tasks_are_blocked(self):
+        content = self.state_content(
+            "| 01 | Guide | TODO | P1 | Executor | - | No | No | No | out | now |")
+        body, = find_markdown_sections(content, "Blocked", level=3)
+        content = content.replace("### Blocked\n" + body, "", 1)
+        validation, rendered = self.run_tools(content)
+        self.assert_valid(validation)
+        self.assertEqual(rendered["blocked_items"], [])
 
     def test_nested_historical_tables_do_not_override_current_state(self):
         content = self.state_content(
@@ -155,8 +182,13 @@ class StatusTableCLITests(unittest.TestCase):
                     "| 01 | Historical task | Completed | P1 | Executor | - | No | No | No | out | past |\n"
                     "\n### Blocked\n| 01 | TODO | Historical reason | QA | Done | past |\n")
         validation, rendered = self.run_tools(content)
-        self.assert_valid(validation)
-        self.assertEqual(json.loads(validation.stdout)["completed_count"], 0)
+        self.assertEqual(validation.returncode, 1)
+        payload = json.loads(validation.stdout)
+        self.assertFalse(payload["valid"])
+        self.assertTrue(any("Nested Blocked section must be under Needs you now" in error
+                            for error in payload["errors"]), payload)
+        self.assertEqual(payload["task_count"], 1)
+        self.assertEqual(payload["completed_count"], 0)
         self.assertEqual(rendered["task_states"]["01"]["status"], "TODO")
         self.assertEqual(rendered["task_states"]["01"]["name"], "Current task")
         self.assertEqual(rendered["blocked_items"], [])
@@ -203,6 +235,60 @@ class StatusTableCLITests(unittest.TestCase):
                 self.assertFalse(payload["valid"])
                 self.assertTrue(any("expected 11 columns, found 12" in error
                                     for error in payload["errors"]), payload)
+
+    def test_legacy_top_level_blocked_section_is_rendered(self):
+        content = self.state_content(
+            "| 01 | Guide | Blocked | P1 | Executor | - | No | No | No | out | now |",
+            "| 01 | In Review | Need evidence | QA | Verified | next |",
+        ).replace("### Blocked", "## Blocked", 1)
+        validation, rendered = self.run_tools(content)
+        self.assert_valid(validation)
+        self.assertEqual(rendered["blocked_items"][0]["task"], "01")
+
+    def test_nested_pending_user_actions_are_rendered(self):
+        content = self.state_content(
+            "| 01 | Guide | In Progress | P1 | Executor | - | No | No | No | out | now |")
+        content = content.replace(
+            "## Task list",
+            "### Pending user actions\n\n"
+            "| ID | Affected tasks | Question / local action | Expected safe return | Owner | Resume condition / fallback |\n"
+            "|---|---|---|---|---|---|\n"
+            "| U01 | 01 | Confirm access window | Approval note | User | Access approved |\n\n"
+            "## Task list", 1)
+        validation, rendered = self.run_tools(content)
+        self.assert_valid(validation)
+        self.assertEqual(rendered["pending_user_actions"][0]["id"], "U01")
+        self.assertEqual(rendered["pending_user_actions"][0]["owner"], "User")
+
+    def test_legacy_top_level_pending_user_actions_are_rendered(self):
+        content = self.state_content(
+            "| 01 | Guide | In Progress | P1 | Executor | - | No | No | No | out | now |")
+        content = content.replace(
+            "## Task list",
+            "## Pending user actions\n\n"
+            "| ID | Affected tasks | Question / local action | Expected safe return | Owner | Resume condition / fallback |\n"
+            "|---|---|---|---|---|---|\n"
+            "| U01 | 01 | Confirm access window | Approval note | User | Access approved |\n\n"
+            "## Task list", 1)
+        validation, rendered = self.run_tools(content)
+        self.assert_valid(validation)
+        self.assertEqual(rendered["pending_user_actions"][0]["id"], "U01")
+
+    def test_misplaced_nested_pending_actions_are_rejected_and_not_rendered(self):
+        content = self.state_content(
+            "| 01 | Guide | TODO | P1 | Executor | - | No | No | No | out | now |")
+        content += (
+            "\n### Pending user actions\n\n"
+            "| ID | Affected tasks | Question / local action | Expected safe return | Owner | Resume condition / fallback |\n"
+            "|---|---|---|---|---|---|\n"
+            "| U01 | 01 | Confirm access | Approval note | User | Access approved |\n")
+        validation, rendered = self.run_tools(content)
+        self.assertEqual(validation.returncode, 1)
+        payload = json.loads(validation.stdout)
+        self.assertFalse(payload["valid"])
+        self.assertTrue(any("Nested Pending user actions section must be under Needs you now" in error
+                            for error in payload["errors"]), payload)
+        self.assertEqual(rendered["pending_user_actions"], [])
 
     def test_extra_blocked_columns_are_not_silently_accepted(self):
         validation, _ = self.run_tools(self.state_content(

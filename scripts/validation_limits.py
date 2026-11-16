@@ -1,7 +1,7 @@
-"""Shared validation defaults; keep alongside the command-line helpers."""
+"""Shared thresholds for the standard-library validators."""
 
 NEEDS_YOU_MAX_ROWS = 5
-COMPLETED_TASK_WARNING_LIMIT = 10
-MAX_FILE_BYTES = 2 * 1024 * 1024
-ENTRY_LINE_LIMIT = 20
-SUMMARY_LENGTH_LIMIT = 200
+COMPLETED_TASK_WARNING_THRESHOLD = 10
+KNOWLEDGE_FILE_MAX_BYTES = 2 * 1024 * 1024
+KNOWLEDGE_LOG_ENTRY_LINE_LIMIT = 20
+KNOWLEDGE_TOPIC_SUMMARY_LENGTH_LIMIT = 200

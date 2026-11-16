@@ -39,5 +39,5 @@ Write the analysis to `09_decision_analysis.md` in the directory the task brief 
 
 - Analyze and recommend only; never write a recommendation as an already-effective decision.
 - Never modify project deliverables, `project-status.md`, or `decision-log.md`.
-- After the user confirms, the Commander appends the final decision to `decision-log.md` per `templates/decision-log.md`.
+- After the user confirms, the Commander appends a compact, append-only decision record to `decision-log.md` per `templates/decision-log.md`. Keep each new record to about 3–5 substantive lines; put full option analysis in the separate analysis artifact. Never rewrite or delete a prior confirmed decision. A later record may point to the decision it supersedes.
 - In high-risk domains (investment, medical, legal, etc.), state the professional boundary and remaining uncertainty explicitly.

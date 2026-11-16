@@ -6,7 +6,7 @@
 
 | Role | File | Responsibility | Main output |
 |---|---|---|---|
-| Context Agent | references/01-context-brief.md | Uses the available context methodology to understand the project and turn vague ideas into executable goals | background/01_project_background.md, background/02_skill_list.md, AGENTS.md, optional knowledge/LOG.md |
+| Context Agent | references/01-context-brief.md | Uses the available context methodology to understand the project and turn vague ideas into executable goals | background/01_project_background.md (including Available skills), AGENTS.md, optional knowledge/LOG.md |
 | Commander | references/02-commander.md | Schedules ready batches, integrates information and knowledge deltas, requests human help, accepts evidence | Startup batches, continuation/recovery prompts, knowledge audit/closeout |
 | Executor | references/03-executor.md | Completes the assigned contract and delivers | task-output/01_task_name/ or concise inline result for independent Fast Lane |
 | Reviewer | references/04-reviewer.md | Spec compliance, completeness, risk and data review; reviews only, never modifies | 04_review_findings.md |
@@ -34,7 +34,7 @@ Task status follows `references/11-task-state-machine.md`; skill discovery follo
 
 ## Directory and numbering conventions
 
-- `background/` — context background documents, skill inventory, and pending questionnaires
+- `background/` — project background (including the Available skills inventory) and pending questionnaires; `02_skill_list.md` is a legacy input path only
 - `AGENTS.md` — concise project-level behavioral rules and navigation for all AI agents, generated or reconciled from confirmed constraints during context building
 - `knowledge/` — optional durable knowledge layer: `LOG.md` timeline, `topics/` current truth, optional `ROADMAP.md`, `Cited.md` and raw `Reference/`; see `references/20-knowledge-layer.md`
 - Task outputs live in: `task-output/`

@@ -1,5 +1,9 @@
 # Protocol v3 integration contract
 
+> Superseded by the canonical compact-context integration in `docs/superpowers/plans/2026-11-16-unify-v3-compact-context.md`.
+> The Coordination-nested attention convention below records the interim main implementation, not the current v3 specification.
+> Current templates use top-level `## Needs you now` with nested `### Blocked` and optional `### Pending user actions`.
+
 ## Basis and scope
 
 The integration starts at `a52ecec`. The current user request authorizes parallel implementation and cleanup of temporary validation artifacts.
