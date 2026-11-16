@@ -119,6 +119,7 @@ roadmap = read("knowledge/ROADMAP.md") or ""
 accepted_artifact = read("task-output/TASK-009/validation.md")
 
 check("- Protocol version: 3" in status, "Status records Version 3")
+check("- Status revision: 8" in status, "Status revision increments exactly once from 7 to 8")
 check("## Needs you now" in status, "Needs you now parent section retained")
 
 task_rows = table_rows(section(status, "## Task list"), "ID")
@@ -141,6 +142,7 @@ for heading in (
     check(heading not in status_headings, "Empty optional section omitted: " + heading)
 
 check("## Available skills" in background, "Skills have a consolidated section")
+available_skills = "\\n".join(section(background, "## Available skills"))
 for skill, details in {
     "csv-normalizer": (
         "Choice reason: Normalize imported CSV records before database staging.",
@@ -155,8 +157,8 @@ for skill, details in {
         "Path: /workspace/skills/sqlite-migrator/SKILL.md",
     ),
 }.items():
-    check(skill in background and all(detail in background for detail in details),
-          "Full " + skill + " inventory entry migrated")
+    check(skill in available_skills and all(detail in available_skills for detail in details),
+          "Full " + skill + " inventory entry migrated under Available skills")
 check(legacy_skills == EXPECTED_LEGACY_SKILLS, "Legacy skill inventory preserved unchanged")
 check(not Path("CONTEXT.md").exists(), "No session-only CONTEXT.md created")
 check(agents == EXPECTED_AGENTS, "Already accurate AGENTS.md left unchanged")
