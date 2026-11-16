@@ -88,26 +88,35 @@ def parse_heading(line):
 
 
 def extract_sections(content, title, allowed_levels, stop_at_nested=False):
-    """Return matching Markdown sections, preserving nested and legacy layouts."""
+    """Return matching Markdown sections and their containing level-2 section."""
     lines = content.splitlines()
     sections = []
+    current_parent = None
     for index, raw_line in enumerate(lines):
         heading = parse_heading(raw_line)
-        if not heading or heading[1] != title:
+        if not heading:
             continue
-        level = heading[0]
-        if level not in allowed_levels:
-            continue
-        end = len(lines)
-        for cursor in range(index + 1, len(lines)):
-            next_heading = parse_heading(lines[cursor])
-            if not next_heading:
-                continue
-            next_level = next_heading[0]
-            if (stop_at_nested and next_level > level) or next_level <= level:
-                end = cursor
-                break
-        sections.append({'level': level, 'body': '\n'.join(lines[index + 1:end])})
+        level, heading_name = heading
+        parent = current_parent if level > 2 else None
+        if heading_name == title and level in allowed_levels:
+            end = len(lines)
+            for cursor in range(index + 1, len(lines)):
+                next_heading = parse_heading(lines[cursor])
+                if not next_heading:
+                    continue
+                next_level = next_heading[0]
+                if (stop_at_nested and next_level > level) or next_level <= level:
+                    end = cursor
+                    break
+            sections.append({
+                'level': level,
+                'parent': parent,
+                'body': '\n'.join(lines[index + 1:end]),
+            })
+        if level < 2:
+            current_parent = None
+        elif level == 2:
+            current_parent = heading_name
     return sections
 
 
@@ -280,8 +289,13 @@ def main():
     # section is optional when no task is currently Blocked.
     blocked_before_by_task = {}
     blocked_title = heading_title(settings['blocked_section_start'])
+    needs_you_parent_title = heading_title(
+        settings.get('needs_you_section_start', '## Needs you now'))
     blocked_sections = extract_sections(content, blocked_title, (2, 3))
     for blocked_section in blocked_sections:
+        if (blocked_section['level'] == 3
+                and blocked_section['parent'] != needs_you_parent_title):
+            errors.append('Nested Blocked section must be under ' + needs_you_parent_title)
         for line_number, line in enumerate(
                 re.split(r'\r\n|\r|\n', blocked_section['body']), start=1):
             line = line.strip()
@@ -317,6 +331,16 @@ def main():
     for task_key, state in task_states_by_id.items():
         if normalize_state(state) == 'blocked' and task_key not in blocked_before_by_task:
             errors.append('Missing blocked record for task: ' + task_key)
+
+    pending_actions_start = settings.get('pending_user_actions_section_start')
+    if pending_actions_start:
+        pending_actions_title = heading_title(pending_actions_start)
+        pending_actions_sections = extract_sections(content, pending_actions_title, (2, 3))
+        for pending_section in pending_actions_sections:
+            if (pending_section['level'] == 3
+                    and pending_section['parent'] != needs_you_parent_title):
+                errors.append('Nested Pending user actions section must be under '
+                              + needs_you_parent_title)
 
     # Optional compare-and-set metadata: the sole writer bumps the revision once
     # per update, so a stale read is detectable instead of silently overwritten.
