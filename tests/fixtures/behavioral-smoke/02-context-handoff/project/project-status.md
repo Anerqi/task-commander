@@ -4,20 +4,26 @@
 
 - Project name: Synthetic Microservice Documentation
 - Project phase: Context Building
+- Protocol version: 3
 - Status owner: Context Agent
 - Pre-pause phase: n/a
 - Last updated: 2026-10-18 09:00 UTC
 - Current focus: Complete context stage and emit Commander handoff
 
+## Needs you now
+
+| Task | Question | Resume when |
+|---|---|---|
+
+### Blocked
+
+| Task | Pre-block state | Reason | Owner | Done-when | Next check |
+|---|---|---|---|---|---|
+
 ## Task list
 
 | ID | Name | Status | Priority | Agent | Depends | Parallel | Reviewer | QA | Output dir | Updated |
 |---|---|---|---|---|---|---|---|---|---|---|
-
-## Blocked
-
-| Task | Pre-block state | Reason | Owner | Done-when | Next check |
-|---|---|---|---|---|---|
 
 ## Next steps
 

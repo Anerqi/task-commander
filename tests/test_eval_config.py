@@ -1,5 +1,6 @@
 """Checks for the pre-validation agent-judge model renderer."""
 
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -131,3 +132,185 @@ class CommanderScopeFixtureTests(unittest.TestCase):
         self.assertIn("| TASK-002 | User Guide | In Progress |", status)
         brief = (fixture / "briefs" / "task-002.md").read_text(encoding="utf-8")
         self.assertIn("Deliverable: docs/guide.md", brief)
+
+
+class ContextHandoffOptimizationTests(unittest.TestCase):
+    def handoff_route(self):
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        return skill.split("**Handoff only**:", 1)[1].split(
+            "\n  - **Initialize or recover**:", 1)[0]
+
+    def test_handoff_checks_recorded_protocol_before_shortcut(self):
+        route = self.handoff_route()
+        for condition in ("exactly one", "well-formed", "authoritative Project section",
+                          "current version `3`", "Missing", "below-3", "invalid", "duplicate",
+                          "unrecognized", "future versions", "**Initialize or recover**",
+                          "references/23-protocol-upgrade.md"):
+            with self.subTest(condition=condition):
+                self.assertIn(condition, route)
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("never an automatic metadata upgrade", skill)
+
+    def test_handoff_uses_current_inventory_and_optional_legacy_records(self):
+        route = self.handoff_route()
+        self.assertIn("Reuse `Available skills` in the background", route)
+        self.assertIn("`CONTEXT.md` only if present", route)
+        self.assertIn("`background/02_skill_list.md` only if present as legacy input", route)
+        template = (ROOT / "templates" / "commander-handoff.md").read_text(encoding="utf-8")
+        for name in ("CONTEXT.md", "background/02_skill_list.md"):
+            line, = [line for line in template.splitlines() if "/" + name in line]
+            self.assertIn("if present", line)
+        self.assertIn("never assume `3` or upgrade metadata", template)
+
+    def test_handoff_only_route_uses_records_template_and_validation(self):
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        for marker in (
+            "**Handoff only**",
+            "templates/commander-handoff.md",
+            "scripts/validate-project-state.py --path",
+            "**Initialize or recover**",
+            "Do not load full-initialization references on this successful path",
+            "without changing project files",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, skill)
+
+    def test_commander_handoff_is_separate_from_context_brief(self):
+        context = (ROOT / "references" / "01-context-brief.md").read_text(encoding="utf-8")
+        template = (ROOT / "templates" / "commander-handoff.md").read_text(encoding="utf-8")
+        self.assertIn("templates/commander-handoff.md", context)
+        self.assertNotIn("You are the Commander for this project.", context)
+        for marker in (
+            "You are the Commander for this project.",
+            "references/02-commander.md",
+            "references/15-collaboration.md",
+            "references/11-task-state-machine.md",
+            "templates/task-continuation.md",
+            "Do not load its listed references in the current Context Agent window",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, template)
+
+    def test_existing_agents_noop_write_is_avoided(self):
+        context = (ROOT / "references" / "01-context-brief.md").read_text(encoding="utf-8")
+        self.assertIn("byte-for-byte identical", context)
+        self.assertIn("leave it untouched", context)
+        self.assertIn("as early as practical", context)
+
+    def test_context_reference_loading_is_conditional(self):
+        context = (ROOT / "references" / "01-context-brief.md").read_text(encoding="utf-8")
+        for marker in (
+            "only when defining or changing policy",
+            "only when creating status or reconstructing/recovering",
+            "only when creating or maintaining the layer",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, context)
+
+    def test_case_02_disk_check_guards_existing_agents_file(self):
+        script = (ROOT / "evals" / "scripts" / "check_02_context_handoff.py").read_text(encoding="utf-8")
+        self.assertIn("pre-existing AGENTS.md remains unchanged", script)
+
+    def test_case_02_checker_rejects_changed_agents_rules(self):
+        checker = ROOT / "evals" / "scripts" / "check_02_context_handoff.py"
+        fixture = ROOT / "tests" / "fixtures" / "behavioral-smoke" / "02-context-handoff" / "project"
+        with tempfile.TemporaryDirectory(prefix="_tmp_handoff_check_", dir=ROOT) as directory:
+            project = Path(directory) / "project"
+            shutil.copytree(fixture, project)
+            baseline = subprocess.run([sys.executable, str(checker)], cwd=project,
+                                      capture_output=True, text=True, encoding="utf-8", check=False)
+            self.assertEqual(baseline.returncode, 0, baseline.stdout + baseline.stderr)
+            agents = project / "AGENTS.md"
+            agents.write_text(agents.read_text(encoding="utf-8") + "\n- Unapproved new rule.\n",
+                              encoding="utf-8", newline="\n")
+            changed = subprocess.run([sys.executable, str(checker)], cwd=project,
+                                     capture_output=True, text=True, encoding="utf-8", check=False)
+            self.assertEqual(changed.returncode, 1, changed.stdout + changed.stderr)
+            self.assertIn("FAIL pre-existing AGENTS.md remains unchanged", changed.stdout)
+
+            original_bytes = (fixture / "AGENTS.md").read_bytes()
+            self.assertNotIn(b"\r\n", original_bytes)
+            agents.write_bytes(original_bytes.replace(b"\n", b"\r\n"))
+            changed_newlines = subprocess.run([sys.executable, str(checker)], cwd=project,
+                                             capture_output=True, text=True, encoding="utf-8", check=False)
+            self.assertEqual(changed_newlines.returncode, 1,
+                             changed_newlines.stdout + changed_newlines.stderr)
+            self.assertIn("FAIL pre-existing AGENTS.md remains unchanged", changed_newlines.stdout)
+
+    def test_case_02_disk_check_accepts_v3_without_optional_legacy_records(self):
+        fixture = ROOT / "tests" / "fixtures" / "behavioral-smoke" / "02-context-handoff" / "project"
+        with tempfile.TemporaryDirectory(prefix="_tmp_handoff_v3_", dir=ROOT) as directory:
+            project = Path(directory) / "project"
+            shutil.copytree(fixture, project)
+            for name in ("CONTEXT.md", "background/02_skill_list.md"):
+                (project / name).unlink(missing_ok=True)
+            shutil.copyfile(ROOT / "templates" / "project-status.md", project / "project-status.md")
+            for script, arguments in (
+                (ROOT / "scripts" / "validate-project-state.py", ["--path", str(project / "project-status.md")]),
+                (ROOT / "evals" / "scripts" / "check_02_context_handoff.py", []),
+            ):
+                with self.subTest(script=script.name):
+                    result = subprocess.run([sys.executable, str(script), *arguments], cwd=project,
+                                            capture_output=True, text=True, encoding="utf-8", check=False)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    CASE_02_FIXTURE = ROOT / "tests" / "fixtures" / "behavioral-smoke" / "02-context-handoff" / "project"
+
+    @staticmethod
+    def project_protocol_versions(status_text):
+        sys.path.insert(0, str(ROOT / "scripts"))
+        try:
+            from markdown_table import find_markdown_sections
+        finally:
+            sys.path.pop(0)
+        versions = []
+        for body in find_markdown_sections(status_text, "Project", level=2):
+            for line in body.splitlines():
+                if line.strip().startswith("- Protocol version:"):
+                    versions.append(line.split(":", 1)[1].strip())
+        return versions
+
+    def run_validator(self, status_path):
+        return subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "validate-project-state.py"), "--path", str(status_path)],
+            capture_output=True, text=True, encoding="utf-8", check=False,
+        )
+
+    def test_case_02_fixture_is_eligible_for_handoff_only(self):
+        status = (self.CASE_02_FIXTURE / "project-status.md").read_text(encoding="utf-8")
+        self.assertEqual(self.project_protocol_versions(status), ["3"])
+        self.assertIn("\n## Needs you now\n", status)
+        self.assertIn("\n### Blocked\n", status)
+        self.assertNotIn("\n## Blocked\n", status)
+        background = (self.CASE_02_FIXTURE / "background" / "01_project_background.md").read_text(encoding="utf-8")
+        self.assertRegex(background, r"(?m)^## (\d+\. )?Available skills$")
+        self.assertFalse((self.CASE_02_FIXTURE / "background" / "02_skill_list.md").exists())
+        result = self.run_validator(self.CASE_02_FIXTURE / "project-status.md")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_case_02_legacy_variant_passes_validation_but_not_version_gate(self):
+        with tempfile.TemporaryDirectory(prefix="_tmp_handoff_legacy_", dir=ROOT) as directory:
+            project = Path(directory) / "project"
+            shutil.copytree(self.CASE_02_FIXTURE, project)
+            status_path = project / "project-status.md"
+            status = status_path.read_text(encoding="utf-8")
+            variants = {
+                "missing": status.replace("- Protocol version: 3\n", ""),
+                "below-3": status.replace("- Protocol version: 3\n", "- Protocol version: 2\n"),
+                "duplicate": status.replace("- Protocol version: 3\n", "- Protocol version: 3\n- Protocol version: 3\n"),
+                "future": status.replace("- Protocol version: 3\n", "- Protocol version: 4\n"),
+            }
+            for name, text in variants.items():
+                with self.subTest(variant=name):
+                    self.assertNotEqual(self.project_protocol_versions(text), ["3"])
+            # A validator pass alone must not establish protocol currency.
+            status_path.write_text(variants["missing"], encoding="utf-8")
+            (project / "background" / "02_skill_list.md").write_text(
+                "# Discovered Skills\n\nNo external skills required for this synthetic project.\n", encoding="utf-8")
+            result = self.run_validator(status_path)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            checker = subprocess.run(
+                [sys.executable, str(ROOT / "evals" / "scripts" / "check_02_context_handoff.py")],
+                cwd=project, capture_output=True, text=True, encoding="utf-8", check=False,
+            )
+            self.assertEqual(checker.returncode, 0, checker.stdout + checker.stderr)
