@@ -16,6 +16,7 @@ input:
     - Read the installed Task Commander SKILL.md first, then the project AGENTS.md and authoritative records.
     - Preserve every task ID, task state, status-history row, accepted artifact and confirmed decision. Do not delete or renumber history.
     - Preserve task-output/TASK-009/validation.md byte-for-byte as accepted evidence.
+    - Increment Status revision exactly once, from 7 to 8, for this status update.
     - Merge still-relevant entries from background/02_skill_list.md into the Available skills subsection of background/01_project_background.md. Keep the legacy file unchanged.
     - This project does not maintain a persistent grill-with-docs glossary. Do not create CONTEXT.md merely because the method is available in this session.
     - The knowledge layer already exists. Add one concise LOG entry for this substantive phase closeout and update ROADMAP.md for the next phase, which extends beyond this session.
