@@ -142,7 +142,7 @@ for heading in (
     check(heading not in status_headings, "Empty optional section omitted: " + heading)
 
 check("## Available skills" in background, "Skills have a consolidated section")
-available_skills = "\\n".join(section(background, "## Available skills"))
+available_skills = "\n".join(section(background, "## Available skills"))
 for skill, details in {
     "csv-normalizer": (
         "Choice reason: Normalize imported CSV records before database staging.",
