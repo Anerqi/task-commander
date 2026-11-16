@@ -123,6 +123,32 @@ class AttentionAndRevisionTests(unittest.TestCase):
             needs=["| 01 | Question | Later | extra |"]))
         self.assert_error(payload, "Malformed needs-you-now row")
 
+    def test_nested_blocked_section_must_be_under_needs_you_now(self):
+        content = self.build(
+            tasks=[task_row("01", "Blocked")],
+            blocked=["| 01 | In Review | Need evidence | QA | Evidence checked | next |"])
+        start = content.index("### Blocked\\n")
+        end = content.index("## Task list", start)
+        blocked_section = content[start:end].strip("\\n")
+        content = content[:start] + content[end:]
+        content = content.replace(
+            "## Next steps\\n",
+            "## Next steps\\n\\n" + blocked_section + "\\n\\n", 1)
+        _, payload = self.run_validator(content)
+        self.assert_error(payload, "Nested Blocked section must be under Needs you now")
+
+    def test_nested_pending_actions_must_be_under_needs_you_now(self):
+        content = self.build()
+        misplaced = (
+            "### Pending user actions\\n\\n"
+            "| ID | Affected tasks | Question / local action | Expected safe return | Owner | Resume condition / fallback |\\n"
+            "|---|---|---|---|---|---|\\n"
+            "| U01 | 01 | Confirm access | Approval note | User | Access approved |\\n\\n"
+        )
+        content = content.replace("## Next steps\\n", "## Next steps\\n\\n" + misplaced, 1)
+        _, payload = self.run_validator(content)
+        self.assert_error(payload, "Nested Pending user actions section must be under Needs you now")
+
     def test_expected_revision_matches_and_mismatches(self):
         process, payload = self.run_validator(self.build(), "--expected-revision", "1")
         self.assertEqual(process.returncode, 0, payload)
