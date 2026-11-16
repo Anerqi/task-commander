@@ -43,7 +43,7 @@ Two seams decide whether a long project stays honest: who may act, and what a pe
 
 - **Authority record:** a task brief carries the grant source, the scope it covers, the strength it carries and the condition that invalidates it. A resumed task, including one leaving Blocked, revalidates that record instead of inheriting it silently; a narrowed grant means narrower work or a fresh confirmation.
 - **Three strengths — observe, propose and act:** `observe` reads and produces a plan without writing, `propose` writes only to an isolated output and never the working tree, `act` executes normally. Strength sits beside Fast Lane, Lean and Standard rather than replacing them. An unfamiliar scope, a first delegation of a new kind or an irreversible action starts record-only at `propose`; strength never waives a review or QA gate.
-- **Needs you now:** `project-status.md` may carry a derived view with three columns — `Task | Question | Resume when` — capped at five rows and empty when the project is healthy. It reads the status file; it is not a second place to store state.
+- **Needs you now:** new templates place this derived view at `## Coordination` → `### Needs you now`, with three columns — `Task | Question | Resume when` — capped at five rows and empty when the project is healthy. Legacy top-level `## Needs you now` and files without the section remain valid. It reads the status file; it is not a second place to store state.
 - **Receipt attention block:** outcome, attention, question, resume when and dispatch key, with the next owner named explicitly (`person`, `executor`, `reviewer`, `qa`, `commander` or `none`). "Waiting for a person" is declared in that block; a receipt whose prose only sounds like waiting has not asked you for anything.
 - **Status revision:** `- Status revision: N` in the project section, bumped once per update, plus `--expected-revision` on the validator. A single writer still needs it: a resumed window or a parallel window can act on a stale read, and the check reports a concurrency error instead of overwriting newer state.
 - **Design constitution:** a new capability is an attribute of an existing concept or prompt text before it becomes a new role, state, file or section; one default beats a configuration knob; every output element justifies the attention it costs. Coordination messages and continuations therefore report only what needs a person or what finished — no periodic progress narration, and a healthy project occupies no space in status output.
@@ -96,7 +96,7 @@ The entry document is `SKILL.md`.
 The context orchestration flow composes the following external skills when their branches apply; use available methods or the matching module of `references/methodology-fallback.md` (loading conditions and composition order in `references/10-context-orchestration.md`):
 
 - `writing-for-agents` — startup writing rules
-- `grill-with-docs` — startup interview method; terminology/ADR formats when needed
+- `grill-with-docs` — METHOD only: startup interviews and terminology/ADR formats when needed; Task Commander owns paths and integration, and `decision-log.md` owns confirmed decisions
 - `wait-what` — only when clarification is needed
 - `to-questionnaire` — only for third-party knowledge gaps
 
@@ -145,6 +145,7 @@ Optional:
   - `run-workflow.py` sequentially runs trusted commands; its exit-0 completion is not project acceptance
   - `render-workflow.py` renders command checkpoints or recorded project status
   - `markdown_table.py` shares status-table cell parsing between validation and rendering (not a CLI)
+  - `validation_limits.py` owns shared attention, Completed-warning, file-size and knowledge-text limits (not a CLI)
 - `agents/openai.yaml` — agent configuration
 - `assets/workflow-section-en.png` — workflow overview diagram
 - `.github/workflows/ci.yml` — three-platform CI matrix
@@ -154,7 +155,7 @@ Optional:
 
 - Python 3.10+ (standard library only, zero third-party dependencies). Use the current runtime interpreter when available; otherwise try `py -3` then `python` on Windows, or `python3` then `python` on macOS/Linux, and verify the reported version.
 - A host that can read and write the project files and, for the automated checks, run Python. Native Skill support is convenient but not required; see `references/host-adapters.md`.
-- Keep the `scripts/` directory together: `validate-project-state.py` and `render-workflow.py` import `markdown_table.py`. Copying one script alone produces a clear import error rather than a silent fallback.
+- Keep the `scripts/` directory together: `validate-project-state.py` imports `markdown_table.py` and `validation_limits.py`; `render-workflow.py` imports `markdown_table.py`; `validate-knowledge.py` imports `validation_limits.py`. Copying one CLI alone leaves required helpers missing.
 - Project files use UTF-8 without BOM
 
 ## Triggering
@@ -202,7 +203,9 @@ Dry-run writes simulation-only checkpoints and does not execute task commands, b
 
 Read the existing authoritative background, terms, confirmed decisions, status, relevant knowledge topics and relevant task evidence before asking for context again; resolve only missing, stale or conflicting information that matters to the work. Handoffs carry essential paths, relevant revisions, the full assigned outcome and effective constraints rather than copying every background document. A stored claim of approval is not new authorization; cold-start review still uses its staged packets.
 
-Protocol version 2 adds optional knowledge, window-boundary, task-shaping, two-axis review, debug-loop and retro capabilities. Existing projects remain valid and adopt them incrementally; see `references/23-protocol-upgrade.md`. Adding `Protocol version: 2` is metadata, not a task transition.
+Protocol version 3 uses nested attention in new templates and shared parsing/validation limits while preserving version 2's optional knowledge, window-boundary, task-shaping, two-axis review, debug-loop and retro capabilities. Existing projects remain valid and adopt changes incrementally; see `references/23-protocol-upgrade.md`. Adding `Protocol version: 3` is metadata, not a task transition.
+
+More than 10 task rows with status `Completed` (case-insensitive) produces an advisory archive/readability warning, not a validation failure; `Cancelled` does not count. Preserve history and evidence pointers when archiving. `scripts/validation_limits.py` owns the shared limits. `CONTEXT.md` holds only terms/domain relations, `decision-log.md` is the sole decision ledger, and optional `knowledge/ROADMAP.md` holds long-term direction; live task state stays in `project-status.md`.
 
 At coordination checkpoints, compare actual artifacts, valid evidence and remaining unknowns. The adjustable default is diagnosis after two consecutive checks without substantive progress, not after a wall-clock timeout. This is separate from the existing targeted-revision budget. Long-running work and useful negative experiments are not stalled merely because they remain In Progress.
 

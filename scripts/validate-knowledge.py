@@ -68,6 +68,13 @@ import os
 import re
 import sys
 
+try:
+    from validation_limits import ENTRY_LINE_LIMIT, MAX_FILE_BYTES, SUMMARY_LENGTH_LIMIT
+except ImportError as exc:
+    raise SystemExit(
+        'validation_limits.py must be alongside this script; copy the whole '
+        'scripts/ directory. (' + str(exc) + ')'
+    ) from None
 
 ISO_DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
 LOG_HEADING_RE = re.compile(
@@ -82,7 +89,6 @@ KNOWN_FRONTMATTER_KEYS = frozenset({
     'type', 'status', 'summary', 'tags', 'contains', 'created', 'updated',
     'related', 'authoring_mode', 'graduation_status', 'contributors',
 })
-MAX_FILE_BYTES = 2 * 1024 * 1024
 
 TOPIC_TYPES = ('project_topic',)
 TOPIC_STATUSES = ('active', 'superseded', 'archived', 'needs_review')
@@ -94,8 +100,6 @@ REQUIRED_TOPIC_FIELDS = (
     'type', 'status', 'summary', 'tags', 'contains', 'created', 'updated',
     'authoring_mode',
 )
-ENTRY_LINE_LIMIT = 20
-SUMMARY_LENGTH_LIMIT = 200
 
 
 def inspect_encoding(path, label, errors, warnings):

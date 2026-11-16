@@ -99,8 +99,84 @@ class StatusTableCLITests(unittest.TestCase):
     def test_blank_task_id_does_not_become_a_display_task(self):
         validation, rendered = self.run_tools(self.state_content(
             "|| No task | TODO | P1 | Executor | - | No | No | No | out | now |"))
-        self.assert_valid(validation, task_count=0)
+        self.assertEqual(validation.returncode, 1)
+        payload = json.loads(validation.stdout)
+        self.assertFalse(payload["valid"])
+        self.assertEqual(payload["task_count"], 0)
+        self.assertTrue(any("task id must be nonblank" in error
+                            for error in payload["errors"]), payload)
         self.assertEqual(rendered["task_states"], {})
+
+    def test_fenced_task_and_blocked_tables_are_not_records(self):
+        content = self.state_content(
+            "| 01 | Guide | TODO | P1 | Executor | - | No | No | No | out | now |")
+        content = content.replace(TASK_SEPARATOR, TASK_SEPARATOR + "\n```md\n"
+                                 "| fake | Example | Completed | P1 | Executor | - | No | No | No | out | now |\n"
+                                 "```", 1)
+        content = content.replace("\n" + BLOCKED_SEPARATOR + "\n",
+                                 "\n" + BLOCKED_SEPARATOR + "\n~~~md\n"
+                                 "| fake | In Progress | Example | QA | Done | next |\n~~~\n", 1)
+        content += "\n```md\n## Task list\n"
+        content += "| fenced | Fake heading | Completed | P1 | Executor | - | No | No | No | out | now |\n"
+        content += "## Blocked\n| fenced | TODO | Fake | QA | Done | next |\n```\n"
+        validation, rendered = self.run_tools(content)
+        self.assert_valid(validation)
+        self.assertEqual(json.loads(validation.stdout)["completed_count"], 0)
+        self.assertEqual(list(rendered["task_states"]), ["01"])
+        self.assertEqual(rendered["blocked_items"], [])
+
+    def test_nested_tables_end_the_task_and_blocked_direct_bodies(self):
+        content = self.state_content(
+            "| 01 | Guide | TODO | P1 | Executor | - | No | No | No | out | now |")
+        content = content.replace("\n## Blocked\n", "\n### Task examples\n"
+                                 "| fake | Example | Completed | P1 | Executor | - | No | No | No | out | now |\n"
+                                 "\n## Blocked\n", 1)
+        content = content.replace("\n## Next steps\n", "\n### Blocked examples\n"
+                                 "| fake | TODO | Example | QA | Done | next |\n"
+                                 "\n## Next steps\n", 1)
+        validation, rendered = self.run_tools(content)
+        self.assert_valid(validation)
+        self.assertEqual(list(rendered["task_states"]), ["01"])
+        self.assertEqual(rendered["blocked_items"], [])
+
+    def test_missing_task_boundary_is_still_rejected(self):
+        content = self.state_content(
+            "| 01 | Guide | TODO | P1 | Executor | - | No | No | No | out | now |")
+        self.path.write_text(content.replace("\n## Blocked\n", "\n## Missing\n"),
+                             encoding="utf-8", newline="\n")
+        validation = self.run_cli("validate-project-state.py", "--path", self.path)
+        self.assertEqual(validation.returncode, 1)
+        self.assertIn("Task table section is missing", json.loads(validation.stdout)["errors"])
+
+    def test_nested_historical_tables_do_not_override_current_state(self):
+        content = self.state_content(
+            "| 01 | Current task | TODO | P1 | Executor | - | No | No | No | out | now |")
+        content += ("\n### Task list\n"
+                    "| 01 | Historical task | Completed | P1 | Executor | - | No | No | No | out | past |\n"
+                    "\n### Blocked\n| 01 | TODO | Historical reason | QA | Done | past |\n")
+        validation, rendered = self.run_tools(content)
+        self.assert_valid(validation)
+        self.assertEqual(json.loads(validation.stdout)["completed_count"], 0)
+        self.assertEqual(rendered["task_states"]["01"]["status"], "TODO")
+        self.assertEqual(rendered["task_states"]["01"]["name"], "Current task")
+        self.assertEqual(rendered["blocked_items"], [])
+
+    def test_isolated_validator_explains_required_helper_copy(self):
+        validator = SCRIPTS / "validate-project-state.py"
+        for helper in (None, "markdown_table.py"):
+            with self.subTest(helper=helper):
+                isolated = self.directory / ("no-helpers" if helper is None else "one-helper")
+                isolated.mkdir()
+                script = isolated / validator.name
+                script.write_bytes(validator.read_bytes())
+                if helper:
+                    (isolated / helper).write_bytes((SCRIPTS / helper).read_bytes())
+                result = subprocess.run([sys.executable, str(script), "--help"],
+                                        cwd=isolated, env=self.environment, capture_output=True,
+                                        text=True, encoding="utf-8", timeout=30, check=False)
+                self.assertEqual(result.returncode, 1)
+                self.assertIn("copy the whole scripts/ directory", result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
 
     def test_backslash_parity_and_non_pipe_backslashes_are_preserved(self):
         cases = (

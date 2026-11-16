@@ -13,7 +13,8 @@ behavior are described below.
   hard-coding absolute paths); --expected-revision N compares the optional
   "- Status revision: N" line in the Project section, which gives the sole
   writer a compare-and-set check instead of an honour-system read.
-- Optional coordination metadata: a "## Needs you now" section, when present,
+- Optional coordination metadata: a "Needs you now" section (nested under
+  Coordination in new templates, or a legacy top-level section), when present,
   must hold at most needs_you_max_rows rows (default 5) of three columns
   (task, one concrete question, resume condition). Each row must name an
   existing task in a non-terminal state and carry a nonblank question; a
@@ -42,7 +43,8 @@ behavior are described below.
 - Case comparison: state and transition lookup is case-insensitive; the
   spelling from the specification is retained in validation messages.
 - Output: UTF-8 without BOM, LF line endings. JSON contains valid / path /
-  task_count / status_revision / needs_you_count / errors; when errors exist the JSON is still printed and the
+  task_count / completed_count / warnings / status_revision / needs_you_count /
+  errors; more than 10 Completed tasks produces a nonfatal warning. When errors exist the JSON is still printed and the
   exit code is 1; fatal errors such as a missing state file or a missing
   spec key go to stderr with exit code 1.
 """
@@ -54,10 +56,12 @@ import re
 import sys
 
 try:
-    from markdown_table import is_separator_row, split_markdown_row
+    from markdown_table import find_markdown_sections, is_separator_row, split_markdown_row
+    from validation_limits import COMPLETED_TASK_WARNING_LIMIT, NEEDS_YOU_MAX_ROWS
 except ImportError as exc:
     raise SystemExit(
-        'markdown_table.py must be alongside this script; copy the whole '
+        'Required helpers (markdown_table.py and validation_limits.py) must be '
+        'alongside this script; copy the whole '
         'scripts/ directory. (' + str(exc) + ')'
     ) from None
 
@@ -206,10 +210,13 @@ def main():
     section_pattern = ('(?s)' + re.escape(settings['task_section_start'])
                        + r'\s*(.*?)\s*' + re.escape(settings['task_section_end']))
     task_section = re.search(section_pattern, content)
+    task_heading = settings['task_section_start']
+    task_level = len(task_heading) - len(task_heading.lstrip('#'))
+    task_sections = find_markdown_sections(content, task_heading.lstrip('#').strip(), task_level)
     task_states_by_id = {}   # case-insensitive task id -> parsed current state
-    if task_section:
+    if task_section and task_sections:
         for line_number, line in enumerate(
-                re.split(r'\r\n|\r|\n', task_section.group(1)), start=1):
+                '\n'.join(task_sections).splitlines(), start=1):
             line = line.strip()
             if not line.startswith('|'):
                 continue
@@ -219,7 +226,11 @@ def main():
                               + ': expected ' + str(task_column_count)
                               + ' columns, found ' + str(len(cells)))
                 continue
-            if is_separator_row(cells) or contains_ci((settings['task_id_header'], ''), cells[0]):
+            if is_separator_row(cells) or contains_ci((settings['task_id_header'],), cells[0]):
+                continue
+            if not cells[0].strip():
+                errors.append('Malformed task table row ' + str(line_number)
+                              + ': task id must be nonblank')
                 continue
             parsed_task_id = cells[0]
             state = cells[2]
@@ -238,9 +249,12 @@ def main():
     blocked_pattern = ('(?s)' + re.escape(settings['blocked_section_start'])
                        + r'\s*(.*?)\s*' + re.escape(settings['blocked_section_end']))
     blocked_match = re.search(blocked_pattern, content)
-    if blocked_match:
+    blocked_heading = settings['blocked_section_start']
+    blocked_level = len(blocked_heading) - len(blocked_heading.lstrip('#'))
+    blocked_sections = find_markdown_sections(content, blocked_heading.lstrip('#').strip(), blocked_level)
+    if blocked_match and blocked_sections:
         for line_number, line in enumerate(
-                re.split(r'\r\n|\r|\n', blocked_match.group(1)), start=1):
+                '\n'.join(blocked_sections).splitlines(), start=1):
             line = line.strip()
             if not line.startswith('|'):
                 continue
@@ -300,25 +314,21 @@ def main():
     # Optional attention view: only work that waits for a person belongs here,
     # and the row count is capped so a healthy project takes no space.
     needs_you_count = 0
-    needs_you_start = settings.get('needs_you_section_start')
-    needs_you_end = settings.get('needs_you_section_end')
-    if needs_you_start and needs_you_end and needs_you_start in content:
+    needs_you_sections = find_markdown_sections(content, 'Needs you now')
+    if len(needs_you_sections) > 1:
+        errors.append('Duplicate Needs you now sections: expected at most one')
+    if needs_you_sections:
         try:
             needs_you_columns = int(settings.get('needs_you_column_count', '3'))
-            needs_you_max_rows = int(settings.get('needs_you_max_rows', '5'))
-            if needs_you_columns < 1 or needs_you_max_rows < 1:
+            needs_you_max_rows = int(settings.get('needs_you_max_rows', NEEDS_YOU_MAX_ROWS))
+            if needs_you_columns < 3 or needs_you_max_rows < 1:
                 raise ValueError
         except ValueError:
-            sys.exit('Needs-you-now column count and row cap must be positive integers')
+            sys.exit('Needs-you-now column count must be at least 3 and row cap must be positive')
         needs_you_header = settings.get('needs_you_task_header', 'Task')
-        needs_you_section = re.search(
-            '(?s)' + re.escape(needs_you_start) + r'\s*(.*?)\s*' + re.escape(needs_you_end),
-            content)
-        if not needs_you_section:
-            errors.append('Needs you now section is not closed by the following section heading')
-        else:
+        for needs_you_section in needs_you_sections:
             for line_number, line in enumerate(
-                    re.split(r'\r\n|\r|\n', needs_you_section.group(1)), start=1):
+                    re.split(r'\r\n|\r|\n', needs_you_section), start=1):
                 line = line.strip()
                 if not line.startswith('|'):
                     continue
@@ -328,7 +338,7 @@ def main():
                                   + ': expected ' + str(needs_you_columns)
                                   + ' columns, found ' + str(len(cells)))
                     continue
-                if is_separator_row(cells) or contains_ci((needs_you_header, ''), cells[0]):
+                if is_separator_row(cells) or contains_ci((needs_you_header,), cells[0]):
                     continue
                 needs_you_count += 1
                 needs_you_task = cells[0].strip()
@@ -344,9 +354,9 @@ def main():
                 if not cells[1].strip() or cells[1].strip() == '-':
                     errors.append('Needs you now row for task ' + needs_you_task
                                   + ' has no concrete question')
-            if needs_you_count > needs_you_max_rows:
-                errors.append('Needs you now lists ' + str(needs_you_count)
-                              + ' rows; the attention budget is ' + str(needs_you_max_rows))
+        if needs_you_count > needs_you_max_rows:
+            errors.append('Needs you now lists ' + str(needs_you_count)
+                          + ' rows; the attention budget is ' + str(needs_you_max_rows))
 
     # Flag presence, not truthiness: empty values must never bypass validation.
     # State transition validation (including <blocked-before> blocked recovery)
@@ -392,10 +402,20 @@ def main():
     elif task_id is not None:
         errors.append('--task-id requires --from-state and --to-state')
 
+    completed_count = sum(normalize_state(state) == 'completed'
+                          for state in task_states_by_id.values())
+    warnings = []
+    if completed_count > COMPLETED_TASK_WARNING_LIMIT:
+        warnings.append('Task list contains ' + str(completed_count)
+                        + ' Completed tasks; consider archiving completed tasks '
+                        + '(warning limit is ' + str(COMPLETED_TASK_WARNING_LIMIT) + ')')
+
     result = {
         'valid': len(errors) == 0,
         'path': real_path,
         'task_count': len(task_states_by_id),
+        'completed_count': completed_count,
+        'warnings': warnings,
         'status_revision': revision_value,
         'needs_you_count': needs_you_count,
         'errors': errors,

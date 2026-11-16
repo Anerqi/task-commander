@@ -7,7 +7,9 @@ the rejection cases.
 """
 
 import json
+import os
 import pathlib
+import re
 import subprocess
 import sys
 import tempfile
@@ -18,7 +20,7 @@ VALIDATOR = ROOT / "scripts" / "validate-project-state.py"
 TEMPLATE = ROOT / "templates" / "project-status.md"
 TASK_SEPARATOR = "|---|---|---|---|---|---|---|---|---|---|---|"
 BLOCKED_SEPARATOR = "|---|---|---|---|---|---|"
-NEEDS_BLOCK = "## Needs you now\n\n"
+NEEDS_BLOCK = "### Needs you now\n\n"
 NEEDS_HEADER = "| Task | Question | Resume when |\n|---|---|---|"
 
 
@@ -29,6 +31,10 @@ def task_row(task_id, state="TODO"):
 
 def needs_row(task_id, question="May I publish this draft?"):
     return f"| {task_id} | {question} | The draft is reviewed |"
+
+
+def without_attention(content):
+    return re.sub(r"(?ms)^#{2,3} Needs you now\n.*?(?=^#{1,6} |\Z)", "", content)
 
 
 class AttentionAndRevisionTests(unittest.TestCase):
@@ -50,18 +56,21 @@ class AttentionAndRevisionTests(unittest.TestCase):
             content = content.replace("- Status revision: 1",
                                       f"- Status revision: {revision}", 1)
         if drop_needs_section:
-            head, separator, tail = content.partition(NEEDS_BLOCK)
-            if separator:
-                content = head + "## Task list" + tail.split("## Task list", 1)[-1]
+            content = without_attention(content)
         return content
 
-    def run_validator(self, content, *extra):
-        with tempfile.TemporaryDirectory(prefix="_tmp_attention_") as directory:
+    def run_validator(self, content, *extra, spec=None):
+        with tempfile.TemporaryDirectory(prefix="_tmp_attention_", dir=ROOT) as directory:
             path = pathlib.Path(directory) / "project-status.md"
             path.write_text(content, encoding="utf-8", newline="\n")
+            if spec is not None:
+                spec_path = pathlib.Path(directory) / "state-spec.txt"
+                spec_path.write_text(spec, encoding="utf-8", newline="\n")
+                extra = (*extra, "--spec-path", str(spec_path))
             process = subprocess.run(
                 [sys.executable, str(VALIDATOR), "--path", str(path), *extra],
                 capture_output=True, text=True, encoding="utf-8",
+                env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"),
                 cwd=directory, check=False, timeout=30)
             self.assertEqual(process.stderr, "")
             return process, json.loads(process.stdout)
@@ -71,6 +80,9 @@ class AttentionAndRevisionTests(unittest.TestCase):
         self.assertTrue(any(fragment in error for error in payload["errors"]), payload["errors"])
 
     def test_template_ships_an_empty_attention_view_and_revision(self):
+        template = TEMPLATE.read_text(encoding="utf-8")
+        self.assertIn(NEEDS_BLOCK, template.split("## Coordination\n", 1)[1])
+        self.assertNotIn("\n## Needs you now\n", template)
         process, payload = self.run_validator(self.build())
         self.assertEqual(process.returncode, 0, payload)
         self.assertTrue(payload["valid"])
@@ -83,6 +95,76 @@ class AttentionAndRevisionTests(unittest.TestCase):
             needs=[needs_row("01")]))
         self.assertEqual(process.returncode, 0, payload)
         self.assertEqual(payload["needs_you_count"], 1)
+
+    def test_legacy_top_level_attention_remains_supported(self):
+        content = self.build(tasks=[task_row("01")], drop_needs_section=True)
+        content += "\n## Needs you now\n\n" + NEEDS_HEADER + "\n" + needs_row("01") + "\n"
+        process, payload = self.run_validator(content)
+        self.assertEqual(process.returncode, 0, payload)
+        self.assertEqual(payload["needs_you_count"], 1)
+
+    def test_attention_stops_at_eof_or_any_following_heading(self):
+        base = self.build(tasks=[task_row("01")], drop_needs_section=True)
+        attention = "\n## Coordination\n\n" + NEEDS_BLOCK + NEEDS_HEADER + "\n" + needs_row("01")
+        for suffix in ("", "\n### Active windows\n| A | B | C | D |",
+                       "\n#### Detail\n| 99 | unrelated | table |",
+                       "\n## Other\n| 99 | unrelated | table |"):
+            with self.subTest(suffix=suffix):
+                process, payload = self.run_validator(base + attention + suffix)
+                self.assertEqual(process.returncode, 0, payload)
+                self.assertEqual(payload["needs_you_count"], 1)
+
+    def test_duplicate_attention_sections_are_rejected(self):
+        for heading in ("##", "###"):
+            with self.subTest(heading=heading):
+                _, payload = self.run_validator(self.build() + f"\n{heading} Needs you now\n")
+                self.assert_error(payload, "Duplicate Needs you now sections")
+
+    def test_fenced_attention_headings_and_rows_are_ignored(self):
+        content = self.build(tasks=[task_row("01")])
+        content = content.replace(NEEDS_HEADER, NEEDS_HEADER + "\n```md\n"
+                                  + needs_row("99") + "\n## Needs you now\n```", 1)
+        process, payload = self.run_validator(content)
+        self.assertEqual(process.returncode, 0, payload)
+        self.assertEqual(payload["needs_you_count"], 0)
+
+    def test_blank_attention_task_id_fails(self):
+        _, payload = self.run_validator(self.build(needs=[needs_row("")]))
+        self.assert_error(payload, "task id must be nonblank")
+        self.assertEqual(payload["needs_you_count"], 1)
+
+    def test_attention_default_limit_and_legacy_override(self):
+        spec = (ROOT / "templates" / "task-state-spec.txt").read_text(encoding="utf-8")
+        spec = "\n".join(line for line in spec.splitlines()
+                         if not line.startswith("needs_you_"))
+        tasks = [task_row(str(index)) for index in range(6)]
+        content = self.build(tasks=tasks, needs=[needs_row(str(index)) for index in range(6)])
+        _, payload = self.run_validator(content, spec=spec)
+        self.assert_error(payload, "the attention budget is 5")
+        process, payload = self.run_validator(content, spec=spec + "\nneeds_you_max_rows=6\n")
+        self.assertEqual(process.returncode, 0, payload)
+        self.assertEqual(payload["needs_you_count"], 6)
+
+    def test_completed_warning_boundary_excludes_cancelled(self):
+        for count in (10, 11):
+            with self.subTest(count=count):
+                tasks = [task_row(str(index), "cOmPlEtEd") for index in range(count)]
+                tasks += [task_row("cancelled-" + str(index), "Cancelled") for index in range(12)]
+                process, payload = self.run_validator(self.build(tasks=tasks))
+                self.assertEqual(process.returncode, 0, payload)
+                self.assertTrue(payload["valid"], payload)
+                self.assertEqual(payload["completed_count"], count)
+                self.assertEqual(len(payload["warnings"]), int(count > 10))
+                self.assertEqual(payload["errors"], [])
+
+    def test_completed_count_uses_unique_valid_parsed_task_ids(self):
+        tasks = [task_row("A", "Completed"), task_row("a", "Completed"),
+                 task_row("", "Completed"), task_row("bad", "Completed") + " extra |"]
+        _, payload = self.run_validator(self.build(tasks=tasks))
+        self.assert_error(payload, "Duplicate task id")
+        self.assertEqual(payload["completed_count"], 1)
+        self.assertEqual(payload["task_count"], 1)
+        self.assertEqual(payload["warnings"], [])
 
     def test_unknown_task_in_the_attention_view_fails(self):
         _, payload = self.run_validator(self.build(

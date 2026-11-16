@@ -309,6 +309,19 @@ class KnowledgeValidatorTests(unittest.TestCase):
         self.assertTrue(any("contains is empty" in warning
                             for warning in data["warnings"]), data)
 
+    def test_shared_length_limits_keep_exact_boundaries(self):
+        for entry_lines, summary_length, expect_warning in ((20, 200, False), (21, 201, True)):
+            with self.subTest(entry_lines=entry_lines, summary_length=summary_length):
+                root = self.make_project(f"limits-{entry_lines}-{summary_length}")
+                self.add_log(root, "# Log\n\n## 2026-01-01 - Entry\n"
+                             + "- Detail.\n" * entry_lines)
+                self.add_topic(root, "topic.md", self.topic_content(summary="x" * summary_length))
+                data = self.assert_valid(self.run_for(root), topic_count=1)
+                self.assertEqual(any("non-empty body lines" in item for item in data["warnings"]),
+                                 expect_warning, data)
+                self.assertEqual(any("summary exceeds" in item for item in data["warnings"]),
+                                 expect_warning, data)
+
     def test_roadmap_and_cited_are_light_warnings(self):
         root = self.make_project("optional-files")
         self.write(root / "knowledge" / "ROADMAP.md",

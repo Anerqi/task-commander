@@ -28,7 +28,7 @@ When a project resumes from `Paused`, the pre-pause phase must be recorded and r
 
 ## Protocol version
 
-`project-status.md` may include an optional `- Protocol version: 2` line in the Project section. It records which Task Commander protocol the project was last reconciled against and supports the upgrade checks in `references/23-protocol-upgrade.md`. It is metadata, not a task state: existing files without it remain valid, and adding it requires neither a transition nor a new task row. The task table, blocked table and state rules are unchanged by protocol version.
+`project-status.md` may include an optional `- Protocol version: 3` line in the Project section. It records which Task Commander protocol the project was last reconciled against and supports the upgrade checks in `references/23-protocol-upgrade.md`. It is metadata, not a task state: existing files without it remain valid, and adding it requires neither a transition nor a new task row. The task table, blocked table and state rules are unchanged by protocol version.
 
 ## Required task fields
 
@@ -82,6 +82,10 @@ A gate may be skipped only when the task brief explicitly states that Reviewer o
 ## Status table cells
 
 Use the existing 11-column task table and 6-column blocked table. Both CLI tools share the same cell parser: start rows with `|`, escape a literal pipe inside a cell as `\|`, and retain empty cells. Surrounding whitespace, an optional closing pipe, and alignment rows such as `| :--- | ---: |` are supported. Other backslashes are preserved; this is not a general Markdown parser. The validator still rejects wrong column counts and inconsistent blocked records; rendering alone is not validation.
+
+Section parsing uses ATX headings with exact, case-sensitive titles. A section's direct body stops at the next heading of any level; headings and tables inside fenced code are ignored. These rules apply to both legacy and nested attention views.
+
+`scripts/validation_limits.py` is the shared source for limits. Count only task rows with status `Completed` (case-insensitive): more than `COMPLETED_TASK_WARNING_LIMIT=10` produces an advisory archive/readability warning, not a validation failure. `Cancelled` and other states do not count. Any archival preserves task histories and evidence pointers; a warning does not authorize removing records or changing terminal states.
 
 ## Status update transaction
 
@@ -142,6 +146,8 @@ Parallelism only changes dispatch order; it never changes a single task's state 
 ## Optional coordination metadata
 
 The optional Coordination, Knowledge, Active windows, Pending user actions, Backups, and Synchronization sections in `templates/project-status.md` track context revisions, durable-knowledge pointers, task/window mappings, input versions, ownership and acknowledgment. They do not add states or alter the required task/history columns. Existing projects may add them incrementally.
+
+New templates place `### Needs you now` under `## Coordination`. Legacy `## Needs you now` and files without any attention section remain valid. When present, the derived view uses `Task | Question | Resume when`, with at most `NEEDS_YOU_MAX_ROWS=5` rows from `scripts/validation_limits.py`; it is empty when no person is needed and never duplicates live state or lists finished tasks.
 
 Optional in-phase progress evidence belongs in task receipts/checkpoints per `templates/task-receipt.md`; continuations reference it. `references/02-commander.md` (In-phase progress checks) owns the diagnostic trigger. These checks add no required fields or states and never imply a transition or gate pass by themselves; use the existing evidence and transaction rules for any actual status change.
 

@@ -4,19 +4,12 @@
 
 - Project name: <Project Name>
 - Project phase: Context Building
-- Protocol version: 2
+- Protocol version: 3
 - Status revision: 1
 - Status owner: Commander
 - Pre-pause phase: n/a
 - Last updated: YYYY-MM-DD HH:mm <timezone>
 - Current focus: Complete the project context
-
-## Needs you now
-
-Empty when nothing waits for a person. List at most five rows, one question each; a healthy project leaves this section empty and a finished task never appears here.
-
-| Task | Question | Resume when |
-|---|---|---|
 
 ## Task list
 
@@ -42,6 +35,13 @@ Empty when nothing waits for a person. List at most five rows, one question each
 - Capacity: confirm project policy; batch size adapts to user's window capacity
 
 These coordination sections are optional for existing projects and manually checked; the CLI does not validate their semantics. Use pointers and versions, not duplicate background content.
+
+### Needs you now
+
+Empty when nothing waits for a person. List at most five rows, one question each; a healthy project leaves this section empty and a finished task never appears here. Existing files may retain a top-level section or omit it.
+
+| Task | Question | Resume when |
+|---|---|---|
 
 ## Knowledge
 

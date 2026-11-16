@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 try:
-    from markdown_table import is_separator_row, split_markdown_row
+    from markdown_table import find_markdown_sections, is_separator_row, split_markdown_row
 except ImportError as exc:
     raise SystemExit(
         'markdown_table.py must be alongside this script; copy the whole '
@@ -48,14 +48,14 @@ def load_state_data(source_path: Path) -> Dict[str, Any]:
         tasks: Dict[str, Any] = {}
         blocked: List[Dict[str, str]] = []
         needs_you: List[Dict[str, str]] = []
-        current_section = None
-
-        with open(source_path, "r", encoding="utf-8") as f:
-            for line in f:
+        with open(source_path, "r", encoding="utf-8-sig") as f:
+            content = f.read()
+        sections = ((title, body)
+                    for title, level in (("Task list", 2), ("Blocked", 2), ("Needs you now", None))
+                    for body in find_markdown_sections(content, title, level))
+        for current_section, body in sections:
+            for line in body.splitlines():
                 line_str = line.strip()
-                if line_str.startswith("## "):
-                    current_section = line_str[3:].strip()
-                    continue
 
                 if current_section == "Task list" and line_str.startswith("|"):
                     parts = split_markdown_row(line_str)

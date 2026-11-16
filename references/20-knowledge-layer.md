@@ -16,12 +16,15 @@ The knowledge layer is **optional**. A one-shot or purely local task may need no
 | User-confirmed major decisions | `decision-log.md` | Topics summarize and point to the decision ID |
 | Stable technical conclusions, lessons, procedures | `knowledge/topics/<topic>.md` | LOG and task receipts point to the topic |
 | Chronological progress summary | `knowledge/LOG.md` | Short entries with pointers; no long conclusions |
+| Optional long-term direction | `knowledge/ROADMAP.md` | Goals and direction only; live task state remains in `project-status.md` |
 | Delivery evidence | Task result files and receipts | Topics cite artifact versions and receipt paths |
 | Project context, scope, constraints, collaboration policy | `background/01_project_background.md` | Other files point to it |
 | Project-wide behavioral rules | root `AGENTS.md` | Knowledge notes do not replace project rules |
 | External knowledge actually used | `knowledge/Cited.md` | Pointers only; never copy the external body |
 
 Do not create a second competing summary. If a topic needs the full reasoning, it points to the artifact, decision or receipt that owns it.
+
+`CONTEXT.md` holds only terms and domain relations; `decision-log.md` is the sole decision ledger. Composed `grill-with-docs` supplies METHOD only; Task Commander owns paths and integration rules.
 
 **Engineering assets stay in the code tree.** A schema, configuration, source file or executable specification is not knowledge about the project; it is a project asset. Only the reasoning, pitfalls, decisions and reusable lessons about such assets belong in `knowledge/`.
 
@@ -102,6 +105,8 @@ Run a knowledge audit at a milestone and before project Acceptance when the laye
 ```
 
 The validator checks layout, frontmatter fields, enum values, LOG ordering and basic shell/empty-file warnings. It does not judge truth, contradicting conclusions or whether a topic is worth keeping.
+
+Keep `scripts/validation_limits.py` with the validator: it owns shared bounds including `MAX_FILE_BYTES=2*1024*1024`, `ENTRY_LINE_LIMIT=20` and `SUMMARY_LENGTH_LIMIT=200`. These structural/readability limits do not replace the audit below.
 
 Human/Commander audit checklist:
 

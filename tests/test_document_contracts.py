@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import re
+from runpy import run_path
 import unittest
 
 
@@ -626,7 +627,7 @@ class DocumentContracts(unittest.TestCase):
             self.assertIn(marker, orchestration)
 
         status = (ROOT / "templates/project-status.md").read_text(encoding="utf-8")
-        self.assertIn("Protocol version: 2", status)
+        self.assertIn("Protocol version: 3", status)
         self.assertIn("## Knowledge", status)
 
         receipt = (ROOT / "templates/task-receipt.md").read_text(encoding="utf-8")
@@ -709,7 +710,7 @@ class DocumentContracts(unittest.TestCase):
                        "mechanical", "judgment", "human-confirmed", "not a new task state"):
             self.assertIn(marker, retro)
         upgrade = (ROOT / "references/23-protocol-upgrade.md").read_text(encoding="utf-8")
-        for marker in ("Current protocol version: 2", "protocol_version",
+        for marker in ("Current protocol version: 3 (2026-11-16)", "protocol_version",
                        "Existing `project-status.md` files may omit",
                        "backward-compatible", "This is metadata, not a task transition"):
             self.assertIn(marker, upgrade)
@@ -765,7 +766,7 @@ class DocumentContracts(unittest.TestCase):
             "templates/task-receipt.md": (
                 "## Attention", "Outcome:", "Attention:", "Dispatch key:"),
             "templates/project-status.md": (
-                "## Needs you now", "Status revision: 1"),
+                "### Needs you now", "Status revision: 1"),
             "templates/task-state-spec.txt": (
                 "needs_you_section_start", "needs_you_max_rows", "revision_prefix"),
         }
@@ -774,6 +775,74 @@ class DocumentContracts(unittest.TestCase):
             for marker in markers:
                 with self.subTest(source=source, marker=marker):
                     self.assertIn(marker, text)
+
+    def test_v3_template_attention_is_nested_and_matches_spec(self):
+        status = (ROOT / "templates/project-status.md").read_text(encoding="utf-8")
+        parser = run_path(str(ROOT / "scripts/markdown_table.py"))
+        sections = list(parser["iter_markdown_sections"](status))
+        titles = [title for title, _ in sections]
+        self.assertEqual(titles.count("Needs you now"), 1)
+        headings = [line for line in status.splitlines() if line.startswith("#")]
+        attention_index = headings.index("### Needs you now")
+        self.assertEqual(headings[attention_index - 1], "## Coordination")
+        self.assertNotIn("## Needs you now", headings)
+        body, = parser["find_markdown_sections"](status, "Needs you now")
+        table = [line for line in body.splitlines() if line.startswith("|")]
+        self.assertEqual(table, ["| Task | Question | Resume when |", "|---|---|---|"])
+        self.assertNotIn("Knowledge policy", body)
+
+        spec = dict(line.split("=", 1) for line in
+                    (ROOT / "templates/task-state-spec.txt").read_text(encoding="utf-8").splitlines()
+                    if "=" in line and not line.startswith("#"))
+        self.assertEqual(spec["needs_you_section_start"], "### Needs you now")
+        self.assertNotIn("heading=### Needs you now",
+                         (ROOT / "templates/task-state-spec.txt").read_text(encoding="utf-8"))
+        limits = run_path(str(ROOT / "scripts/validation_limits.py"))
+        self.assertEqual(int(spec["needs_you_max_rows"]), limits["NEEDS_YOU_MAX_ROWS"])
+
+    def test_v3_upgrade_preserves_history_contracts_and_legacy_attention(self):
+        upgrade = (ROOT / "references/23-protocol-upgrade.md").read_text(encoding="utf-8")
+        self.assertIn("### 2026-10-24 — protocol version 2", upgrade)
+        self.assertIn("### 2026-11-16 — protocol version 3", upgrade)
+        self.assertIn("## What changed in version 2", upgrade)
+        text = self.protocol_text("references/23-protocol-upgrade.md")
+        self.assert_protocol_concepts(text, {
+            "legacy attention optional": r"legacy[^.]{0,80}needs you now[^.]{0,80}without an attention section[^.]{0,60}supported",
+            "history preservation": r"task ids, phases, history, active contracts and accepted evidence remain intact",
+            "confirmation before contract change": r"user confirmation before altering",
+            "warning not failure": r"advisory archive/readability warning, not a validation failure",
+            "Completed only": r"count only task rows whose status is completed \(case-insensitive\)",
+            "Cancelled excluded": r"cancelled and other states do not count",
+        })
+        limits = run_path(str(ROOT / "scripts/validation_limits.py"))
+        for name, value in (("NEEDS_YOU_MAX_ROWS", 5),
+                            ("COMPLETED_TASK_WARNING_LIMIT", 10),
+                            ("MAX_FILE_BYTES", 2 * 1024 * 1024),
+                            ("ENTRY_LINE_LIMIT", 20), ("SUMMARY_LENGTH_LIMIT", 200)):
+            with self.subTest(limit=name):
+                self.assertEqual(limits[name], value)
+                self.assertIn(name, upgrade)
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        for dependency in (
+            "`validate-project-state.py` imports `markdown_table.py` and `validation_limits.py`",
+            "`render-workflow.py` imports `markdown_table.py`",
+            "`validate-knowledge.py` imports `validation_limits.py`",
+        ):
+            self.assertIn(dependency, readme)
+
+    def test_v3_source_ownership_keeps_methods_separate_from_records(self):
+        for source in ("references/10-context-orchestration.md",
+                       "references/20-knowledge-layer.md",
+                       "references/02-commander.md"):
+            with self.subTest(source=source):
+                text = self.protocol_text(source)
+                self.assert_protocol_concepts(text, {
+                    "method only": r"grill-with-docs[^.]{0,40}(?:supplies|supply) method only|grill-with-docs.{0,20}method only",
+                    "terms only": r"context\.md[^.]{0,60}(?:holds|holding) only terms and domain relations",
+                    "sole decision ledger": r"decision-log\.md[^.]{0,40}(?:is|owns|keeps|holds)[^.]{0,40}(?:sole|user-confirmed decisions)|sole (?:decision )?ledger decision-log\.md",
+                    "roadmap direction": r"roadmap\.md[^.]{0,40}(?:holds|records) long-term direction|optional long-term direction \| knowledge/roadmap\.md \| goals and direction only; live task state remains in project-status\.md",
+                    "live state ownership": r"project-status\.md",
+                })
 
 
 if __name__ == "__main__":

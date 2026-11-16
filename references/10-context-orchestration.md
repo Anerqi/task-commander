@@ -28,7 +28,7 @@ For each triggered method, use the external material if present; otherwise read 
 | Skill | Responsibility in the flow | Usage condition | Not responsible for |
 |---|---|---|---|
 | writing-for-agents | Constrains the structure, pointers, completion criteria, and single source of truth of every context document | Always used | Interviewing and project decisions |
-| grill-with-docs | Deep-dives round by round into goals, scope, terms, scenarios, boundaries, and contradictions | Always used | Deciding Task Commander's output paths on its own |
+| grill-with-docs | METHOD only: deep-dives round by round into goals, scope, terms, scenarios, boundaries, and contradictions | Always used | Owning output paths, integration rules or project decisions |
 | wait-what | Re-expresses an unclear question or summary as concise language with context | Used when the user shows lack of understanding, or the current question depends on implicit context | Adding new question branches or answering for the user |
 | to-questionnaire | Turns knowledge gaps only a third party can fill into an asynchronous questionnaire | Used when the information is confirmed to sit with a third party | Asking the current user to guess facts they do not know |
 
@@ -104,6 +104,8 @@ Completion criteria: applicable records are readable, every gap has a status/own
 | Third-party questions awaiting replies | `background/pending-questionnaire/` | The project background records open items and questionnaire paths |
 | Project-level behavioral rules for all AI agents (hard constraints, coding conventions, forbidden patterns) | `AGENTS.md` | Task prompts may note its path; roles propose additions with evidence and write only after user confirmation |
 | Optional durable knowledge: stable conclusions, timeline, roadmap, external citations | `knowledge/`; `references/20-knowledge-layer.md` owns layout, triggers and conflict priority | Other files keep only paths/summaries; do not duplicate current task state or confirmed decisions |
+
+Optional `knowledge/ROADMAP.md` records long-term direction, not live task state. Task Commander owns the paths and integration rules in this table; `grill-with-docs` supplies METHOD only and does not create a competing decision ledger.
 
 ## Writes and synchronization after handoff
 
