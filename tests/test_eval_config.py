@@ -1,5 +1,6 @@
 """Checks for the pre-validation agent-judge model renderer."""
 
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -134,6 +135,33 @@ class CommanderScopeFixtureTests(unittest.TestCase):
 
 
 class ContextHandoffOptimizationTests(unittest.TestCase):
+    def handoff_route(self):
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        return skill.split("**Handoff only**:", 1)[1].split(
+            "\n  - **Initialize or recover**:", 1)[0]
+
+    def test_handoff_checks_recorded_protocol_before_shortcut(self):
+        route = self.handoff_route()
+        for condition in ("exactly one", "well-formed", "authoritative Project section",
+                          "current version `3`", "Missing", "below-3", "invalid", "duplicate",
+                          "unrecognized", "future versions", "**Initialize or recover**",
+                          "references/23-protocol-upgrade.md"):
+            with self.subTest(condition=condition):
+                self.assertIn(condition, route)
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("never an automatic metadata upgrade", skill)
+
+    def test_handoff_uses_current_inventory_and_optional_legacy_records(self):
+        route = self.handoff_route()
+        self.assertIn("Reuse `Available skills` in the background", route)
+        self.assertIn("`CONTEXT.md` only if present", route)
+        self.assertIn("`background/02_skill_list.md` only if present as legacy input", route)
+        template = (ROOT / "templates" / "commander-handoff.md").read_text(encoding="utf-8")
+        for name in ("CONTEXT.md", "background/02_skill_list.md"):
+            line, = [line for line in template.splitlines() if "/" + name in line]
+            self.assertIn("if present", line)
+        self.assertIn("never assume `3` or upgrade metadata", template)
+
     def test_handoff_only_route_uses_records_template_and_validation(self):
         skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
         for marker in (
@@ -141,7 +169,7 @@ class ContextHandoffOptimizationTests(unittest.TestCase):
             "templates/commander-handoff.md",
             "scripts/validate-project-state.py --path",
             "**Initialize or recover**",
-            "Do not load full-initialization references on this path",
+            "Do not load full-initialization references on this successful path",
             "without changing project files",
         ):
             with self.subTest(marker=marker):
@@ -182,3 +210,37 @@ class ContextHandoffOptimizationTests(unittest.TestCase):
     def test_case_02_disk_check_guards_existing_agents_file(self):
         script = (ROOT / "evals" / "scripts" / "check_02_context_handoff.py").read_text(encoding="utf-8")
         self.assertIn("pre-existing AGENTS.md remains unchanged", script)
+
+    def test_case_02_checker_rejects_changed_agents_rules(self):
+        checker = ROOT / "evals" / "scripts" / "check_02_context_handoff.py"
+        fixture = ROOT / "tests" / "fixtures" / "behavioral-smoke" / "02-context-handoff" / "project"
+        with tempfile.TemporaryDirectory(prefix="_tmp_handoff_check_", dir=ROOT) as directory:
+            project = Path(directory) / "project"
+            shutil.copytree(fixture, project)
+            baseline = subprocess.run([sys.executable, str(checker)], cwd=project,
+                                      capture_output=True, text=True, encoding="utf-8", check=False)
+            self.assertEqual(baseline.returncode, 0, baseline.stdout + baseline.stderr)
+            agents = project / "AGENTS.md"
+            agents.write_text(agents.read_text(encoding="utf-8") + "\n- Unapproved new rule.\n",
+                              encoding="utf-8", newline="\n")
+            changed = subprocess.run([sys.executable, str(checker)], cwd=project,
+                                     capture_output=True, text=True, encoding="utf-8", check=False)
+            self.assertEqual(changed.returncode, 1, changed.stdout + changed.stderr)
+            self.assertIn("FAIL pre-existing AGENTS.md remains unchanged", changed.stdout)
+
+    def test_case_02_disk_check_accepts_v3_without_optional_legacy_records(self):
+        fixture = ROOT / "tests" / "fixtures" / "behavioral-smoke" / "02-context-handoff" / "project"
+        with tempfile.TemporaryDirectory(prefix="_tmp_handoff_v3_", dir=ROOT) as directory:
+            project = Path(directory) / "project"
+            shutil.copytree(fixture, project)
+            for name in ("CONTEXT.md", "background/02_skill_list.md"):
+                (project / name).unlink(missing_ok=True)
+            shutil.copyfile(ROOT / "templates" / "project-status.md", project / "project-status.md")
+            for script, arguments in (
+                (ROOT / "scripts" / "validate-project-state.py", ["--path", str(project / "project-status.md")]),
+                (ROOT / "evals" / "scripts" / "check_02_context_handoff.py", []),
+            ):
+                with self.subTest(script=script.name):
+                    result = subprocess.run([sys.executable, str(script), *arguments], cwd=project,
+                                            capture_output=True, text=True, encoding="utf-8", check=False)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

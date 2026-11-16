@@ -76,7 +76,7 @@ class DocumentContracts(unittest.TestCase):
         context = (ROOT / "references/01-context-brief.md").read_text(encoding="utf-8")
         orchestration = (ROOT / "references/10-context-orchestration.md").read_text(encoding="utf-8")
         for marker in (
-            "generate this file after the core project records are complete",
+            "**New file:** generate it after the core documents are complete",
             "Extract hard rules from the interview",
             "read it during the first project-record pass and compare it with confirmed rules",
             "byte-for-byte identical",
@@ -734,7 +734,7 @@ class DocumentContracts(unittest.TestCase):
 
     def test_version_three_context_and_compaction_contracts(self):
         context = (ROOT / "references/01-context-brief.md").read_text(encoding="utf-8")
-        for marker in ("Available skills", "legacy input only", "does not trigger creation",
+        for marker in ("Available skills", "compatibility/history source", "does not trigger creation",
                        "Do not rewrite it when there is no meaningful durable change"):
             self.assertIn(marker, context)
 

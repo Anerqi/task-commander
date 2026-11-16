@@ -2,7 +2,9 @@
 
 > Read only when the Context Agent has confirmed that project context is ready for Commander coordination.
 
-Use this template after reading the required project records and validating `project-status.md`. Replace every placeholder with a verified value. Use absolute paths. Mark absent optional records as absent; do not invent paths. Include only active task records relevant to the next coordination step.
+Use this template after reading the required project records and validating `project-status.md`. Handoff-only eligibility follows `SKILL.md`: user-confirmed complete context, valid status and an explicit, unique current protocol version `3`. Other versions or unresolved version fields use Initialize or recover and `references/23-protocol-upgrade.md`; user confirmation is required before adoption. A recovery-only handoff must state unresolved validation and block business dispatch.
+
+Replace every placeholder with a verified value. Use absolute paths. Mark absent optional records as absent and omit their read-list entries; do not invent paths or create files. Reuse `Available skills` in `background/01_project_background.md`. Include only active task records relevant to the next coordination step. Report the actual protocol version, including missing, invalid or ambiguous values; never assume `3` or upgrade metadata to fill this template.
 The code block below is addressed to the receiving Commander. Do not load its listed references in the current Context Agent window.
 
 ```text
@@ -16,15 +18,15 @@ Read first:
 - <absolute Skill root>/references/11-task-state-machine.md
 - <absolute Skill root>/templates/task-continuation.md (New-window read contract)
 - <absolute project root>/background/01_project_background.md
-- <absolute project root>/CONTEXT.md
-- <absolute project root>/background/02_skill_list.md
+- <absolute project root>/CONTEXT.md (if present; otherwise omit)
+- <absolute project root>/background/02_skill_list.md (legacy input only, if present; otherwise omit)
 - <absolute project root>/decision-log.md
 - <absolute project root>/project-status.md
-- <absolute project root>/AGENTS.md
+- <absolute project root>/AGENTS.md (if present; otherwise omit)
 - <absolute project root>/knowledge/ROADMAP.md (if present)
 - <absolute project root>/knowledge/LOG.md (if present; read recent entries)
 Before file/CLI work, read <absolute Skill root>/references/runtime.md.
-Current phase, protocol version and context revision: <actual values>
+Current phase, protocol version and context revision: <actual values; identify missing, invalid or ambiguous fields explicitly; do not assume or upgrade the version>
 Relevant task briefs, receipts/checkpoints and input versions: <absolute paths and versions needed for the next coordination step; preserve IDs/rounds/history>
 Confirmed goal and scope: <short summary pointing to background>
 Knowledge layer status: <enabled / deferred / absent; paths to ROADMAP and recent LOG>
