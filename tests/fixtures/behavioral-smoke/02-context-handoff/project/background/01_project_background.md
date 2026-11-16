@@ -33,5 +33,8 @@ Build core documentation for the synthetic local microservice. Target users are 
 - Data sensitivity: Public synthetic code/docs only. Zero credentials, personal data, or sensitive assets.
 - Recovery: The unchanged source fixture is the recovery copy; work only in its disposable duplicate and preserve earlier drafts during revisions. No Git repository is assumed. There are no valuable pre-existing assets, external services, or live databases.
 
-## 8. Open Items & Decisions
+## 8. Available skills
+- None selected. No external skills are required for this synthetic project.
+
+## 9. Open Items & Decisions
 - Pending decisions: None. All scope, technology, and architectural questions are confirmed in `decision-log.md`.

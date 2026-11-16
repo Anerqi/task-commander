@@ -253,3 +253,64 @@ class ContextHandoffOptimizationTests(unittest.TestCase):
                     result = subprocess.run([sys.executable, str(script), *arguments], cwd=project,
                                             capture_output=True, text=True, encoding="utf-8", check=False)
                     self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    CASE_02_FIXTURE = ROOT / "tests" / "fixtures" / "behavioral-smoke" / "02-context-handoff" / "project"
+
+    @staticmethod
+    def project_protocol_versions(status_text):
+        sys.path.insert(0, str(ROOT / "scripts"))
+        try:
+            from markdown_table import find_markdown_sections
+        finally:
+            sys.path.pop(0)
+        versions = []
+        for body in find_markdown_sections(status_text, "Project", level=2):
+            for line in body.splitlines():
+                if line.strip().startswith("- Protocol version:"):
+                    versions.append(line.split(":", 1)[1].strip())
+        return versions
+
+    def run_validator(self, status_path):
+        return subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "validate-project-state.py"), "--path", str(status_path)],
+            capture_output=True, text=True, encoding="utf-8", check=False,
+        )
+
+    def test_case_02_fixture_is_eligible_for_handoff_only(self):
+        status = (self.CASE_02_FIXTURE / "project-status.md").read_text(encoding="utf-8")
+        self.assertEqual(self.project_protocol_versions(status), ["3"])
+        self.assertIn("\n## Needs you now\n", status)
+        self.assertIn("\n### Blocked\n", status)
+        self.assertNotIn("\n## Blocked\n", status)
+        background = (self.CASE_02_FIXTURE / "background" / "01_project_background.md").read_text(encoding="utf-8")
+        self.assertRegex(background, r"(?m)^## (\d+\. )?Available skills$")
+        self.assertFalse((self.CASE_02_FIXTURE / "background" / "02_skill_list.md").exists())
+        result = self.run_validator(self.CASE_02_FIXTURE / "project-status.md")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_case_02_legacy_variant_passes_validation_but_not_version_gate(self):
+        with tempfile.TemporaryDirectory(prefix="_tmp_handoff_legacy_", dir=ROOT) as directory:
+            project = Path(directory) / "project"
+            shutil.copytree(self.CASE_02_FIXTURE, project)
+            status_path = project / "project-status.md"
+            status = status_path.read_text(encoding="utf-8")
+            variants = {
+                "missing": status.replace("- Protocol version: 3\n", ""),
+                "below-3": status.replace("- Protocol version: 3\n", "- Protocol version: 2\n"),
+                "duplicate": status.replace("- Protocol version: 3\n", "- Protocol version: 3\n- Protocol version: 3\n"),
+                "future": status.replace("- Protocol version: 3\n", "- Protocol version: 4\n"),
+            }
+            for name, text in variants.items():
+                with self.subTest(variant=name):
+                    self.assertNotEqual(self.project_protocol_versions(text), ["3"])
+            # A validator pass alone must not establish protocol currency.
+            status_path.write_text(variants["missing"], encoding="utf-8")
+            (project / "background" / "02_skill_list.md").write_text(
+                "# Discovered Skills\n\nNo external skills required for this synthetic project.\n", encoding="utf-8")
+            result = self.run_validator(status_path)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            checker = subprocess.run(
+                [sys.executable, str(ROOT / "evals" / "scripts" / "check_02_context_handoff.py")],
+                cwd=project, capture_output=True, text=True, encoding="utf-8", check=False,
+            )
+            self.assertEqual(checker.returncode, 0, checker.stdout + checker.stderr)
