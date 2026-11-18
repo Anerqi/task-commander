@@ -36,7 +36,12 @@ class StatusTableCLITests(unittest.TestCase):
         return content
 
     def insert_row(self, content, title, separator, row):
-        body, = find_markdown_sections(content, title)
+        sections = find_markdown_sections(content, title)
+        if title == "Blocked" and not sections:
+            blocked = ("\n### Blocked\n\n" + separator + "\n" + row
+                       + "\n\n## Task list\n")
+            return content.replace("\n## Task list\n", blocked, 1)
+        body, = sections
         self.assertIn(separator, body)
         return content.replace(body, body.replace(separator, separator + "\n" + row, 1), 1)
 
@@ -169,8 +174,7 @@ class StatusTableCLITests(unittest.TestCase):
     def test_blocked_section_can_be_omitted_when_no_tasks_are_blocked(self):
         content = self.state_content(
             "| 01 | Guide | TODO | P1 | Executor | - | No | No | No | out | now |")
-        body, = find_markdown_sections(content, "Blocked", level=3)
-        content = content.replace("### Blocked\n" + body, "", 1)
+        self.assertEqual(find_markdown_sections(content, "Blocked", level=3), [])
         validation, rendered = self.run_tools(content)
         self.assert_valid(validation)
         self.assertEqual(rendered["blocked_items"], [])

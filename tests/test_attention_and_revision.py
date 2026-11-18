@@ -48,13 +48,19 @@ def insert_rows(content, title, separator, rows):
         separator, separator + "\n" + "\n".join(rows), 1), 1)
 
 
+def insert_blocked_rows(content, rows):
+    section = ("### Blocked\n\n" + BLOCKED_SEPARATOR + "\n"
+               + "\n".join(rows) + "\n\n")
+    return content.replace("## Task list\n", section + "## Task list\n", 1)
+
+
 class AttentionAndRevisionTests(unittest.TestCase):
     def build(self, tasks=(), blocked=(), needs=(), revision=1, drop_needs_section=False):
         content = TEMPLATE.read_text(encoding="utf-8")
         if tasks:
             content = insert_rows(content, "Task list", TASK_SEPARATOR, tasks)
         if blocked:
-            content = insert_rows(content, "Blocked", BLOCKED_SEPARATOR, blocked)
+            content = insert_blocked_rows(content, blocked)
         if needs:
             content = insert_rows(content, "Needs you now", NEEDS_HEADER, needs)
         if revision is None:
@@ -90,8 +96,10 @@ class AttentionAndRevisionTests(unittest.TestCase):
         template = TEMPLATE.read_text(encoding="utf-8")
         self.assertIn(NEEDS_BLOCK, template)
         self.assertNotIn("\n## Coordination\n", template)
-        self.assertIn("\n### Blocked\n", template)
-        self.assertLess(template.index("### Blocked\n"), template.index("## Task list\n"))
+        self.assertIn(
+            "Add ### Blocked (6 columns) and ### Pending user actions here only when they carry a current record.",
+            template)
+        self.assertNotIn("\n### Blocked\n", template)
         self.assertNotIn("\n## Blocked\n", template)
         process, payload = self.run_validator(self.build())
         self.assertEqual(process.returncode, 0, payload)

@@ -563,7 +563,8 @@ class ProjectStateValidationTests(unittest.TestCase):
         self.assertTrue(payload["valid"])
 
     def test_blocked_section_may_be_absent_when_no_task_is_blocked(self):
-        content = TEMPLATE.read_text(encoding="utf-8").replace("### Blocked", "### No blocked tasks", 1)
+        content = TEMPLATE.read_text(encoding="utf-8")
+        self.assertNotIn("### Blocked", content)
         process, payload = self.run_validator(content)
         self.assertEqual(process.returncode, 0, payload)
         self.assertTrue(payload["valid"])
@@ -580,8 +581,9 @@ class ProjectStateValidationTests(unittest.TestCase):
 
     def test_malformed_blocked_row_fails(self):
         content = TEMPLATE.read_text(encoding="utf-8").replace(
-            "\n|---|---|---|---|---|---|\n",
-            "\n|---|---|---|---|---|---|\n| 01 |\n",
+            "## Task list\n",
+            "### Blocked\n\n|---|---|---|---|---|---|\n| 01 |\n\n## Task list\n",
+            1,
         )
         process, payload = self.run_validator(content)
         self.assertEqual(process.returncode, 1)
@@ -627,8 +629,11 @@ class ProjectStateValidationTests(unittest.TestCase):
         content = content.replace(task_separator, task_separator + "\n" + task_row)
         rows = [f"| {task_id} | {before} | Dependency | Commander | Resolved | now |"
                 for task_id, before in blocked]
-        return content.replace("\n" + blocked_separator + "\n",
-                               "\n" + blocked_separator + "\n" + "\n".join(rows) + "\n")
+        if rows:
+            section = ("### Blocked\n\n" + blocked_separator + "\n"
+                       + "\n".join(rows) + "\n\n")
+            content = content.replace("## Task list\n", section + "## Task list\n", 1)
+        return content
 
     def assert_transition(self, content, source, target, *, valid=True,
                           error=None, task_id="TC-01", task_count=1):

@@ -804,7 +804,9 @@ class DocumentContracts(unittest.TestCase):
             "templates/task-receipt.md": (
                 "## Attention", "Outcome:", "Attention:", "Dispatch key:"),
             "templates/project-status.md": (
-                "## Needs you now", "### Blocked", "Protocol version: 3", "Status revision: 1"),
+                "## Needs you now",
+                "Add ### Blocked (6 columns) and ### Pending user actions here only when they carry a current record.",
+                "Protocol version: 3", "Status revision: 1"),
             "templates/task-state-spec.txt": (
                 "needs_you_section_start", "blocked_section_start", "needs_you_max_rows", "revision_prefix"),
         }
@@ -822,11 +824,15 @@ class DocumentContracts(unittest.TestCase):
         self.assertEqual(titles.count("Needs you now"), 1)
         headings = [line for line in status.splitlines() if line.startswith("#")]
         attention_index = headings.index("## Needs you now")
-        self.assertEqual(headings[attention_index + 1], "### Blocked")
+        self.assertEqual(headings[attention_index + 1], "## Task list")
+        self.assertNotIn("### Blocked", headings)
         self.assertNotIn("## Coordination", headings)
         body, = parser["find_markdown_sections"](status, "Needs you now")
         table = [line for line in body.splitlines() if line.startswith("|")]
         self.assertEqual(table, ["| Task | Question | Resume when |", "|---|---|---|"])
+        self.assertIn(
+            "Add ### Blocked (6 columns) and ### Pending user actions here only when they carry a current record.",
+            body)
         self.assertNotIn("Knowledge policy", body)
 
         spec = dict(line.split("=", 1) for line in

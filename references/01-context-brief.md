@@ -67,6 +67,7 @@ Create the prescribed records for a new project. For an existing project, reuse 
    - The task list may be empty while no task is being executed; when third-party questionnaires are unanswered, record the current blockage or next actions.
    - After creation, the sole writer of the status file becomes the Commander.
    - Validate available status with `scripts/validate-project-state.py` before delivering. For a missing-record recovery handoff, disclose pending validation; Commander must integrate the recovery evidence and validate before ordinary dispatch.
+   - Add nested `### Blocked` and `### Pending user actions` tables under `## Needs you now` only when they carry current records. Omit empty optional tables. Preserve legacy top-level `## Blocked` and `## Pending user actions` sections in existing projects.
 
 5. `<Project Root>/decision-log.md`
    - Initialize with the single-file format of `templates/decision-log.md` only if absent; retain all existing confirmed decisions.

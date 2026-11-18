@@ -9,23 +9,14 @@ input:
   prompt: |
     Use the Task Commander skill and adopt the Commander role.
 
-    The project owner explicitly approved adopting Task Commander Version 3 at this phase boundary.
-    Review the project records, close Phase 1, compact the coordination status and prepare a concise Phase 2 handoff.
-
-    Requirements:
-    - Read the installed Task Commander SKILL.md first, then the project AGENTS.md and authoritative records.
-    - Preserve every task ID, task state, status-history row, accepted artifact and confirmed decision. Do not delete or renumber history.
-    - Preserve task-output/TASK-009/validation.md byte-for-byte as accepted evidence.
-    - Increment Status revision exactly once, from 7 to 8, for this status update.
-    - Merge still-relevant entries from background/02_skill_list.md into the Available skills subsection of background/01_project_background.md. Keep the legacy file unchanged.
-    - This project does not maintain a persistent grill-with-docs glossary. Do not create CONTEXT.md merely because the method is available in this session.
-    - The knowledge layer already exists. Add one concise LOG entry for this substantive phase closeout and update ROADMAP.md for the next phase, which extends beyond this session.
-    - AGENTS.md already contains the current durable rules. Do not rewrite it when no durable rule changed.
-    - There is no new user decision. Preserve D001 exactly; do not add a decision entry.
-    - Update project-status.md to Version 3, use the nested Needs you now layout, and remove empty optional coordination sections. Preserve all task and history rows.
-    - More than ten tasks are Completed. Treat the validator warning as a review prompt, not permission to archive or delete. No archive destination or retention has been approved.
-    - Do not run product code, install packages or use external network.
-    - All dates in this fixture are synthetic. Use 2026-11-15 for the closeout entry.
+    The project owner approved adopting Version 3 at this phase boundary.
+    Close Phase 1 and prepare a concise handoff for Phase 2.
+    There are no new user decisions.
+    No archive destination or retention period has been approved.
+    Phase 2 continues beyond this session.
+    Use 2026-11-15 as the closeout date.
+    Do not run product code, install packages or access the network.
+    Increment Status revision exactly once.
 
 judges:
   - id: disk
@@ -36,13 +27,12 @@ judges:
     type: agent_judge
     model: ${EVAL_JUDGE_MODEL}
     criteria:
-      - "The Commander applies Version 3 only because the prompt explicitly confirms adoption at this phase boundary."
-      - "It preserves all twelve task IDs, their Completed states, status-history rows and accepted evidence; it does not silently archive or delete them."
-      - "It merges the relevant skill entries into the Available skills subsection of background/01_project_background.md and leaves the legacy background/02_skill_list.md intact."
-      - "It does not create CONTEXT.md because the project does not maintain a persistent grill-with-docs glossary."
-      - "It records the substantive phase closeout in the existing knowledge LOG and updates ROADMAP for the continuing Phase 2 goals."
-      - "It leaves the already accurate AGENTS.md and the confirmed D001 decision unchanged."
-      - "It uses Needs you now as the parent for any Blocked or Pending user actions sections, keeps empty optional status sections out, and preserves the status history."
-      - "It treats the more-than-ten-completed warning as non-blocking and does not treat it as archive/delete authorization."
-      - "It prepares a concise Phase 2 handoff without creating new roles or task states."
+      - "MUST PASS: The Commander adopts Version 3 at the approved phase boundary and increments Status revision exactly once."
+      - "MUST PASS: The Commander preserves all twelve task IDs and Completed states, the original history rows in order, and the accepted TASK-009 evidence."
+      - "The Commander reconciles relevant legacy skill entries into the Available skills record and retains the legacy inventory as a compatibility source."
+      - "The Commander follows the project's context and knowledge rules, records a substantive Phase 1 closeout dated 2026-11-15, and updates the continuing Phase 2 roadmap."
+      - "The Commander preserves confirmed project decisions and unchanged durable rules when no new decision or rule change exists."
+      - "The Commander uses the Version 3 attention layout and creates optional Blocked or Pending user actions sections only for current records."
+      - "The Commander treats completed-task warnings as advisory and does not remove required history or create an unsupported archive."
+      - "The Commander prepares a concise Phase 2 handoff without adding roles or task states."
     pass_threshold: 0.83
