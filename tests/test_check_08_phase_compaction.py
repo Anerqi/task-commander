@@ -118,6 +118,47 @@ class PhaseCompactionCheckTests(unittest.TestCase):
         roadmap = "- [ ] Phase 2: rehearse production cutover and rollback.\n"
         self.assertFalse(CHECKER.roadmap_milestones_are_valid(roadmap))
 
+    def test_one_line_skill_entries_pass(self):
+        skills = (
+            "- csv-normalizer: Normalize imported CSV records. Trigger: a task reads a CSV source. "
+            "Applicable tasks: TASK-002, TASK-004. Path: /workspace/skills/csv-normalizer/SKILL.md\n"
+            "- sqlite-migrator: Validate the schema. Trigger: a task changes the staging database. "
+            "Applicable tasks: TASK-006, TASK-009. Path: /workspace/skills/sqlite-migrator/SKILL.md\n"
+        )
+        self.assertTrue(CHECKER.skill_entry_is_complete(skills, "csv-normalizer"))
+        self.assertTrue(CHECKER.skill_entry_is_complete(skills, "sqlite-migrator"))
+
+    def test_multi_line_skill_entries_pass(self):
+        skills = (
+            "### csv-normalizer\n"
+            "- Choice reason: Normalize imported CSV records before database staging.\n"
+            "- Trigger: A task reads a CSV source.\n"
+            "- Applicable tasks: TASK-002, TASK-004.\n"
+            "- Path: /workspace/skills/csv-normalizer/SKILL.md\n\n"
+            "### sqlite-migrator\n"
+            "- Path: /workspace/skills/sqlite-migrator/SKILL.md\n"
+        )
+        self.assertTrue(CHECKER.skill_entry_is_complete(skills, "csv-normalizer"))
+
+    def test_skill_entry_missing_path_or_task_fails(self):
+        no_path = (
+            "- csv-normalizer: Trigger: a task reads a CSV source. "
+            "Applicable tasks: TASK-002, TASK-004.\n"
+        )
+        self.assertFalse(CHECKER.skill_entry_is_complete(no_path, "csv-normalizer"))
+        no_task = (
+            "- csv-normalizer: Trigger: a task reads a CSV source. Applicable tasks: TASK-002. "
+            "Path: /workspace/skills/csv-normalizer/SKILL.md\n"
+        )
+        self.assertFalse(CHECKER.skill_entry_is_complete(no_task, "csv-normalizer"))
+
+    def test_skill_facts_cannot_borrow_from_another_entry(self):
+        skills = (
+            "- csv-normalizer: Trigger: a task reads a CSV source. Applicable tasks: TASK-002, TASK-004.\n"
+            "- sqlite-migrator: Path: /workspace/skills/csv-normalizer/SKILL.md\n"
+        )
+        self.assertFalse(CHECKER.skill_entry_is_complete(skills, "csv-normalizer"))
+
 
 if __name__ == "__main__":
     unittest.main()

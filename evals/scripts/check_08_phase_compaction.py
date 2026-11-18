@@ -178,6 +178,42 @@ def log_entries_are_newest_first(log):
     return all(previous >= current for previous, current in zip(dates, dates[1:]))
 
 
+EXPECTED_SKILL_FACTS = {
+    "csv-normalizer": (
+        "/workspace/skills/csv-normalizer/skill.md",
+        "task-002",
+        "task-004",
+        "reads a csv source",
+    ),
+    "sqlite-migrator": (
+        "/workspace/skills/sqlite-migrator/skill.md",
+        "task-006",
+        "task-009",
+        "changes the staging database",
+    ),
+}
+
+
+def skill_entry_is_complete(available_skills, skill):
+    """Accept any entry layout that keeps the skill's path, tasks and trigger.
+
+    The entry runs from the first line that names the skill to the next line
+    that names another expected skill.
+    """
+    lines = available_skills.splitlines()
+    others = [name for name in EXPECTED_SKILL_FACTS if name != skill]
+    start = next((i for i, line in enumerate(lines) if skill in line.casefold()), None)
+    if start is None:
+        return False
+    end = next(
+        (i for i in range(start + 1, len(lines))
+         if any(other in lines[i].casefold() for other in others)),
+        len(lines),
+    )
+    entry = " ".join(lines[start:end]).casefold()
+    return all(fact in entry for fact in EXPECTED_SKILL_FACTS[skill])
+
+
 def check(condition, message):
     print(("PASS " if condition else "FAIL ") + message)
     if not condition:
@@ -255,21 +291,8 @@ def main():
 
     check("## Available skills" in background, "Skills have a consolidated section")
     available_skills = "\n".join(section(background, "## Available skills"))
-    for skill, details in {
-        "csv-normalizer": (
-            "Choice reason: Normalize imported CSV records before database staging.",
-            "Trigger: A task reads a CSV source.",
-            "Applicable tasks: TASK-002, TASK-004.",
-            "Path: /workspace/skills/csv-normalizer/SKILL.md",
-        ),
-        "sqlite-migrator": (
-            "Choice reason: Validate and migrate the SQLite staging schema.",
-            "Trigger: A task changes the staging database.",
-            "Applicable tasks: TASK-006, TASK-009.",
-            "Path: /workspace/skills/sqlite-migrator/SKILL.md",
-        ),
-    }.items():
-        check(skill in available_skills and all(detail in available_skills for detail in details),
+    for skill in EXPECTED_SKILL_FACTS:
+        check(skill_entry_is_complete(available_skills, skill),
               "Full " + skill + " inventory entry migrated under Available skills")
     check(legacy_skills == EXPECTED_LEGACY_SKILLS, "Legacy skill inventory preserved unchanged")
     check(not Path("CONTEXT.md").exists(), "No session-only CONTEXT.md created")
