@@ -121,18 +121,44 @@ def current_focus_is_phase_2(roadmap):
     return "phase 2" in focus and "phase 1 validation" not in focus
 
 
-def latest_log_entry_is_valid(log):
-    """Check the latest dated entry without requiring a fixed title or wording."""
+def roadmap_milestones_are_valid(roadmap):
+    """Accept descriptive milestone suffixes while keeping Phase 2 open."""
+    lines = [line.strip() for line in roadmap.splitlines()]
+    has_phase_1_closeout = any(
+        line.startswith("- [x] Phase 1: validate legacy import and SQLite staging")
+        for line in lines
+    )
+    has_open_phase_2 = any(
+        line.startswith("- [ ] Phase 2: rehearse production cutover and rollback")
+        for line in lines
+    )
+    phase_2_is_completed = any(line.startswith("- [x] Phase 2:") for line in lines)
+    return has_phase_1_closeout and has_open_phase_2 and not phase_2_is_completed
+
+
+def dated_log_entries(log):
+    """Return dated level-two LOG entries in file order."""
     lines = log.splitlines()
     entries = []
     for index, line in enumerate(lines):
         match = re.match(r"^##\s+(\d{4}-\d{2}-\d{2})(?:\s|$)", line)
-        if match:
-            entries.append((index, match.group(1)))
-    if not entries:
+        if not match:
+            continue
+        try:
+            entry_date = date.fromisoformat(match.group(1))
+        except ValueError:
+            entry_date = None
+        entries.append((index, entry_date))
+    return lines, entries
+
+
+def newest_first_log_entry_is_valid(log):
+    """Check the first dated LOG entry under the newest-first contract."""
+    lines, entries = dated_log_entries(log)
+    if not entries or entries[0][1] != date(2026, 11, 15):
         return False
 
-    start, entry_date = entries[-1]
+    start = entries[0][0]
     end = next(
         (index for index in range(start + 1, len(lines))
          if lines[index].startswith("## ")),
@@ -140,11 +166,16 @@ def latest_log_entry_is_valid(log):
     )
     entry_lines = lines[start:end]
     body = "\n".join(entry_lines[1:])
-    return (
-        entry_date == "2026-11-15"
-        and len(entry_lines) <= 20
-        and "phase 1" in body.casefold()
-    )
+    return len(entry_lines) <= 20 and "phase 1" in body.casefold()
+
+
+def log_entries_are_newest_first(log):
+    """Require dated LOG entries to be ordered by non-increasing date."""
+    _, entries = dated_log_entries(log)
+    dates = [entry_date for _, entry_date in entries]
+    if not dates or any(entry_date is None for entry_date in dates):
+        return False
+    return all(previous >= current for previous, current in zip(dates, dates[1:]))
 
 
 def check(condition, message):
@@ -248,13 +279,14 @@ def main():
     check(accepted_artifact == EXPECTED_ACCEPTED_ARTIFACT,
           "Accepted TASK-009 migration evidence preserved unchanged")
     check(EXPECTED_LOG_ENTRY in log, "Existing knowledge LOG entry preserved")
-    check(latest_log_entry_is_valid(log),
-          "Latest LOG entry is dated 2026-11-15, mentions Phase 1 and has at most 20 lines")
+    check(newest_first_log_entry_is_valid(log),
+          "Newest-first LOG entry is dated 2026-11-15, mentions Phase 1 and has at most 20 lines")
+    check(log_entries_are_newest_first(log),
+          "Dated LOG entries are ordered newest first")
     check(current_focus_is_phase_2(roadmap),
           "ROADMAP current focus advances to Phase 2 without repeating Phase 1 validation")
-    check("- [x] Phase 1: validate legacy import and SQLite staging." in roadmap
-          and "- [ ] Phase 2: rehearse production cutover and rollback." in roadmap,
-          "ROADMAP preserves Phase 1 and Phase 2 milestones")
+    check(roadmap_milestones_are_valid(roadmap),
+          "ROADMAP preserves the Phase 1 closeout and keeps Phase 2 open")
     check(not Path("archive").exists(), "No unapproved archive created")
 
     return 1 if FAILS else 0

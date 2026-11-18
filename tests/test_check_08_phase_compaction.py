@@ -63,7 +63,18 @@ class PhaseCompactionCheckTests(unittest.TestCase):
         roadmap = "**Current focus**: Phase 2 after Phase 1 validation.\n"
         self.assertFalse(CHECKER.current_focus_is_phase_2(roadmap))
 
-    def test_latest_log_entry_accepts_descriptive_phase_one_closeout(self):
+    def test_newest_first_log_entry_accepts_descriptive_phase_one_closeout(self):
+        log = (
+            "# Project Knowledge Log\n\n"
+            "## 2026-11-15 — Closeout and handoff\n"
+            "- Phase 1 is closed and the Phase 2 handoff is ready.\n\n"
+            "## 2026-11-10 — Phase 1 validation baseline\n"
+            "- Baseline retained.\n"
+        )
+        self.assertTrue(CHECKER.newest_first_log_entry_is_valid(log))
+        self.assertTrue(CHECKER.log_entries_are_newest_first(log))
+
+    def test_newer_log_entry_appended_after_older_entry_fails(self):
         log = (
             "# Project Knowledge Log\n\n"
             "## 2026-11-10 — Phase 1 validation baseline\n"
@@ -71,20 +82,41 @@ class PhaseCompactionCheckTests(unittest.TestCase):
             "## 2026-11-15 — Closeout and handoff\n"
             "- Phase 1 is closed and the Phase 2 handoff is ready.\n"
         )
-        self.assertTrue(CHECKER.latest_log_entry_is_valid(log))
+        self.assertFalse(CHECKER.log_entries_are_newest_first(log))
 
-    def test_latest_log_entry_rejects_wrong_date_and_long_entry(self):
+    def test_newest_first_log_entry_rejects_wrong_date(self):
         wrong_date = (
             "# Project Knowledge Log\n\n"
             "## 2026-11-14 — Phase 1 closeout\n"
             "- Phase 1 is closed.\n"
         )
-        self.assertFalse(CHECKER.latest_log_entry_is_valid(wrong_date))
+        self.assertFalse(CHECKER.newest_first_log_entry_is_valid(wrong_date))
+
+    def test_newest_first_log_entry_rejects_entry_over_twenty_lines(self):
         long_entry = (
             "## 2026-11-15 — Phase 1 closeout\n"
             + "".join(f"- Detail {index}.\n" for index in range(20))
         )
-        self.assertFalse(CHECKER.latest_log_entry_is_valid(long_entry))
+        self.assertFalse(CHECKER.newest_first_log_entry_is_valid(long_entry))
+
+    def test_roadmap_phase_one_milestone_allows_closeout_suffix(self):
+        roadmap = (
+            "- [x] Phase 1: validate legacy import and SQLite staging (closed 2026-11-15).\n"
+            "- [ ] Phase 2: rehearse production cutover and rollback.\n"
+        )
+        self.assertTrue(CHECKER.roadmap_milestones_are_valid(roadmap))
+
+    def test_roadmap_rejects_completed_phase_two(self):
+        roadmap = (
+            "- [x] Phase 1: validate legacy import and SQLite staging.\n"
+            "- [ ] Phase 2: rehearse production cutover and rollback.\n"
+            "- [x] Phase 2: production cutover completed.\n"
+        )
+        self.assertFalse(CHECKER.roadmap_milestones_are_valid(roadmap))
+
+    def test_roadmap_rejects_missing_phase_one_milestone(self):
+        roadmap = "- [ ] Phase 2: rehearse production cutover and rollback.\n"
+        self.assertFalse(CHECKER.roadmap_milestones_are_valid(roadmap))
 
 
 if __name__ == "__main__":
