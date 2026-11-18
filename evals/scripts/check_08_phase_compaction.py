@@ -132,7 +132,7 @@ def latest_log_entry_is_valid(log):
     if not entries:
         return False
 
-    start, entry_date = max(entries, key=lambda item: (item[1], item[0]))
+    start, entry_date = entries[-1]
     end = next(
         (index for index in range(start + 1, len(lines))
          if lines[index].startswith("## ")),
@@ -188,71 +188,77 @@ def table_rows(lines, header_id):
     return rows
 
 
-status = read("project-status.md") or ""
-background = read("background/01_project_background.md") or ""
-legacy_skills = read("background/02_skill_list.md")
-agents = read("AGENTS.md")
-decisions = read("decision-log.md")
-log = read("knowledge/LOG.md") or ""
-roadmap = read("knowledge/ROADMAP.md") or ""
-accepted_artifact = read("task-output/TASK-009/validation.md")
+def main():
+    FAILS.clear()
+    status = read("project-status.md") or ""
+    background = read("background/01_project_background.md") or ""
+    legacy_skills = read("background/02_skill_list.md")
+    agents = read("AGENTS.md")
+    decisions = read("decision-log.md")
+    log = read("knowledge/LOG.md") or ""
+    roadmap = read("knowledge/ROADMAP.md") or ""
+    accepted_artifact = read("task-output/TASK-009/validation.md")
 
-check("- Protocol version: 3" in status, "Status records Version 3")
-check("- Status revision: 8" in status, "Status revision increments exactly once from 7 to 8")
-check("## Needs you now" in status, "Needs you now parent section retained")
+    check("- Protocol version: 3" in status, "Status records Version 3")
+    check("- Status revision: 8" in status, "Status revision increments exactly once from 7 to 8")
+    check("## Needs you now" in status, "Needs you now parent section retained")
 
-task_rows = table_rows(section(status, "## Task list"), "ID")
-task_ids = {row[0] for row in task_rows if len(row) >= 3}
-expected_task_ids = {f"TASK-{index:03d}" for index in range(1, 13)}
-check(task_ids == expected_task_ids, "All twelve task IDs remain present")
-check(len(task_rows) == 12 and all(row[2] == "Completed" for row in task_rows if len(row) >= 3),
-      "All twelve completed task rows remain in live status")
+    task_rows = table_rows(section(status, "## Task list"), "ID")
+    task_ids = {row[0] for row in task_rows if len(row) >= 3}
+    expected_task_ids = {f"TASK-{index:03d}" for index in range(1, 13)}
+    check(task_ids == expected_task_ids, "All twelve task IDs remain present")
+    check(len(task_rows) == 12 and all(row[2] == "Completed" for row in task_rows if len(row) >= 3),
+          "All twelve completed task rows remain in live status")
 
-history_rows = table_rows(section(status, "## Status history"), "When")
-check(history_is_valid(history_rows),
-      "Original status history is unchanged; valid dated phase updates may follow")
+    history_rows = table_rows(section(status, "## Status history"), "When")
+    check(history_is_valid(history_rows),
+          "Original status history is unchanged; valid dated phase updates may follow")
 
-status_headings = {line.strip() for line in status.splitlines() if line.lstrip().startswith("#")}
-for heading in (
-    "## Coordination", "## Knowledge", "## Active windows",
-    "## Backups", "## Synchronization", "## Blocked",
-    "## Pending user actions", "### Blocked", "### Pending user actions",
-):
-    check(heading not in status_headings, "Empty optional section omitted: " + heading)
+    status_headings = {line.strip() for line in status.splitlines() if line.lstrip().startswith("#")}
+    for heading in (
+        "## Coordination", "## Knowledge", "## Active windows",
+        "## Backups", "## Synchronization", "## Blocked",
+        "## Pending user actions", "### Blocked", "### Pending user actions",
+    ):
+        check(heading not in status_headings, "Empty optional section omitted: " + heading)
 
-check("## Available skills" in background, "Skills have a consolidated section")
-available_skills = "\n".join(section(background, "## Available skills"))
-for skill, details in {
-    "csv-normalizer": (
-        "Choice reason: Normalize imported CSV records before database staging.",
-        "Trigger: A task reads a CSV source.",
-        "Applicable tasks: TASK-002, TASK-004.",
-        "Path: /workspace/skills/csv-normalizer/SKILL.md",
-    ),
-    "sqlite-migrator": (
-        "Choice reason: Validate and migrate the SQLite staging schema.",
-        "Trigger: A task changes the staging database.",
-        "Applicable tasks: TASK-006, TASK-009.",
-        "Path: /workspace/skills/sqlite-migrator/SKILL.md",
-    ),
-}.items():
-    check(skill in available_skills and all(detail in available_skills for detail in details),
-          "Full " + skill + " inventory entry migrated under Available skills")
-check(legacy_skills == EXPECTED_LEGACY_SKILLS, "Legacy skill inventory preserved unchanged")
-check(not Path("CONTEXT.md").exists(), "No session-only CONTEXT.md created")
-check(agents == EXPECTED_AGENTS, "Already accurate AGENTS.md left unchanged")
-check(decisions == EXPECTED_DECISIONS, "Confirmed D001 decision left unchanged")
+    check("## Available skills" in background, "Skills have a consolidated section")
+    available_skills = "\n".join(section(background, "## Available skills"))
+    for skill, details in {
+        "csv-normalizer": (
+            "Choice reason: Normalize imported CSV records before database staging.",
+            "Trigger: A task reads a CSV source.",
+            "Applicable tasks: TASK-002, TASK-004.",
+            "Path: /workspace/skills/csv-normalizer/SKILL.md",
+        ),
+        "sqlite-migrator": (
+            "Choice reason: Validate and migrate the SQLite staging schema.",
+            "Trigger: A task changes the staging database.",
+            "Applicable tasks: TASK-006, TASK-009.",
+            "Path: /workspace/skills/sqlite-migrator/SKILL.md",
+        ),
+    }.items():
+        check(skill in available_skills and all(detail in available_skills for detail in details),
+              "Full " + skill + " inventory entry migrated under Available skills")
+    check(legacy_skills == EXPECTED_LEGACY_SKILLS, "Legacy skill inventory preserved unchanged")
+    check(not Path("CONTEXT.md").exists(), "No session-only CONTEXT.md created")
+    check(agents == EXPECTED_AGENTS, "Already accurate AGENTS.md left unchanged")
+    check(decisions == EXPECTED_DECISIONS, "Confirmed D001 decision left unchanged")
 
-check(accepted_artifact == EXPECTED_ACCEPTED_ARTIFACT,
-      "Accepted TASK-009 migration evidence preserved unchanged")
-check(EXPECTED_LOG_ENTRY in log, "Existing knowledge LOG entry preserved")
-check(latest_log_entry_is_valid(log),
-      "Latest LOG entry is dated 2026-11-15, mentions Phase 1 and has at most 20 lines")
-check(current_focus_is_phase_2(roadmap),
-      "ROADMAP current focus advances to Phase 2 without repeating Phase 1 validation")
-check("- [x] Phase 1: validate legacy import and SQLite staging." in roadmap
-      and "- [ ] Phase 2: rehearse production cutover and rollback." in roadmap,
-      "ROADMAP preserves Phase 1 and Phase 2 milestones")
-check(not Path("archive").exists(), "No unapproved archive created")
+    check(accepted_artifact == EXPECTED_ACCEPTED_ARTIFACT,
+          "Accepted TASK-009 migration evidence preserved unchanged")
+    check(EXPECTED_LOG_ENTRY in log, "Existing knowledge LOG entry preserved")
+    check(latest_log_entry_is_valid(log),
+          "Latest LOG entry is dated 2026-11-15, mentions Phase 1 and has at most 20 lines")
+    check(current_focus_is_phase_2(roadmap),
+          "ROADMAP current focus advances to Phase 2 without repeating Phase 1 validation")
+    check("- [x] Phase 1: validate legacy import and SQLite staging." in roadmap
+          and "- [ ] Phase 2: rehearse production cutover and rollback." in roadmap,
+          "ROADMAP preserves Phase 1 and Phase 2 milestones")
+    check(not Path("archive").exists(), "No unapproved archive created")
 
-sys.exit(1 if FAILS else 0)
+    return 1 if FAILS else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

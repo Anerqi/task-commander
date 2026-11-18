@@ -77,8 +77,28 @@ class PhaseCompactionFixtureTests(unittest.TestCase):
         self.assertTrue((project / "background" / "02_skill_list.md").is_file())
         self.assertFalse((project / "CONTEXT.md").exists())
         prompt = case.read_text(encoding="utf-8").split("judges:", 1)[0]
-        self.assertIn("explicitly approved adopting Task Commander Version 3", prompt)
-        self.assertIn("No archive destination or retention has been approved", prompt)
+        self.assertIn("The project owner approved adopting Version 3 at this phase boundary.", prompt)
+        self.assertIn("There are no new user decisions.", prompt)
+        self.assertIn("No archive destination or retention period has been approved.", prompt)
+        self.assertIn("Phase 2 continues beyond this session.", prompt)
+        self.assertIn("Use 2026-11-15 as the closeout date.", prompt)
+        self.assertIn("Increment Status revision exactly once.", prompt)
+        self.assertNotIn("Requirements:", prompt)
+        self.assertNotIn("TASK-009", prompt)
+        for removed_instruction in (
+            "Do not create CONTEXT.md",
+            "Preserve D001 exactly",
+            "use the nested Needs you now layout",
+            "remove empty optional coordination sections",
+            "Add one concise LOG entry",
+            "Do not rewrite it when no durable rule changed",
+            "Treat the validator warning as a review prompt",
+        ):
+            self.assertNotIn(removed_instruction, prompt)
+
+        receipt = project / "task-output" / "TASK-009" / "validation.md"
+        self.assertIn("- Status: Accepted", receipt.read_text(encoding="utf-8"))
+        self.assertIn("pass_threshold: 0.83", case.read_text(encoding="utf-8"))
 
 class CommanderScopeFixtureTests(unittest.TestCase):
     def test_fixture_does_not_repeat_scope_protection_rule(self):

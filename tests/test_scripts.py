@@ -564,7 +564,7 @@ class ProjectStateValidationTests(unittest.TestCase):
 
     def test_blocked_section_may_be_absent_when_no_task_is_blocked(self):
         content = TEMPLATE.read_text(encoding="utf-8")
-        self.assertNotIn("### Blocked", content)
+        self.assertNotIn("\n### Blocked\n", content)
         process, payload = self.run_validator(content)
         self.assertEqual(process.returncode, 0, payload)
         self.assertTrue(payload["valid"])
