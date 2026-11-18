@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Deterministic checks for Version 3 phase compaction and history preservation."""
 
+from datetime import date
 from pathlib import Path
+import re
 import sys
 
 FAILS = []
@@ -68,6 +70,83 @@ EXPECTED_HISTORY = [
 ]
 
 
+PROJECT_PHASES = {
+    "context building", "planning", "in progress", "acceptance", "completed", "paused",
+}
+HISTORY_DATE_FLOOR = date(2026, 11, 10)
+
+
+def history_is_valid(history_rows):
+    """Keep the original history exact; validate only appended rows flexibly."""
+    original_count = len(EXPECTED_HISTORY)
+    if len(history_rows) < original_count:
+        return False
+    if [tuple(row) for row in history_rows[:original_count]] != EXPECTED_HISTORY:
+        return False
+
+    appended = history_rows[original_count:]
+    if not appended:
+        return True
+
+    has_project_phase_change = False
+    for row in appended:
+        if len(row) != 6 or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", row[0]):
+            return False
+        try:
+            row_date = date.fromisoformat(row[0])
+        except ValueError:
+            return False
+        if row_date < HISTORY_DATE_FLOOR:
+            return False
+
+        source = row[2].strip().casefold()
+        target = row[3].strip().casefold()
+        if (row[1].strip().casefold() == "project"
+                and source in PROJECT_PHASES and target in PROJECT_PHASES
+                and source != target):
+            has_project_phase_change = True
+
+    return has_project_phase_change
+
+
+def current_focus_is_phase_2(roadmap):
+    """Accept a descriptive Phase 2 focus, not only a fixed literal."""
+    matches = [
+        line for line in roadmap.splitlines()
+        if re.match(r"^\s*\*\*current focus\*\*\s*:", line, re.IGNORECASE)
+    ]
+    if len(matches) != 1:
+        return False
+    focus = matches[0].casefold()
+    return "phase 2" in focus and "phase 1 validation" not in focus
+
+
+def latest_log_entry_is_valid(log):
+    """Check the latest dated entry without requiring a fixed title or wording."""
+    lines = log.splitlines()
+    entries = []
+    for index, line in enumerate(lines):
+        match = re.match(r"^##\s+(\d{4}-\d{2}-\d{2})(?:\s|$)", line)
+        if match:
+            entries.append((index, match.group(1)))
+    if not entries:
+        return False
+
+    start, entry_date = max(entries, key=lambda item: (item[1], item[0]))
+    end = next(
+        (index for index in range(start + 1, len(lines))
+         if lines[index].startswith("## ")),
+        len(lines),
+    )
+    entry_lines = lines[start:end]
+    body = "\n".join(entry_lines[1:])
+    return (
+        entry_date == "2026-11-15"
+        and len(entry_lines) <= 20
+        and "phase 1" in body.casefold()
+    )
+
+
 def check(condition, message):
     print(("PASS " if condition else "FAIL ") + message)
     if not condition:
@@ -130,8 +209,8 @@ check(len(task_rows) == 12 and all(row[2] == "Completed" for row in task_rows if
       "All twelve completed task rows remain in live status")
 
 history_rows = table_rows(section(status, "## Status history"), "When")
-check([tuple(row) for row in history_rows] == EXPECTED_HISTORY,
-      "All twelve original status-history rows remain unchanged and in order")
+check(history_is_valid(history_rows),
+      "Original status history is unchanged; valid dated phase updates may follow")
 
 status_headings = {line.strip() for line in status.splitlines() if line.lstrip().startswith("#")}
 for heading in (
@@ -167,10 +246,10 @@ check(decisions == EXPECTED_DECISIONS, "Confirmed D001 decision left unchanged")
 check(accepted_artifact == EXPECTED_ACCEPTED_ARTIFACT,
       "Accepted TASK-009 migration evidence preserved unchanged")
 check(EXPECTED_LOG_ENTRY in log, "Existing knowledge LOG entry preserved")
-check("2026-11-15" in log and "phase 1 closeout" in log.lower(),
-      "Substantive phase closeout recorded in existing LOG")
-check("**Current focus**: Phase 2" in roadmap,
-      "ROADMAP current focus advances to Phase 2")
+check(latest_log_entry_is_valid(log),
+      "Latest LOG entry is dated 2026-11-15, mentions Phase 1 and has at most 20 lines")
+check(current_focus_is_phase_2(roadmap),
+      "ROADMAP current focus advances to Phase 2 without repeating Phase 1 validation")
 check("- [x] Phase 1: validate legacy import and SQLite staging." in roadmap
       and "- [ ] Phase 2: rehearse production cutover and rollback." in roadmap,
       "ROADMAP preserves Phase 1 and Phase 2 milestones")

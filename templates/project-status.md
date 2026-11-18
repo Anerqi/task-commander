@@ -18,10 +18,7 @@ Empty when nothing waits for a person. Keep the attention view concise; list at 
 | Task | Question | Resume when |
 |---|---|---|
 
-### Blocked
-
-| Task | Pre-block state | Reason | Owner | Done-when | Next check |
-|---|---|---|---|---|---|
+Add ### Blocked (6 columns) and ### Pending user actions here only when they carry a current record.
 
 ## Task list
 
