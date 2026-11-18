@@ -45,6 +45,16 @@ class PhaseCompactionCheckTests(unittest.TestCase):
         ])
         self.assertFalse(CHECKER.history_is_valid(rows))
 
+    def test_appended_history_row_without_a_date_is_not_ignored(self):
+        lines = [
+            "| When | Target | From state | To state | Basis | By |",
+            "|---|---|---|---|---|---|",
+            "| | Project | Acceptance | Planning | Phase boundary | Commander |",
+        ]
+        rows = CHECKER.table_rows(lines, "When")
+        self.assertEqual(len(rows), 1)
+        self.assertFalse(CHECKER.history_is_valid(self.history_rows() + rows))
+
     def test_descriptive_phase_two_current_focus_passes(self):
         roadmap = "**Current focus**: Plan the Phase 2 cutover rehearsal and rollback review.\n"
         self.assertTrue(CHECKER.current_focus_is_phase_2(roadmap))
