@@ -54,7 +54,7 @@ None of these adds a role, task state or required column. A version-1 project re
 1. Read the current status, background, decision log, root AGENTS.md and relevant knowledge records. Read legacy skill inventories and CONTEXT.md only when they exist.
 2. Wait for the next genuine phase boundary and explicit user confirmation before adopting Version 3. Do not mass-migrate during routine execution.
 3. On the first status write after confirmation, add or update `- Protocol version: 3` in the Project section. This is metadata, not a task transition; preserve task IDs, task states and history.
-4. When the project background is next updated, merge still-relevant entries from an existing `background/02_skill_list.md` into the `Available skills` subsection of `background/01_project_background.md`. Leave the legacy file intact unless cleanup is separately approved.
+4. At the confirmed Version 3 adoption boundary, merge still-relevant entries from an existing `background/02_skill_list.md` into the `Available skills` subsection of `background/01_project_background.md`, even when no other background change is needed. Leave the legacy file intact unless cleanup is separately approved.
 5. Preserve an existing CONTEXT.md. If it is absent, create it only when the project already uses grill-with-docs as a persistent glossary or the user explicitly requests it.
 6. Do not create a knowledge LOG merely for multi-session work. Apply the creation trigger in `references/20-knowledge-layer.md`; create ROADMAP only for goals that continue beyond this session.
 7. Use the nested Needs you now layout for new or deliberately revised status files. The validator continues to read legacy top-level Blocked and Pending user actions sections.
