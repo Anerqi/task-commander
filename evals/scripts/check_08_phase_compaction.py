@@ -183,7 +183,7 @@ def table_rows(lines, header_id):
         if not stripped.startswith("|") or stripped.startswith("|---"):
             continue
         cells = [cell.strip() for cell in stripped.strip("|").split("|")]
-        if cells and cells[0] != header_id and cells[0]:
+        if cells and cells[0] != header_id and any(cells):
             rows.append(cells)
     return rows
 
